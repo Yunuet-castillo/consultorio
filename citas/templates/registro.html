@@ -1,0 +1,299 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registro - Hospital San Pedro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{% static 'citas/img/logo.png' %}">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Roboto", "Lucida Grande", "DejaVu Sans", Verdana, Arial, sans-serif;
+        }
+
+        body {
+            /* Fondo principal: Azul Super Claro */
+            background-color: #EAF2F8;
+            /* Texto: Gris muy oscuro */
+            color: #1C1C1C;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #header {
+            /* Navbar / Header: Azul Grisáceo con sutil gradiente */
+            background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%);
+            color: #FFFFFF;
+            padding: 15px 30px;
+            height: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 80px;
+            width: auto;
+            margin-right: 15px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .logo-placeholder {
+            display: none;
+            width: 80px;
+            height: 80px;
+            background: #EAF2F8;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            color: #2E86C1;
+            border-radius: 5px;
+        }
+
+        .hospital-name {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            line-height: 1.2;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #content {
+            flex: 1;
+            padding: 25px 30px;
+            /* Fondo principal: Azul Super Claro */
+            background: #EAF2F8;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-form-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            /* Tarjetas y paneles: Azul Pastel Claro */
+            background: #AED6F1;
+            border-radius: 14px;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.10);
+            /* Borde: Navbar / Header: Azul Grisáceo */
+            border: 1px solid rgba(46,134,193,0.35);
+            text-align: center;
+        }
+
+        .register-form-container h2 {
+            /* Texto: Gris muy oscuro */
+            color: #1C1C1C;
+            margin-bottom: 6px;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        /* Icono en el título del formulario */
+        .register-form-container h2 i {
+            /* Ícono: Azul Serenidad */
+            color: #4A90E2;
+            margin-right: 10px;
+        }
+
+        .register-subtitle {
+            color: #5f6b7a;
+            font-size: 14px;
+            margin-bottom: 22px;
+        }
+
+        .register-form-container form p {
+            margin-bottom: 14px;
+        }
+
+        .register-form-container form p:last-child {
+            margin-bottom: 0;
+        }
+
+        .register-form-container label {
+            display: block;
+            text-align: left;
+            margin-bottom: 6px;
+            font-weight: 600;
+            /* Texto: Gris muy oscuro */
+            color: #1C1C1C;
+            letter-spacing: 0.2px;
+        }
+
+        .register-form-container input,
+        .register-form-container select {
+            width: 100%;
+            padding: 12px;
+            /* Borde: Navbar / Header: Azul Grisáceo */
+            border: 1px solid rgba(46,134,193,0.55);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            /* Fondo de campo: Azul Super Claro */
+            background-color: #EAF2F8;
+            /* Texto: Gris muy oscuro */
+            color: #1C1C1C;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .register-form-container input:focus,
+        .register-form-container select:focus {
+            /* Borde de foco: Azul Serenidad */
+            border-color: #4A90E2;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(74,144,226,0.28);
+        }
+
+        .action-button {
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 9999px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+            border: none;
+            box-shadow: 0 8px 18px rgba(74,144,226,0.20);
+        }
+
+        .action-button i {
+            margin-right: 10px;
+        }
+
+        /* Botón principal: Azul Serenidad */
+        .register-button {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+        }
+
+        /* Hover de botón: Azul Cielo Suave */
+        .register-button:hover {
+            background-color: #5DADE2;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px rgba(93,173,226,0.25);
+        }
+
+        .register-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.25rem rgba(74,144,226,0.35);
+        }
+
+        .errorlist {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+            margin-bottom: 6px;
+            color: #b00020;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .errorlist li, .errorlist p {
+            margin: 0 0 6px 0;
+        }
+
+        /* Ayuda y enlaces */
+
+        .login-link {
+            display: block;
+            margin-top: 20px;
+            font-size: 14px;
+            /* Texto: Gris muy oscuro */
+            color: #1C1C1C;
+        }
+
+        .login-link a {
+            /* Link: Azul Serenidad */
+            color: #4A90E2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            /* Borde: Navbar / Header: Azul Grisáceo */
+            border-top: 1px solid #2E86C1;
+            /* Texto: Gris muy oscuro */
+            color: #1C1C1C;
+            font-size: 14px;
+            /* Fondo: Fondo principal: Azul Super Claro */
+            background: #EAF2F8;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            #content {
+                padding: 10px;
+            }
+            .register-form-container {
+                max-width: 100%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div class="logo-container">
+            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
+            <div class="logo-placeholder">HSP</div>
+            <div class="hospital-name">Hospital<br>San Pedro</div>
+        </div>
+    </div>
+    <div id="content">
+        <div class="register-form-container">
+            <h2><i class="fas fa-user-plus"></i> Registrarse</h2>
+            <form method="post" autocomplete="off">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {{ form.as_p }}
+                <button type="submit" class="action-button register-button">
+                    <i class="fas fa-user-plus"></i> Registrarme
+                </button>
+            </form>
+            <div class="login-link">
+                ¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión aquí</a>.
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <i class="fas fa-hospital" style="color: #4A90E2; margin-right: 5px;"></i>
+        Hospital San Pedro © 2025 - Sistema de Citas
+    </div>
+</body>
+</html>

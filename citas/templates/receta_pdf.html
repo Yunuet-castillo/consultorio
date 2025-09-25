@@ -1,0 +1,69 @@
+<!-- receta_pdf.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Receta Médica - Hospital San Pedro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #000; }
+        .container { width: 100%; max-width: 800px; margin: 0 auto; border: 2px solid #000; padding: 20px; box-sizing: border-box; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .section { margin-bottom: 15px; }
+        .section-title { font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 10px; }
+        .signos-vitales-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .firma { margin-top: 50px; text-align: right; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Hospital San Pedro</h1>
+            <h2>Receta Médica</h2>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Datos del Paciente</div>
+            <p><strong>Nombre:</strong> {{ receta.paciente.user.get_full_name }}</p>
+            <p><strong>Fecha de Nacimiento:</strong> {{ receta.paciente.fecha_nacimiento }}</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Signos Vitales</div>
+            {% if receta.signos_vitales %}
+            <div class="signos-vitales-grid">
+                <p><strong>Presión Arterial:</strong> {{ receta.signos_vitales.presion_arterial }}</p>
+                <p><strong>Temperatura:</strong> {{ receta.signos_vitales.temperatura }} °C</p>
+                <p><strong>Frecuencia Cardíaca:</strong> {{ receta.signos_vitales.frecuencia_cardiaca }} lpm</p>
+                <p><strong>Frecuencia Respiratoria:</strong> {{ receta.signos_vitales.frecuencia_respiratoria }} rpm</p>
+                <p><strong>Saturación de Oxígeno:</strong> {{ receta.signos_vitales.saturacion_oxigeno }}%</p>
+            </div>
+            {% else %}
+            <p>No se registraron signos vitales.</p>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <div class="section-title">Diagnóstico</div>
+            <p>{{ receta.diagnostico }}</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Medicamentos Recetados</div>
+            <p>{{ receta.medicamentos|linebreaks }}</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Indicaciones</div>
+            <p>{{ receta.indicaciones|linebreaks }}</p>
+        </div>
+
+        <div class="firma">
+            <p>_________________________</p>
+            <p>{{ receta.doctor.user.get_full_name }}</p>
+            <p>{{ receta.doctor.especialidad }}</p>
+            <p>Cédula Profesional: {{ receta.doctor.cedula_profesional }}</p>
+            <p>Fecha: {{ receta.fecha_emision }}</p>
+        </div>
+    </div>
+</body>
+</html>

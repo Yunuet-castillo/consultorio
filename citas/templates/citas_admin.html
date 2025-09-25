@@ -1,0 +1,17 @@
+<h2>Registrar nueva cita</h2>
+<form method="post">
+  {% csrf_token %}
+  <label>Nombre:</label><input type="text" name="nombre"><br>
+  <label>Edad:</label><input type="number" name="edad"><br>
+  <label>Fecha de nacimiento:</label><input type="date" name="fecha_nacimiento"><br>
+  <label>Lugar de origen:</label><input type="text" name="origen"><br>
+  <label>Teléfono:</label><input type="tel" name="telefono"><br>
+  <label>Tipo de cita:</label>
+  <select name="tipo_cita">
+    <option value="primera">Primera</option>
+    <option value="recurrente">Recurrente</option>
+  </select><br>
+  <label>Fecha de la cita:</label><input type="date" name="fecha_cita"><br>
+  <label>Hora:</label><input type="time" name="hora_cita"><br>
+  <button type="submit">Guardar cita</button>
+</form>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar Cita</title>
+</head>
+<body>
+    <h1>Modificar Cita</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar Cambios</button>
+    </form>
+    <a href="{% url 'dashboard_recepcionista' %}">Volver al Dashboard</a>
+</body>
+</html>

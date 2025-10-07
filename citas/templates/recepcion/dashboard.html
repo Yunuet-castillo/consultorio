@@ -9,24 +9,30 @@
     <link rel="icon" type="image/png" href="{% static 'citas/img/logo.png' %}">
     <style>
         body { font-family: 'Roboto', sans-serif; background: #EAF2F8; margin: 0; padding: 0; color: #1C1C1C; }
-        #header { background: #2E86C1; color: #FFFFFF; padding: 15px 30px; height: 100px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        /* Header con gradiente sutil y sombra suave */
+        #header { background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%); color: #FFFFFF; padding: 15px 30px; height: 100px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         .logo-container { display: flex; align-items: center; }
         .logo { height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
         .logo-placeholder { display: none; width: 80px; height: 80px; background: #EAF2F8; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold; color: #2E86C1; border-radius: 5px; }
         .hospital-name { color: white; font-size: 22px; font-weight: bold; line-height: 1.2; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; }
         .container { padding: 30px; max-width: 1200px; margin: auto; }
-        .btn { display: inline-block; padding: 12px 25px; background: #4A90E2; color: #fff; border-radius: 8px; text-decoration: none; font-size: 15px; transition: background 0.3s; margin-bottom: 20px; }
+        /* Botón principal estilo pill */
+        .btn { display: inline-block; padding: 12px 25px; background: #4A90E2; color: #fff; border-radius: 9999px; text-decoration: none; font-size: 15px; transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease; margin-bottom: 20px; box-shadow: 0 6px 14px rgba(74,144,226,0.25); }
         .btn i { margin-right: 6px; }
-        .btn:hover { background: #5DADE2; }
+        .btn:hover { background: #5DADE2; transform: translateY(-1px); box-shadow: 0 10px 18px rgba(93,173,226,0.28); }
         .messages { margin: 20px 0; padding: 0; list-style: none; }
-        .messages li { background: #AED6F1; color: #1C1C1C; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #2E86C1; }
+        .messages li { background: #AED6F1; color: #1C1C1C; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(46,134,193,0.35); box-shadow: 0 6px 14px rgba(0,0,0,0.06); }
         h2 { margin-top: 30px; font-size: 20px; color: #1C1C1C; margin-bottom: 15px; }
         h2 i { color: #4A90E2; margin-right: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #AED6F1; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        table thead { background: #2E86C1; color: #fff; }
-        table th, table td { padding: 12px 15px; text-align: center; font-size: 14px; color: #1C1C1C; }
+        /* Tabla en tarjeta con cabecera destacada */
+        .table-wrapper { background: #AED6F1; border: 1px solid rgba(46,134,193,0.35); border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); overflow: hidden; }
+        .table-caption { background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%); color: #fff; padding: 14px 20px; font-weight: 600; font-size: 16px; letter-spacing: 0.3px; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        table thead { background: #D5E7F4; }
+        table th, table td { padding: 14px 16px; text-align: center; font-size: 14px; color: #1C1C1C; border-bottom: 1px solid rgba(46,134,193,0.2); }
         table tr:nth-child(even) { background: #EAF2F8; }
-        table tr:hover { background: #AED6F1; }
+        table tr:hover { background: rgba(213,231,244,0.6); transition: background-color 0.15s ease; }
         .action-links a, .action-links form { margin: 0 5px; text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 6px; color: white; display: inline-flex; align-items: center; transition: transform 0.2s ease; border: none; cursor: pointer; }
         .action-links a i, .action-links button i { margin-right: 4px; }
         .action-links a:hover, .action-links button:hover { transform: translateY(-2px); }
@@ -47,6 +53,12 @@
         .report-section { margin-top: 40px; padding: 20px; background: #D6EAF8; border-radius: 12px; }
         .report-section h3 { color: #2E86C1; margin-bottom: 15px; }
         .report-buttons form { display: inline-block; margin-right: 10px; }
+        /* Badges de estado */
+        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .status-confirmada { background: #4A90E2; }
+        .status-pendiente { background: #FFC107; color: #333; }
+        .status-cancelada { background: #2E86C1; }
+        .status-atendida { background: #2ECC71; }
         /* --- Reportes: estilo similar a módulos de inicio --- */
     .report-container { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 4px; }
     .report-card {
@@ -72,6 +84,11 @@
         white-space: nowrap;
     }
     .report-link:hover { background: #357ABD; transform: translateY(-1px); color: #fff; }
+        /* Responsividad */
+        @media (max-width: 768px) {
+            #header { height: auto; padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .container { padding: 18px; }
+        }
     </style>
 </head>
 <body>
@@ -144,49 +161,66 @@
 
         {% if request.user.role == 'administradora' %}
             <a href="{% url 'agendar_paciente' %}" class="btn"><i class="fa-solid fa-calendar-plus"></i> Agendar Nueva Cita</a>
-            <h1>Citas Programadas para {{ fecha_actual|date:"l, j F Y" }}</h1>
 
-            {% if citas %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID de Paciente</th>
-                            <th>Nombre del Paciente</th>
-                            <th>Doctor</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cita in citas %}
-                        <tr>
-                            <td>{{ cita.paciente.numero }}</td>
-                            <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
-                            <td>{{ cita.doctor.user.get_full_name }}</td>
-                            <td>{{ cita.fecha }}</td>
-                            <td>{{ cita.hora }}</td>
-                            <td>{{ cita.estado }}</td>
-                            <td class="action-links">
-                                {% if cita.estado == 'Pendiente' or cita.estado == 'Confirmada' %}
-                                    <a href="{% url 'modificar_cita' cita.id %}" class="edit">
-                                        <i class="fa-solid fa-pen-to-square"></i> Editar
-                                    </a>
-                                    <a href="{% url 'cancelar_cita' cita.id %}" class="cancel">
-                                        <i class="fa-solid fa-ban"></i> Cancelar
-                                    </a>
-                                {% else %}
-                                    <span>{{ cita.estado }}</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No hay citas programadas.</p>
-            {% endif %}
+            <div class="table-wrapper">
+                <div class="table-caption"><i class="fas fa-list-alt" style="margin-right:8px;"></i> Citas Programadas para {{ fecha_actual|date:"l, j F Y" }}</div>
+                {% if citas %}
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID de Paciente</th>
+                                <th>Nombre del Paciente</th>
+                                <th>Doctor</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in citas %}
+                            <tr>
+                                <td>{{ cita.paciente.numero }}</td>
+                                <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
+                                <td>{{ cita.doctor.user.get_full_name }}</td>
+                                <td>{{ cita.fecha }}</td>
+                                <td>{{ cita.hora }}</td>
+
+                                <td>
+                                    {% if cita.estado == 'Confirmada' %}
+                                        <span class="status-badge status-confirmada">{{ cita.estado }}</span>
+                                    {% elif cita.estado == 'Pendiente' %}
+                                        <span class="status-badge status-pendiente">{{ cita.estado }}</span>
+                                    {% elif cita.estado == 'Cancelada' %}
+                                        <span class="status-badge status-cancelada">{{ cita.estado }}</span>
+                                    {% elif cita.estado == 'Atendida' %}
+                                        <span class="status-badge status-atendida">{{ cita.estado }}</span>
+                                    {% else %}
+                                        <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="action-links">
+                                    {% if cita.estado == 'Pendiente' or cita.estado == 'Confirmada' %}
+                                        <a href="{% url 'modificar_cita' cita.id %}" class="edit">
+                                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                                        </a>
+                                        <a href="{% url 'cancelar_cita' cita.id %}" class="cancel">
+                                            <i class="fa-solid fa-ban"></i> Cancelar
+                                        </a>
+                                    {% else %}
+                                        <span>{{ cita.estado }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <div style="padding:16px;">No hay citas programadas.</div>
+                {% endif %}
+            </div>
 
             <!-- 🔹 Sección de Reportes -->
 

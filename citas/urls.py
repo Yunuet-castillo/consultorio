@@ -1,3 +1,4 @@
+
 # citas/urls.py
 from django.urls import path
 from . import views
@@ -52,4 +53,7 @@ urlpatterns = [
    path('reporte-semana/', views.reporte_semana, name='reporte_semana'),
    path('reporte-mes/', views.reporte_mes, name='reporte_mes'),
 
+   path('imprimir_historial/<int:paciente_id>/', views.imprimir_historial_paciente, name='imprimir_historial_paciente')
+    
 ]
+

@@ -40,7 +40,21 @@ def redirect_by_role(user):
 # --- Página de inicio ---
 # ---------------------------
 def inicio(request):
-    return render(request, 'inicio.html')
+    hoy = date.today()
+    
+    # Filtrar solo las citas del día actual
+    citas = Cita.objects.filter(fecha=hoy).order_by('hora')
+    
+    # Contar las pendientes del día
+    pendientes = citas.filter(estado='pendiente').count()
+    
+    contexto = {
+        'citas': citas,
+        'hoy': hoy,
+        'pendientes': pendientes
+    }
+    
+    return render(request, 'inicio.html', contexto)
 
 # ---------------------------
 # --- Dashboard genérico ---
@@ -117,12 +131,17 @@ def logout_view(request):
 # ---------------------------
 # --- Dashboards por rol ---
 # ---------------------------
+from datetime import date
+
 @login_required
 @user_passes_test(is_administradora)
 def dashboard_administradora(request):
-    citas = Cita.objects.all().order_by('fecha', 'hora')
-    contexto = {'citas': citas, 'fecha_actual': date.today()}
+    fecha_actual = date.today()
+    # Filtramos citas cuyo día sea hoy o posterior
+    citas = Cita.objects.filter(fecha__gte=fecha_actual).order_by('fecha', 'hora')
+    contexto = {'citas': citas, 'fecha_actual': fecha_actual}
     return render(request, 'recepcion/dashboard.html', contexto)
+
 
 @login_required
 @user_passes_test(is_doctor)
@@ -313,12 +332,16 @@ def agregar_receta(request, cita_id):
 # ---------------------------
 # Generar PDF de receta
 # ---------------------------
+import os
+from io import BytesIO
+from django.urls import reverse 
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
 
 @login_required
 @user_passes_test(lambda u: hasattr(u, 'doctor'))
 def generar_receta_pdf(request, cita_id):
     from reportlab.lib.enums import TA_CENTER
-    from reportlab.lib.styles import ParagraphStyle
 
     cita = get_object_or_404(Cita, id=cita_id)
     receta = getattr(cita, 'receta', None)
@@ -331,133 +354,122 @@ def generar_receta_pdf(request, cita_id):
     doctor = cita.doctor
     signos = getattr(cita, 'signosvitales', None)
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="receta_{paciente.nombre}.pdf"'
+    # --- ✅ Cambiar el estado de la cita a “Atendida” ---
+    cita.estado = "Atendida"
+    cita.save()
 
-    doc = SimpleDocTemplate(response, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=30, bottomMargin=30)
+    # --- Crear el PDF ---
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=30, bottomMargin=30)
     elements = []
     styles = getSampleStyleSheet()
 
-    # Colores personalizados
     azul_oscuro = colors.HexColor('#2E86C1')
     azul_claro = colors.HexColor('#AED6F1')
     azul_btn = colors.HexColor('#4A90E2')
-    gris = colors.HexColor('#F4F6F7')
 
-    # Estilos personalizados
-    title_style = ParagraphStyle(
-        'TitleCustom',
-        parent=styles['Title'],
-        fontName='Helvetica-Bold',
-        fontSize=22,
-        textColor=azul_oscuro,
-        alignment=TA_CENTER,
-        spaceAfter=8,
-    )
-    subtitle_style = ParagraphStyle(
-        'SubtitleCustom',
-        parent=styles['Heading2'],
-        fontName='Helvetica-Bold',
-        fontSize=14,
-        textColor=azul_btn,
-        spaceAfter=6,
-    )
-    label_style = ParagraphStyle(
-        'LabelCustom',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=11,
-        textColor=azul_oscuro,
-    )
-    normal_style = ParagraphStyle(
-        'NormalCustom',
-        parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=11,
-        textColor=colors.black,
-    )
+    title_style = ParagraphStyle('TitleCustom', parent=styles['Title'], fontName='Helvetica-Bold', fontSize=22, textColor=azul_oscuro, alignment=TA_CENTER, spaceAfter=8)
+    subtitle_style = ParagraphStyle('SubtitleCustom', parent=styles['Heading2'], fontName='Helvetica-Bold', fontSize=14, textColor=azul_btn, spaceAfter=6)
+    label_style = ParagraphStyle('LabelCustom', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=11, textColor=azul_oscuro)
+    normal_style = ParagraphStyle('NormalCustom', parent=styles['Normal'], fontName='Helvetica', fontSize=11, textColor=colors.black)
 
-    # Logo y nombre del hospital
-    logo_path = os.path.join(settings.BASE_DIR, "static/img/logo_sn_pedro.png")
+    # --- Encabezado ---
+    logo_path = os.path.join(settings.BASE_DIR, "static", "citas", "img", "logo.png")
+    header_title = Paragraph("HOSPITAL SAN PEDRO", title_style)
+    header_subtitle = Paragraph("Av. 5 de Mayo Sur Nº 29, Zacapoaxtla, Pue. • Tel: 233 314-30-84", normal_style)
+
+    header_cells = []
     if os.path.exists(logo_path):
-        elements.append(Image(logo_path, width=60, height=60))
-    elements.append(Paragraph("HOSPITAL SAN PEDRO", title_style))
-    elements.append(Paragraph("Av. 5 de Mayo Sur Nº 29, Zacapoaxtla, Pue. Tel: 233143084", normal_style))
-    elements.append(Spacer(1, 18))
+        header_cells = [[Image(logo_path, width=60, height=60), header_title], ["", header_subtitle]]
+    else:
+        header_cells = [["", header_title], ["", header_subtitle]]
 
-    # Información del paciente
+    header_table = Table(header_cells, colWidths=[70, 360])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('ALIGN', (1,0), (1,-1), 'CENTER'),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 10))
+    elements.append(Table([[" "]], colWidths=[430], rowHeights=[1], style=TableStyle([('BACKGROUND', (0,0), (-1,-1), azul_oscuro)])))
+    elements.append(Spacer(1, 14))
+    elements.append(Paragraph("Receta Médica", title_style))
+    elements.append(Spacer(1, 10))
+
+    # --- Datos del paciente ---
+    fecha_str = cita.fecha.strftime('%d/%m/%Y') if cita.fecha else "---"
+    hora_str = cita.hora.strftime('%H:%M') if cita.hora else "---"
+
     data_paciente = [
         [Paragraph("<b>Nombre:</b>", label_style), Paragraph(f"{paciente.nombre} {paciente.apellido}", normal_style)],
-        [Paragraph("<b>Edad:</b>", label_style), Paragraph(f"{paciente.edad or '---'} años", normal_style)],
+        [Paragraph("<b>Edad:</b>", label_style), Paragraph(f"{getattr(paciente, 'edad', '---')} años", normal_style)],
         [Paragraph("<b>Médico:</b>", label_style), Paragraph(f"Dr. {doctor.user.get_full_name()}", normal_style)],
-        [Paragraph("<b>Fecha y hora:</b>", label_style), Paragraph(f"{cita.fecha} {cita.hora}", normal_style)],
+        [Paragraph("<b>Fecha y hora:</b>", label_style), Paragraph(f"{fecha_str} {hora_str}", normal_style)],
     ]
-    table_paciente = Table(data_paciente, colWidths=[110, 320])
+    table_paciente = Table(data_paciente, colWidths=[120, 330])
     table_paciente.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), azul_claro),
+        ('BACKGROUND', (0,0), (0,-1), azul_btn),
+        ('TEXTCOLOR', (0,0), (0,-1), colors.white),
+        ('BACKGROUND', (1,0), (1,-1), azul_claro),
         ('BOX', (0,0), (-1,-1), 1, azul_oscuro),
-        ('INNERGRID', (0,0), (-1,-1), 0.5, azul_oscuro),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('LEFTPADDING', (0,0), (-1,-1), 8),
-        ('RIGHTPADDING', (0,0), (-1,-1), 8),
-        ('TOPPADDING', (0,0), (-1,-1), 5),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
     ]))
     elements.append(Paragraph("Información del Paciente", subtitle_style))
     elements.append(table_paciente)
     elements.append(Spacer(1, 14))
 
-    # Signos vitales
-    if signos:
-        data_signos = [
-            [Paragraph("<b>Peso (kg)</b>", label_style), Paragraph("<b>T/A</b>", label_style),
-             Paragraph("<b>FC</b>", label_style), Paragraph("<b>FR</b>", label_style),
-             Paragraph("<b>SpO2</b>", label_style), Paragraph("<b>Temp (°C)</b>", label_style)],
-            [
-                Paragraph(f"{signos.peso or '---'}", normal_style),
-                Paragraph(f"{signos.presion_arterial or '---'}", normal_style),
-                Paragraph(f"{signos.frecuencia_cardiaca or '---'}", normal_style),
-                Paragraph(f"{signos.frecuencia_respiratoria or '---'}", normal_style),
-                Paragraph(f"{signos.saturacion_oxigeno or '---'}", normal_style),
-                Paragraph(f"{signos.temperatura or '---'}", normal_style)
-            ]
-        ]
-        table_signos = Table(data_signos, colWidths=[55]*6)
-        table_signos.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), azul_btn),
-            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-            ('BACKGROUND', (0,1), (-1,1), gris),
-            ('BOX', (0,0), (-1,-1), 1, azul_oscuro),
-            ('INNERGRID', (0,0), (-1,-1), 0.5, azul_oscuro),
-            ('ALIGN',(0,0),(-1,-1),'CENTER'),
-            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ]))
-        elements.append(Paragraph("Signos Vitales", subtitle_style))
-        elements.append(table_signos)
-        elements.append(Spacer(1, 14))
-
-    # Diagnóstico
+    # --- Diagnóstico ---
     if cita.diagnostico:
         elements.append(Paragraph("Diagnóstico", subtitle_style))
         elements.append(Paragraph(cita.diagnostico, normal_style))
         elements.append(Spacer(1, 14))
 
-    # Medicamentos e Indicaciones
+    # --- Medicamentos e Indicaciones ---
     elements.append(Paragraph("Medicamentos", subtitle_style))
-    elements.append(Paragraph(receta.medicamentos or "---", normal_style))
+    elements.append(Paragraph((receta.medicamentos or "---").replace('\n', '<br/>'), normal_style))
     elements.append(Spacer(1, 8))
     elements.append(Paragraph("Indicaciones", subtitle_style))
-    elements.append(Paragraph(receta.indicaciones or "---", normal_style))
+    elements.append(Paragraph((receta.indicaciones or "---").replace('\n', '<br/>'), normal_style))
     elements.append(Spacer(1, 28))
 
-    # Firma del doctor
-    elements.append(Paragraph(f"Dr. {doctor.user.get_full_name()} - Cédula: 1865512 - 8025534", normal_style))
+    # --- Firma ---
+    cedula = getattr(doctor, 'cedula_profesional', '') or '---'
+    elements.append(Paragraph(f"Dr. {doctor.user.get_full_name()} — Cédula: {cedula}", normal_style))
     elements.append(Spacer(1, 12))
     elements.append(Paragraph("______________________________", normal_style))
     elements.append(Paragraph("Firma del Doctor", normal_style))
 
-    doc.build(elements)
+    def draw_footer(canv, doc_obj):
+        canv.saveState()
+        canv.setStrokeColor(azul_oscuro)
+        canv.setLineWidth(0.5)
+        page_width, page_height = doc.pagesize
+        canv.line(40, 40, page_width - 40, 40)
+        canv.setFont("Helvetica", 9)
+        canv.setFillColor(colors.black)
+        canv.drawString(40, 28, f"Dr. {doctor.user.get_full_name()}")
+        canv.drawRightString(page_width - 40, 28, f"Página {canv.getPageNumber()}")
+        canv.restoreState()
+
+    doc.build(elements, onFirstPage=draw_footer, onLaterPages=draw_footer)
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    # --- ✅ Al cerrar o imprimir, redirige al Dashboard ---
+    dashboard_url = reverse('dashboard_doctor')
+
+    # Si el navegador no muestra el PDF inline, fuerza redirección
+    html_redirect = f"""
+    <html>
+        <body onload="window.open('data:application/pdf;base64,{pdf.decode('latin1')}', '_blank'); window.location.href='{dashboard_url}';">
+            <p>Generando receta... redirigiendo al panel.</p>
+        </body>
+    </html>
+    """
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="receta_{paciente.nombre}.pdf"'
     return response
+
 
 @login_required
 def detalle_paciente(request, paciente_id):
@@ -473,7 +485,6 @@ def buscar_pacientes(request):
         'pacientes': pacientes,
         'query': query,
     })
-    
 # ---------------------------
 # --- Reportes en PDF ---
 # ---------------------------
@@ -513,3 +524,137 @@ def reporte_mes(request):
     inicio = hoy.replace(day=1)
     citas = Cita.objects.filter(fecha__range=[inicio, hoy], estado="Atendida")
     return generar_pdf_reporte(f"Reporte Mensual ({inicio} a {hoy})", citas)
+
+def detalle_paciente(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+    return render(request, 'doctor/detalle_paciente.html', {'paciente': paciente})
+
+
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'doctor'))
+def imprimir_historial_paciente(request, paciente_id):
+    from io import BytesIO
+    from reportlab.lib.enums import TA_CENTER
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer, Image
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    import os
+
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+    doctor = getattr(request.user, 'doctor', None)
+    citas = Cita.objects.filter(paciente=paciente, doctor=doctor).order_by('-fecha')
+
+    if not citas.exists():
+        messages.warning(request, "No hay citas registradas para este paciente.")
+        return redirect('dashboard_doctor')
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=30, bottomMargin=30)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    azul_oscuro = colors.HexColor('#2E86C1')
+    azul_claro = colors.HexColor('#AED6F1')
+    azul_btn = colors.HexColor('#4A90E2')
+
+    title_style = ParagraphStyle('TitleCustom', parent=styles['Title'], fontName='Helvetica-Bold', fontSize=22, textColor=azul_oscuro, alignment=TA_CENTER)
+    subtitle_style = ParagraphStyle('SubtitleCustom', parent=styles['Heading2'], fontName='Helvetica-Bold', fontSize=14, textColor=azul_btn, spaceAfter=6)
+    label_style = ParagraphStyle('LabelCustom', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=11, textColor=azul_oscuro)
+    normal_style = ParagraphStyle('NormalCustom', parent=styles['Normal'], fontName='Helvetica', fontSize=11, textColor=colors.black)
+
+    # --- Encabezado ---
+    logo_path = os.path.join(settings.BASE_DIR, "static", "citas", "img", "logo.png")
+    header_title = Paragraph("HOSPITAL SAN PEDRO", title_style)
+    header_subtitle = Paragraph("Av. 5 de Mayo Sur Nº 29, Zacapoaxtla, Pue. • Tel: 233 314-30-84", normal_style)
+
+    header_cells = []
+    if os.path.exists(logo_path):
+        header_cells = [[Image(logo_path, width=60, height=60), header_title], ["", header_subtitle]]
+    else:
+        header_cells = [["", header_title], ["", header_subtitle]]
+
+    header_table = Table(header_cells, colWidths=[70, 360])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('ALIGN', (1,0), (1,-1), 'CENTER'),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 10))
+    elements.append(Table([[" "]], colWidths=[430], rowHeights=[1], style=TableStyle([('BACKGROUND', (0,0), (-1,-1), azul_oscuro)])))
+    elements.append(Spacer(1, 14))
+    elements.append(Paragraph("Historial Clínico del Paciente", title_style))
+    elements.append(Spacer(1, 14))
+
+    # --- Información del Paciente ---
+    data_paciente = [
+        [Paragraph("<b>Nombre:</b>", label_style), Paragraph(f"{paciente.nombre} {paciente.apellido}", normal_style)],
+        [Paragraph("<b>Edad:</b>", label_style), Paragraph(f"{getattr(paciente, 'edad', '---')} años", normal_style)],
+        [Paragraph("<b>Doctor:</b>", label_style), Paragraph(f"Dr. {doctor.user.get_full_name()}", normal_style)],
+    ]
+    table_paciente = Table(data_paciente, colWidths=[120, 330])
+    table_paciente.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (0,-1), azul_btn),
+        ('TEXTCOLOR', (0,0), (0,-1), colors.white),
+        ('BACKGROUND', (1,0), (1,-1), azul_claro),
+        ('BOX', (0,0), (-1,-1), 1, azul_oscuro),
+    ]))
+    elements.append(Paragraph("Información del Paciente", subtitle_style))
+    elements.append(table_paciente)
+    elements.append(Spacer(1, 18))
+
+    # --- Detalle de cada cita ---
+    for c in citas:
+        fecha_str = c.fecha.strftime('%d/%m/%Y') if c.fecha else "---"
+        elements.append(Paragraph(f"📅 Cita del {fecha_str}", subtitle_style))
+        elements.append(Paragraph(f"<b>Estado:</b> {c.estado}", normal_style))
+
+        # Diagnóstico
+        diag = c.nuevo_diagnostico or c.diagnostico or "---"
+        elements.append(Paragraph("<b>Diagnóstico:</b>", label_style))
+        elements.append(Paragraph(diag, normal_style))
+        elements.append(Spacer(1, 6))
+
+        # Medicamentos
+        if hasattr(c, 'receta') and c.receta.medicamentos:
+            elements.append(Paragraph("<b>Medicamentos:</b>", label_style))
+            elements.append(Paragraph(c.receta.medicamentos.replace('\n', '<br/>'), normal_style))
+        else:
+            elements.append(Paragraph("<b>Medicamentos:</b> ---", normal_style))
+        elements.append(Spacer(1, 6))
+
+        # Indicaciones
+        if hasattr(c, 'receta') and c.receta.indicaciones:
+            elements.append(Paragraph("<b>Indicaciones:</b>", label_style))
+            elements.append(Paragraph(c.receta.indicaciones.replace('\n', '<br/>'), normal_style))
+        else:
+            elements.append(Paragraph("<b>Indicaciones:</b> ---", normal_style))
+        elements.append(Spacer(1, 16))
+
+    # --- Firma ---
+    cedula = getattr(doctor, 'cedula_profesional', '') or '---'
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph(f"Dr. {doctor.user.get_full_name()} — Cédula: {cedula}", normal_style))
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph("______________________________", normal_style))
+    elements.append(Paragraph("Firma del Doctor", normal_style))
+
+    def draw_footer(canv, doc_obj):
+        canv.saveState()
+        canv.setStrokeColor(azul_oscuro)
+        canv.setLineWidth(0.5)
+        page_width, page_height = doc.pagesize
+        canv.line(40, 40, page_width - 40, 40)
+        canv.setFont("Helvetica", 9)
+        canv.setFillColor(colors.black)
+        canv.drawString(40, 28, f"Dr. {doctor.user.get_full_name()}")
+        canv.drawRightString(page_width - 40, 28, f"Página {canv.getPageNumber()}")
+        canv.restoreState()
+
+    doc.build(elements, onFirstPage=draw_footer, onLaterPages=draw_footer)
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="historial_{paciente.nombre}.pdf"'
+    return response

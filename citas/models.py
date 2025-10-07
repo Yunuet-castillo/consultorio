@@ -84,7 +84,9 @@ class Cita(models.Model):
         ('Pendiente', 'Pendiente'),
         ('Confirmada', 'Confirmada'),
         ('Cancelada', 'Cancelada'),
+        ('Atendida', 'Atendida'),  # Agregamos el nuevo estado
     )
+
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     fecha = models.DateField()
@@ -92,13 +94,14 @@ class Cita(models.Model):
     recordatorio_activado = models.BooleanField(default=False)
     estado = models.CharField(max_length=50, choices=ESTADO_CHOICES, default='Pendiente')
     creada_en = models.DateTimeField(auto_now_add=True)
-    diagnostico = models.TextField(blank=True, null=True) 
-    diagnostico = models.TextField(blank=True, null=True)  # diagnóstico anterior
-    nuevo_diagnostico = models.TextField(blank=True, null=True)  # nuevo diagnóstico
-    # Aquí se eliminó la línea `numero = models.CharField(max_length=10, unique=True, blank=True)`
+
+    # Diagnósticos
+    diagnostico = models.TextField(blank=True, null=True)  # Diagnóstico anterior
+    nuevo_diagnostico = models.TextField(blank=True, null=True)  # Nuevo diagnóstico
 
     def __str__(self):
         return f"Cita de {self.paciente} con {self.doctor} el {self.fecha} a las {self.hora}"
+
 
 # -------------------------
 # Sección de Modelos de Signos vitales 

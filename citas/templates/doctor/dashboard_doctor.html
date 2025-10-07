@@ -56,32 +56,6 @@
         0% { background-color: #FFF59D; }
         100% { background-color: transparent; }
     }
-
-    /* --- Reportes: estilo similar a módulos de inicio --- */
-    .report-container { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 4px; }
-    .report-card {
-        flex: 1;
-        min-width: 220px;
-        background: #AED6F1;
-        border: 1px solid rgba(46,134,193,0.35);
-        border-radius: 14px;
-        padding: 18px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-        display: flex; align-items: center; justify-content: space-between;
-    }
-    .report-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.12); }
-    .report-info { display: flex; align-items: center; gap: 12px; color: #1C1C1C; }
-    .report-icon { color: #4A90E2; font-size: 24px; }
-    .report-title { font-weight: 600; margin: 0; }
-    .report-link {
-        text-decoration: none;
-        background: #4A90E2; color: #fff; padding: 8px 14px; border-radius: 9999px;
-        box-shadow: 0 6px 14px rgba(74,144,226,0.25);
-        transition: background 0.12s ease, transform 0.12s ease;
-        white-space: nowrap;
-    }
-    .report-link:hover { background: #357ABD; transform: translateY(-1px); color: #fff; }
 </style>
 {% endblock %}
 
@@ -95,8 +69,6 @@
             <p class="mb-0">Panel de control</p>
         </div>
     </div>
-
-  
 
     <!-- 🔹 Buscador de pacientes -->
     <div class="card mt-4 card-custom shadow-sm">

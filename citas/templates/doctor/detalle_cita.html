@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Cita{% endblock %}
+
+{% block extra_head %}
+<style>
+    body { background-color: #EAF2F8; line-height: 1.55; }
+
+    .module-card {
+        background-color: #AED6F1;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.5s forwards;
+    }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    .module-card header {
+        background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%);
+        color: #fff;
+        padding: 12px 18px;
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .module-card .body { padding: 15px 18px; color: #1C1C1C; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 20px; }
+    .info-item i { color: #4A90E2; margin-right: 8px; }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #4A90E2, #357ABD);
+        color: #fff;
+        font-weight: 600;
+        padding: 0.45rem 1rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 6px 14px rgba(74,144,226,0.25);
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    .btn-primary-custom:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 20px rgba(74,144,226,0.35); }
+    .btn-primary-custom:active { transform: translateY(1px) scale(0.98); box-shadow: 0 4px 10px rgba(74,144,226,0.2); }
+    .btn-pill { border-radius: 9999px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Encabezado -->
+    <div class="card mb-4 card-custom shadow-sm">
+        <div class="card-body d-flex align-items-center justify-content-between">
+            <h2 class="card-title mb-0">Detalle de Cita</h2>
+            <a href="{% url 'dashboard_doctor' %}" class="btn btn-primary-custom btn-pill">
+                <i class="fas fa-arrow-left"></i> Regresar al inicio
+            </a>
+        </div>
+    </div>
+
+    <!-- Información del Paciente -->
+    <div class="module-card">
+        <header><i class="fas fa-info-circle"></i> Información del Paciente</header>
+        <div class="body">
+            <div class="info-grid">
+                <div class="info-item"><i class="fas fa-id-card"></i> <strong>Nombre:</strong> {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</div>
+                <div class="info-item"><i class="fas fa-calendar"></i> <strong>Edad:</strong> {{ cita.paciente.edad }} años</div>
+                <div class="info-item"><i class="fas fa-user-md"></i> <strong>Médico:</strong> {{ cita.doctor }}</div>
+                <div class="info-item"><i class="fas fa-clock"></i> <strong>Fecha de cita:</strong> {{ cita.fecha|date:"d/m/Y" }} {{ cita.hora|time:"H:i" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signos Vitales -->
+    <div class="module-card">
+        <header><i class="fas fa-heartbeat"></i> Signos vitales</header>
+        <div class="body">
+            {% if signos %}
+            <div class="info-grid">
+                <div class="info-item"><i class="fas fa-tachometer-alt"></i> <strong>Presión:</strong> {{ signos.presion }}</div>
+                <div class="info-item"><i class="fas fa-heart"></i> <strong>Pulso:</strong> {{ signos.pulso }}</div>
+                <div class="info-item"><i class="fas fa-thermometer-half"></i> <strong>Temperatura:</strong> {{ signos.temperatura }}</div>
+            </div>
+            {% else %}
+            <p>No se han registrado signos vitales aún.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Diagnóstico -->
+    <div class="module-card">
+        <header><i class="fas fa-stethoscope"></i> Diagnóstico</header>
+        <div class="body row">
+            <!-- Diagnóstico anterior -->
+            <!--<div class="col-md-6">
+                <h5>Diagnóstico anterior</h5>
+                {% if cita.diagnostico %}
+                    <p>{{ cita.diagnostico }}</p>
+                {% else %}
+                    <p>No hay diagnóstico anterior.</p>
+                {% endif %}
+            </div> -->
+
+            <!-- Nuevo diagnóstico -->
+            <div class="col-md-6">
+                <h5>Nuevo diagnóstico</h5>
+                {% if cita.nuevo_diagnostico %}
+                    <p>{{ cita.nuevo_diagnostico }}</p>
+                {% else %}
+                    <p>No hay nuevo diagnóstico.</p>
+                {% endif %}
+
+                <!-- Formulario para agregar nuevo diagnóstico -->
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="diagnostico_nuevo" class="form-label">Agregar nuevo diagnóstico</label>
+                        <textarea name="diagnostico_nuevo" id="diagnostico_nuevo" class="form-control" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary-custom btn-pill mt-2">Guardar nuevo diagnóstico</button>
+                </form>
+            </div>
+            <!-- Diagnóstico anterior -->
+            <div class="col-md-6">
+                <h5>Diagnóstico anterior</h5>
+                {% if cita.diagnostico %}
+                    <p>{{ cita.diagnostico }}</p>
+                {% else %}
+                    <p>No hay diagnóstico anterior.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="module-card">
+        <header><i class="fas fa-tools"></i> Acciones</header>
+        <div class="body">
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary-custom btn-pill" href="{% url 'agregar_receta' cita.id %}">
+                    <i class="fas fa-prescription-bottle-alt"></i> Agregar/Editar Receta
+                </a>
+                <a class="btn btn-primary-custom btn-pill" href="{% url 'generar_receta_pdf' cita.id %}">
+                    <i class="fas fa-print"></i> Imprimir Receta
+                        <a href="{% url 'imprimir_historial_paciente' cita.paciente.id %}" class="btn btn-primary-custom btn-pill">📚 Imprimir Historial Clínico</a>
+
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

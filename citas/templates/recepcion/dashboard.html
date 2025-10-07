@@ -3,214 +3,75 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard | {{ request.user.get_full_name }}</title>
+    <title>Sitio administradora {{ request.user.get_full_name }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="{% static 'citas/img/logo.png' %}">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: #EAF2F8;
-            margin: 0;
-            padding: 0;
-            color: #1C1C1C;
-        }
-        #header {
-            background: #2E86C1;
-            color: #FFFFFF;
-            padding: 15px 30px;
-            height: 100px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-        .logo {
-            height: 80px;
-            width: auto;
-            margin-right: 15px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-        .logo-placeholder {
-            display: none;
-            width: 80px;
-            height: 80px;
-            background: #EAF2F8;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-weight: bold;
-            color: #2E86C1;
-            border-radius: 5px;
-        }
-        .hospital-name {
-            color: white;
-            font-size: 22px;
-            font-weight: bold;
-            line-height: 1.2;
-            text-transform: uppercase;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .container {
-            padding: 30px;
-            max-width: 1200px;
-            margin: auto;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            background: #4A90E2;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 15px;
-            transition: background 0.3s;
-            margin-bottom: 20px;
-        }
-        .btn i {
-            margin-right: 6px;
-        }
-        .btn:hover {
-            background: #5DADE2;
-        }
-        .messages {
-            margin: 20px 0;
-            padding: 0;
-            list-style: none;
-        }
-        .messages li {
-            background: #AED6F1;
-            color: #1C1C1C;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            border: 1px solid #2E86C1;
-        }
-        h2 {
-            margin-top: 30px;
-            font-size: 20px;
-            color: #1C1C1C;
-            margin-bottom: 15px;
-        }
-        h2 i {
-            color: #4A90E2;
-            margin-right: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            background: #AED6F1;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        table thead {
-            background: #2E86C1;
-            color: #fff;
-        }
-        table th, table td {
-            padding: 12px 15px;
-            text-align: center;
-            font-size: 14px;
-            color: #1C1C1C;
-        }
-        table tr:nth-child(even) {
-            background: #EAF2F8;
-        }
-        table tr:hover {
-            background: #AED6F1;
-        }
-        .action-links a, .action-links form {
-            margin: 0 5px;
-            text-decoration: none;
-            font-size: 14px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            transition: transform 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-        .action-links a i, .action-links button i {
-            margin-right: 4px;
-        }
-        .action-links a:hover, .action-links button:hover {
-            transform: translateY(-2px);
-        }
-        .edit {
-            background: #4A90E2;
-        }
-        .edit:hover {
-            background: #5DADE2;
-        }
-        .cancel {
-            background: #d63031;
-        }
-        .cancel:hover {
-            background: #ff7675;
-        }
-        .vitales {
-            background: #f1c40f;
-        }
-        .vitales:hover {
-            background: #f4d03f;
-        }
-        .cuestionario {
-            background: #27ae60;
-        }
-        .cuestionario:hover {
-            background: #2ecc71;
-        }
-        .receta {
-            background: #9b59b6;
-        }
-        .receta:hover {
-            background: #a461b6;
-        }
-        .empty-row {
-            text-align: center;
-            color: #1C1C1C;
-            font-style: italic;
-        }
-        .user-info {
-            margin: 30px 0 10px 0;
-            text-align: center;
-        }
-        .user-info h2 {
-            color: #1C1C1C;
-            margin-bottom: 5px;
-            margin-top: 0;
-        }
-        .user-info p {
-            color: #1C1C1C;
-            margin: 0;
-            font-size: 16px;
-        }
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            table th, table td {
-                padding: 8px 5px;
-                font-size: 13px;
-            }
-            .logo {
-                height: 50px;
-            }
-            .action-links a, .action-links form {
-                padding: 4px 8px;
-            }
-        }
+        body { font-family: 'Roboto', sans-serif; background: #EAF2F8; margin: 0; padding: 0; color: #1C1C1C; }
+        #header { background: #2E86C1; color: #FFFFFF; padding: 15px 30px; height: 100px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .logo-container { display: flex; align-items: center; }
+        .logo { height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .logo-placeholder { display: none; width: 80px; height: 80px; background: #EAF2F8; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold; color: #2E86C1; border-radius: 5px; }
+        .hospital-name { color: white; font-size: 22px; font-weight: bold; line-height: 1.2; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; }
+        .container { padding: 30px; max-width: 1200px; margin: auto; }
+        .btn { display: inline-block; padding: 12px 25px; background: #4A90E2; color: #fff; border-radius: 8px; text-decoration: none; font-size: 15px; transition: background 0.3s; margin-bottom: 20px; }
+        .btn i { margin-right: 6px; }
+        .btn:hover { background: #5DADE2; }
+        .messages { margin: 20px 0; padding: 0; list-style: none; }
+        .messages li { background: #AED6F1; color: #1C1C1C; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #2E86C1; }
+        h2 { margin-top: 30px; font-size: 20px; color: #1C1C1C; margin-bottom: 15px; }
+        h2 i { color: #4A90E2; margin-right: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #AED6F1; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        table thead { background: #2E86C1; color: #fff; }
+        table th, table td { padding: 12px 15px; text-align: center; font-size: 14px; color: #1C1C1C; }
+        table tr:nth-child(even) { background: #EAF2F8; }
+        table tr:hover { background: #AED6F1; }
+        .action-links a, .action-links form { margin: 0 5px; text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 6px; color: white; display: inline-flex; align-items: center; transition: transform 0.2s ease; border: none; cursor: pointer; }
+        .action-links a i, .action-links button i { margin-right: 4px; }
+        .action-links a:hover, .action-links button:hover { transform: translateY(-2px); }
+        .edit { background: #4A90E2; }
+        .edit:hover { background: #5DADE2; }
+        .cancel { background: #d63031; }
+        .cancel:hover { background: #ff7675; }
+        .vitales { background: #f1c40f; }
+        .vitales:hover { background: #f4d03f; }
+        .cuestionario { background: #27ae60; }
+        .cuestionario:hover { background: #2ecc71; }
+        .receta { background: #9b59b6; }
+        .receta:hover { background: #a461b6; }
+        .empty-row { text-align: center; color: #1C1C1C; font-style: italic; }
+        .user-info { margin: 30px 0 10px 0; text-align: center; }
+        .user-info h2 { color: #1C1C1C; margin-bottom: 5px; margin-top: 0; }
+        .user-info p { color: #1C1C1C; margin: 0; font-size: 16px; }
+        .report-section { margin-top: 40px; padding: 20px; background: #D6EAF8; border-radius: 12px; }
+        .report-section h3 { color: #2E86C1; margin-bottom: 15px; }
+        .report-buttons form { display: inline-block; margin-right: 10px; }
+        /* --- Reportes: estilo similar a módulos de inicio --- */
+    .report-container { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 4px; }
+    .report-card {
+        flex: 1;
+        min-width: 220px;
+        background: #AED6F1;
+        border: 1px solid rgba(46,134,193,0.35);
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .report-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.12); }
+    .report-info { display: flex; align-items: center; gap: 12px; color: #1C1C1C; }
+    .report-icon { color: #4A90E2; font-size: 24px; }
+    .report-title { font-weight: 600; margin: 0; }
+    .report-link {
+        text-decoration: none;
+        background: #4A90E2; color: #fff; padding: 8px 14px; border-radius: 9999px;
+        box-shadow: 0 6px 14px rgba(74,144,226,0.25);
+        transition: background 0.12s ease, transform 0.12s ease;
+        white-space: nowrap;
+    }
+    .report-link:hover { background: #357ABD; transform: translateY(-1px); color: #fff; }
     </style>
 </head>
 <body>
@@ -238,41 +99,76 @@
             </ul>
         {% endif %}
 
+          <!-- 🔷 Reportes de Citas Atendidas (estilo módulos de inicio) -->
+    <div class="card card-custom shadow-sm mb-4">
+        <div class="card-header card-header-custom">
+            <h3 class="mb-0">Reportes de Citas Atendidas</h3>
+        </div>
+        <div class="card-body">
+            <div class="report-container">
+                <div class="report-card">
+                    <div class="report-info">
+                        <i class="fas fa-calendar-day report-icon"></i>
+                        <div>
+                            <p class="report-title">Reporte Diario</p>
+                            <small>Resumen de citas atendidas hoy</small>
+                        </div>
+                    </div>
+                    <a href="{% url 'reporte_dia' %}" class="report-link">Ver reporte</a>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-info">
+                        <i class="fas fa-calendar-week report-icon"></i>
+                        <div>
+                            <p class="report-title">Reporte Semanal</p>
+                            <small>Comparativo de la última semana</small>
+                        </div>
+                    </div>
+                    <a href="{% url 'reporte_semana' %}" class="report-link">Ver reporte</a>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-info">
+                        <i class="fas fa-calendar-alt report-icon"></i>
+                        <div>
+                            <p class="report-title">Reporte Mensual</p>
+                            <small>Tendencia del mes en curso</small>
+                        </div>
+                    </div>
+                    <a href="{% url 'reporte_mes' %}" class="report-link">Ver reporte</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
         {% if request.user.role == 'administradora' %}
             <a href="{% url 'agendar_paciente' %}" class="btn"><i class="fa-solid fa-calendar-plus"></i> Agendar Nueva Cita</a>
             <h1>Citas Programadas para {{ fecha_actual|date:"l, j F Y" }}</h1>
-        
-        {% elif request.user.role == 'doctor' %}
-            <h1>Mis Citas Programadas para {{ fecha_actual|date:"l, j F Y" }}</h1>
-        
-        {% elif request.user.role == 'enfermera' %}
-            <h1>Citas del Día para {{ fecha_actual|date:"l, j F Y" }}</h1>
-        {% endif %}
 
-        {% if citas %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID de Paciente</th>
-                        <th>Nombre del Paciente</th>
-                        <th>Doctor</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cita in citas %}
-                    <tr>
-                        <td>{{ cita.paciente.numero }}</td>
-                        <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
-                        <td>{{ cita.doctor.user.get_full_name }}</td>
-                        <td>{{ cita.fecha }}</td>
-                        <td>{{ cita.hora }}</td>
-                        <td>{{ cita.estado }}</td>
-                        <td class="action-links">
-                            {% if request.user.role == 'administradora' %}
+            {% if citas %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID de Paciente</th>
+                            <th>Nombre del Paciente</th>
+                            <th>Doctor</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas %}
+                        <tr>
+                            <td>{{ cita.paciente.numero }}</td>
+                            <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
+                            <td>{{ cita.doctor.user.get_full_name }}</td>
+                            <td>{{ cita.fecha }}</td>
+                            <td>{{ cita.hora }}</td>
+                            <td>{{ cita.estado }}</td>
+                            <td class="action-links">
                                 {% if cita.estado == 'Pendiente' or cita.estado == 'Confirmada' %}
                                     <a href="{% url 'modificar_cita' cita.id %}" class="edit">
                                         <i class="fa-solid fa-pen-to-square"></i> Editar
@@ -283,28 +179,19 @@
                                 {% else %}
                                     <span>{{ cita.estado }}</span>
                                 {% endif %}
-                            
-                            {% elif request.user.role == 'enfermera' %}
-                                <a href="{% url 'registrar_signos_vitales' cita.id %}" class="vitales">
-                                    <i class="fa-solid fa-heart-pulse"></i> Signos Vitales
-                                </a>
-                               
-                            
-                            {% elif request.user.role == 'doctor' %}
-                                <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn edit">
-                                    <i class="fa-solid fa-eye"></i> Ver
-                                </a>
-                                <a href="{% url 'crear_receta' cita.id %}" class="btn receta">
-                                    <i class="fa-solid fa-prescription-bottle-medical"></i> Receta
-                                </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No hay citas programadas.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No hay citas programadas.</p>
+            {% endif %}
+
+            <!-- 🔹 Sección de Reportes -->
+
+
+
         {% endif %}
     </div>
 </body>

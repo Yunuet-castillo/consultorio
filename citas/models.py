@@ -45,6 +45,8 @@ class Doctor(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     especialidad = models.CharField(max_length=100)
     cedula_profesional = models.CharField(max_length=20, unique=True)
+    default="Lunes a Viernes de 9:00 a.m - 4:00 p.m",
+    verbose_name="Horario de Consulta"
 
     def __str__(self):
         return f"Dr. {self.user.get_full_name()}"
@@ -90,6 +92,9 @@ class Cita(models.Model):
     recordatorio_activado = models.BooleanField(default=False)
     estado = models.CharField(max_length=50, choices=ESTADO_CHOICES, default='Pendiente')
     creada_en = models.DateTimeField(auto_now_add=True)
+    diagnostico = models.TextField(blank=True, null=True) 
+    diagnostico = models.TextField(blank=True, null=True)  # diagnóstico anterior
+    nuevo_diagnostico = models.TextField(blank=True, null=True)  # nuevo diagnóstico
     # Aquí se eliminó la línea `numero = models.CharField(max_length=10, unique=True, blank=True)`
 
     def __str__(self):
@@ -127,8 +132,8 @@ class Receta(models.Model):
     """
     Modelo para emitir recetas médicas.
     """
-    cita = models.ForeignKey(Cita, on_delete=models.CASCADE, related_name='recetas')
-    diagnostico = models.TextField()
+    cita = models.OneToOneField("Cita", on_delete=models.CASCADE, related_name='receta')
+    doctor = models.ForeignKey("Doctor", on_delete=models.CASCADE)  # relación con el doctor
     medicamentos = models.TextField()
     indicaciones = models.TextField(blank=True, null=True)
     fecha_emision = models.DateField(auto_now_add=True)
@@ -143,8 +148,5 @@ class Receta(models.Model):
     def paciente(self):
         return self.cita.paciente
 
-    @property
-    def doctor(self):
-        return self.cita.doctor
     
     

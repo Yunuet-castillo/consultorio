@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle del Paciente{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Información del Paciente</h2>
+    <table class="table table-bordered">
+        <tr><th>Nombre</th><td>{{ paciente.nombre }} {{ paciente.apellido }}</td></tr>
+        <tr><th>Edad</th><td>{{ paciente.edad }}</td></tr>
+    </table>
+
+    {% if ultima_cita %}
+        <h3 class="mt-4">Última Cita</h3>
+        <p><b>Fecha:</b> {{ ultima_cita.fecha }} — <b>Hora:</b> {{ ultima_cita.hora }}</p>
+
+        {% if signos %}
+            <h4>Signos Vitales</h4>
+            <ul>
+                <li>Peso: {{ signos.peso }}</li>
+                <li>Presión arterial: {{ signos.presion_arterial }}</li>
+                <li>Frecuencia cardíaca: {{ signos.frecuencia_cardiaca }}</li>
+                <li>Frecuencia respiratoria: {{ signos.frecuencia_respiratoria }}</li>
+                <li>SpO₂: {{ signos.saturacion_oxigeno }}</li>
+                <li>Temperatura: {{ signos.temperatura }}</li>
+            </ul>
+        {% endif %}
+
+        {% if diagnostico %}
+            <h4>Diagnóstico</h4>
+            <p>{{ diagnostico }}</p>
+        {% endif %}
+
+        {% if receta %}
+            <h4>Receta</h4>
+            <p><b>Medicamentos:</b> {{ receta.medicamentos }}</p>
+            <p><b>Indicaciones:</b> {{ receta.indicaciones }}</p>
+            <a href="{% url 'generar_receta_pdf' ultima_cita.id %}" class="btn btn-success mt-2">Descargar PDF</a>
+        {% endif %}
+    {% else %}
+        <p>No hay citas registradas para este paciente.</p>
+    {% endif %}
+</div>
+{% endblock %}

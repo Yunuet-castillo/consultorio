@@ -27,5 +27,29 @@ urlpatterns = [
 
     # --- Doctor ---
     path('dashboard/doctor/cita/<int:cita_id>/', views.detalle_cita_doctor, name='detalle_cita_doctor'),
-    path('dashboard/doctor/cita/<int:cita_id>/receta/', views.crear_receta, name='crear_receta'),
+    path('dashboard/doctor/cita/<int:cita_id>/diagnostico/', views.realizar_diagnostico, name='realizar_diagnostico'),
+    path('dashboard/doctor/cita/<int:cita_id>/receta/', views.agregar_receta, name='crear_receta'),
+    path('dashboard/doctor/cita/<int:cita_id>/receta-pdf/', views.generar_receta_pdf, name='receta_pdf'),
+
+    # --- Mis citas ---
+    #path('mis-citas/', views.mis_citas, name='mis_citas'),
+    #path('detalle-cita/<int:cita_id>/', views.detalle_cita, name='detalle_cita'),
+    #m path('dashboard/doctor/cita/<int:cita_id>/receta/', views.agregar_receta, name='crear_receta'),
+
+    
+    path('dashboard/doctor/cita/<int:cita_id>/', views.detalle_cita_doctor, name='detalle_cita_doctor'),
+    path('dashboard/doctor/cita/<int:cita_id>/diagnostico/', views.realizar_diagnostico, name='realizar_diagnostico'),
+    path('dashboard/doctor/cita/<int:cita_id>/receta/', views.agregar_receta, name='agregar_receta'),
+    path('dashboard/doctor/cita/<int:cita_id>/receta/pdf/', views.generar_receta_pdf, name='generar_receta_pdf'),
+    path('cita/<int:cita_id>/receta/pdf/', views.generar_receta_pdf, name='generar_receta_pdf'),
+    path('paciente/<int:paciente_id>/', views.detalle_paciente, name='detalle_paciente'),
+    path("dashboard/doctor/", views.dashboard_doctor, name="dashboard_doctor"),
+    path("buscar_pacientes/", views.buscar_pacientes, name="buscar_pacientes"),
+    path("buscar_pacientes/", views.buscar_pacientes, name="buscar_pacientes"),
+    path("paciente/<int:paciente_id>/", views.detalle_paciente, name="detalle_paciente"),
+
+   path('reporte-dia/', views.reporte_dia, name='reporte_dia'),
+   path('reporte-semana/', views.reporte_semana, name='reporte_semana'),
+   path('reporte-mes/', views.reporte_mes, name='reporte_mes'),
+
 ]

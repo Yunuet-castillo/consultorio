@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar/Editar Receta{% endblock %}
+
+{% block extra_head %}
+<style>
+    body { background-color: #EAF2F8; line-height: 1.55; }
+
+    /* Módulo estilo Signos vitales con animación */
+    .module-card {
+        background-color: #AED6F1;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.5s forwards;
+    }
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .module-card header {
+        background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%);
+        color: #fff;
+        padding: 12px 18px;
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .module-card .body {
+        padding: 15px 18px;
+        color: #1C1C1C;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px 20px;
+    }
+    .info-item i {
+        color: #4A90E2;
+        margin-right: 8px;
+    }
+
+    /* Botones estilo moderno con animación */
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #4A90E2, #357ABD);
+        color: #fff;
+        font-weight: 600;
+        padding: 0.45rem 1rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 6px 14px rgba(74,144,226,0.25);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-primary-custom:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 10px 20px rgba(74,144,226,0.35);
+    }
+    .btn-primary-custom:active {
+        transform: translateY(1px) scale(0.98);
+        box-shadow: 0 4px 10px rgba(74,144,226,0.2);
+    }
+    .btn-secondary-custom {
+        background: #6c757d;
+        color: #fff;
+        font-weight: 600;
+        padding: 0.45rem 1rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .btn-secondary-custom:hover { background: #5a6268; }
+
+    .btn-pill { border-radius: 9999px; }
+
+    /* Inputs */
+    form p { margin-bottom: 15px; }
+    label { font-weight: 600; display: block; margin-bottom: 6px; color: #205067; }
+    input[type="text"], textarea, select {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(46,134,193,0.35);
+        background: #fff;
+        font-size: 15px;
+    }
+    textarea { min-height: 120px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Encabezado -->
+    <div class="card mb-4 card-custom shadow-sm">
+        <div class="card-body d-flex align-items-center justify-content-between">
+            <h2 class="card-title mb-0">Agregar/Editar Receta</h2>
+            <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn btn-primary-custom btn-pill">
+                <i class="fas fa-arrow-left"></i> Regresar a la cita
+            </a>
+        </div>
+    </div>
+
+    <!-- Información del Paciente -->
+    <div class="module-card">
+        <header><i class="fas fa-user"></i> Información del Paciente</header>
+        <div class="body">
+            <div class="info-grid">
+                <div class="info-item"><i class="fas fa-id-card"></i> <strong>Nombre:</strong> {{ paciente.nombre }} {{ paciente.apellido }}</div>
+                <div class="info-item"><i class="fas fa-stethoscope"></i> <strong>Diagnóstico:</strong> {{ cita.diagnostico|default:'N/A' }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de Receta -->
+    <div class="module-card">
+        <header><i class="fas fa-prescription-bottle-alt"></i> Formulario de Receta</header>
+        <div class="body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="submit" class="btn-primary-custom btn-pill"><i class="fas fa-save"></i> Guardar Receta</button>
+                    <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn-secondary-custom btn-pill"><i class="fas fa-times"></i> Cancelar</a>
+                    <a href="{% url 'generar_receta_pdf' cita.id %}" class="btn btn-success">📄 Descargar Receta PDF</a>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

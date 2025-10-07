@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Buscar Pacientes{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Botón regresar al dashboard */
+    .btn-back {
+        background-color: #4A90E2;
+        color: #fff;
+        border-radius: 50px;
+        padding: 0.45rem 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 6px 14px rgba(74,144,226,0.25);
+        text-decoration: none;
+        margin-bottom: 20px;
+    }
+    .btn-back:hover {
+        background-color: #357ABD;
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(74,144,226,0.35);
+    }
+
+    /* Formulario de búsqueda */
+    .search-form .form-control {
+        border-radius: 50px 0 0 50px;
+    }
+    .search-form .btn {
+        border-radius: 0 50px 50px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Botón regresar al dashboard -->
+    <a href="{% url 'dashboard_doctor' %}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Regresar al inicio
+    </a>
+
+
+    <!-- Resultados de búsqueda -->
+    <div class="card card-custom shadow-sm p-3">
+        <h4>Resultados de búsqueda</h4>
+        {% if pacientes %}
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Edad</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for paciente in pacientes %}
+                        <tr>
+                            <td>{{ paciente.nombre }} {{ paciente.apellido }}</td>
+                            <td>{{ paciente.edad }}</td>
+                            <td>{{ paciente.telefono }}</td>
+                            <td>
+                                <a href="{% url 'detalle_paciente' paciente.id %}" class="btn btn-sm btn-primary">Ver Detalle</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="mt-2">No se encontraron pacientes con "{{ query }}".</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -110,6 +110,7 @@ class SignosVitales(models.Model):
     """
     Modelo para registrar los signos vitales de una cita.
     """
+    
     cita = models.OneToOneField(Cita, on_delete=models.CASCADE)
     peso = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     presion_arterial = models.CharField(max_length=20, null=True, blank=True)

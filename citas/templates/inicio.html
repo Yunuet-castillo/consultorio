@@ -466,7 +466,7 @@
                         <div class="accordion-content-inner">
                             <div class="content-item">
                                 <i class="fas fa-hospital"></i>
-                                <span>Lunes a Viernes: 09:30 AM - 04:00 PM</span>
+                                <span>Lunes a Viernes: 09:00 AM - 03:00 PM</span>
                             </div>
                         </div>
                     </div>
@@ -556,18 +556,24 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for cita in citas %}
                         <tr>
-                            <td><i class="fas fa-user" style="margin-right: 5px; color: #4A90E2;"></i> Camila Duran</td>
-                            <td>2025-08-03 12:00:00</td>
-                            <td>Dr. Victor Manuel Bustillos Lucas</td>
-                            <td><span class="status-badge status-completed">Completada</span></td>
+                            <td><i class="fas fa-user" style="margin-right:5px;color:#4A90E2;"></i>{{ cita.paciente.nombre }} {{ cita.paciente.apellidos }}</td>
+                            <td>{{ cita.fecha }} {{ cita.hora }}</td>
+                            <td>{{ cita.medico.nombre }} {{ cita.medico.apellidos }}</td>
+                            <td>
+                                {% if cita.estado == 'pendiente' %}
+                                    <span class="status-badge status-pending">Pendiente</span>
+                                {% else %}
+                                    <span class="status-badge status-completed">Completada</span>
+                                {% endif %}
+                            </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td><i class="fas fa-user" style="margin-right: 5px; color: #4A90E2;"></i> Laura Guerrero</td>
-                            <td>2025-08-26 10:30:00</td>
-                            <td>Dr. Victor Manuel Bustillos Lucas</td>
-                            <td><span class="status-badge status-pending">Pendiente</span></td>
+                            <td colspan="4" style="text-align:center;">No hay citas para hoy</td>
                         </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -579,30 +585,18 @@
         </div>
     </div>
 
-    <script>
+   <script>
         document.addEventListener('DOMContentLoaded', function() {
             const accordionHeaders = document.querySelectorAll('.accordion-header');
-            
             accordionHeaders.forEach(header => {
                 header.addEventListener('click', function() {
-                    accordionHeaders.forEach(otherHeader => {
-                        if (otherHeader !== header) {
-                            otherHeader.classList.remove('active');
-                            otherHeader.nextElementSibling.style.maxHeight = null;
-                        }
-                    });
+                    accordionHeaders.forEach(h => { if(h!==header){h.classList.remove('active'); h.nextElementSibling.style.maxHeight=null;}});
                     this.classList.toggle('active');
                     const content = this.nextElementSibling;
-                    if (content.style.maxHeight) {
-                        content.style.maxHeight = null;
-                    } else {
-                        content.style.maxHeight = content.scrollHeight + "px";
-                    }
+                    content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
                 });
             });
-            if (accordionHeaders.length > 0) {
-                accordionHeaders[0].click();
-            }
+            if(accordionHeaders.length>0){accordionHeaders[0].click();}
         });
     </script>
 </body>

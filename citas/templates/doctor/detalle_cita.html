@@ -77,20 +77,26 @@
     </div>
 
     <!-- Signos Vitales -->
-    <div class="module-card">
-        <header><i class="fas fa-heartbeat"></i> Signos vitales</header>
-        <div class="body">
-            {% if signos %}
-            <div class="info-grid">
-                <div class="info-item"><i class="fas fa-tachometer-alt"></i> <strong>Presión:</strong> {{ signos.presion }}</div>
-                <div class="info-item"><i class="fas fa-heart"></i> <strong>Pulso:</strong> {{ signos.pulso }}</div>
-                <div class="info-item"><i class="fas fa-thermometer-half"></i> <strong>Temperatura:</strong> {{ signos.temperatura }}</div>
-            </div>
-            {% else %}
-            <p>No se han registrado signos vitales aún.</p>
-            {% endif %}
+   <div class="module-card">
+    <header><i class="fas fa-heartbeat"></i> Signos vitales</header>
+    <div class="body">
+        
+        {# Utilizamos la variable 'signos' que viene del contexto de views.py #}
+        {% if signos %}
+        <div class="info-grid">
+            <div class="info-item"><i class="fas fa-weight"></i> <strong>Peso:</strong> {{ signos.peso }} kg</div>
+            <div class="info-item"><i class="fas fa-tachometer-alt"></i> <strong>Presión:</strong> {{ signos.presion_arterial }}</div>
+            <div class="info-item"><i class="fas fa-heart"></i> <strong>Frecuencia Cardíaca:</strong> {{ signos.frecuencia_cardiaca }} lpm</div>
+            <div class="info-item"><i class="fas fa-thermometer-half"></i> <strong>Temperatura:</strong> {{ signos.temperatura }} °C</div>
+            <div class="info-item"><i class="fas fa-lungs"></i> <strong>Frecuencia Respiratoria:</strong> {{ signos.frecuencia_respiratoria }} rpm</div>
+            <div class="info-item"><i class="fas fa-tint"></i> <strong>Saturación de Oxígeno:</strong> {{ signos.saturacion_oxigeno }}%</div>
         </div>
+        {% else %}
+        <p>No se han registrado signos vitales aún.</p>
+        {% endif %}
+
     </div>
+</div>
 
     <!-- Diagnóstico -->
     <div class="module-card">

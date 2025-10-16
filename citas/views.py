@@ -50,7 +50,7 @@ def inicio(request):
     
     contexto = {
         'citas': citas,
-        'hoy': hoy,
+        'hoy': hoy, 
         'pendientes': pendientes
     }
     
@@ -137,7 +137,7 @@ from datetime import date
 @user_passes_test(is_administradora)
 def dashboard_administradora(request):
     fecha_actual = date.today()
-    # Filtramos citas cuyo día sea hoy o posterior
+    # citas cuyo día sea hoy o posterior
     citas = Cita.objects.filter(fecha__gte=fecha_actual).order_by('fecha', 'hora')
     contexto = {'citas': citas, 'fecha_actual': fecha_actual}
     return render(request, 'recepcion/dashboard.html', contexto)
@@ -159,6 +159,9 @@ def dashboard_enfermera(request):
 # ---------------------------
 # --- Gestión de Pacientes y Citas ---
 # ---------------------------
+# ---------------------------
+# REGISTRO DEL PACIENTE
+# ---------------------------
 @login_required
 @user_passes_test(is_administradora)
 def agendar_paciente(request):
@@ -166,6 +169,7 @@ def agendar_paciente(request):
         paciente_form = PacienteForm(request.POST)
         if paciente_form.is_valid():
             paciente = paciente_form.save()
+            # Guarda el ID del paciente en la sesión
             request.session['paciente_id'] = paciente.id
             return redirect('agendar_cita')
         else:
@@ -176,21 +180,55 @@ def agendar_paciente(request):
     contexto = {'paciente_form': paciente_form}
     return render(request, 'recepcion/agendar_paciente.html', contexto)
 
+# ---------------------------
+# REGISTRO DE LA CITA (AUTOMÁTICO CON PACIENTE)
+# ---------------------------
 @login_required
 def agendar_cita(request):
-    doctores = CustomUser.objects.filter(role=CustomUser.Roles.DOCTOR)
+    paciente_id = request.session.get('paciente_id')
+    paciente = None
+
+    if paciente_id:
+        from .models import Paciente, Doctor
+        paciente = Paciente.objects.filter(id=paciente_id).first()
+        doctores = Doctor.objects.all()
+    else:
+        doctores = Doctor.objects.all()
+
     if request.method == 'POST':
-        form = CitaForm(request.POST)
+        # Pasamos paciente y doctor queryset al formulario
+        form = CitaForm(request.POST, paciente=paciente)
+        form.fields['doctor_user'].queryset = doctores
+
         if form.is_valid():
             form.save()
             messages.success(request, '✅ La cita ha sido agendada con éxito.')
+            # Limpiar paciente de sesión
+            if 'paciente_id' in request.session:
+                request.session.pop('paciente_id')
             return redirect('dashboard_administradora')
+        else:
+            # Mostrar errores completos
+            messages.error(request, form.errors.as_text())
     else:
-        form = CitaForm()
-    
-    context = {'form': form, 'titulo': 'Agendar Cita', 'boton': 'Agendar', 'doctores': doctores}
+        form = CitaForm(paciente=paciente)
+        form.fields['doctor_user'].queryset = doctores
+
+    context = {
+        'form': form,
+        'paciente': paciente,
+        'titulo': 'Agendar Cita',
+        'boton': 'Agendar',
+    }
     return render(request, 'recepcion/agendar_cita.html', context)
 
+
+
+
+
+# ---------------------------
+# DASHBOARD
+# ---------------------------
 @login_required
 @user_passes_test(is_administradora)
 def dashboard_citas(request):
@@ -261,16 +299,29 @@ def registrar_signos_vitales(request, cita_id):
 @login_required
 @user_passes_test(is_doctor)
 def detalle_cita_doctor(request, cita_id):
-    cita = get_object_or_404(Cita, id=cita_id)
-    signos = getattr(cita, 'signosvitales', None)
-    receta = getattr(cita, 'receta', None)
     
+    # 1. Recuperar la Cita con precarga de 'paciente'.
+    # Usamos get_object_or_404 para manejar si la Cita no existe.
+    cita = get_object_or_404(
+        # Incluimos 'paciente' en select_related, ya que esa relación (ForeignKey) siempre existe.
+        Cita.objects.select_related('paciente'), 
+        id=cita_id
+    )
+    
+    # 2. Manejar relaciones inversas (SignosVitales y Receta)
+    # Utilizamos getattr() para obtener el objeto. Si no existe, devuelve None en lugar
+    # de lanzar la excepción citas.models.Cita.X.RelatedObjectDoesNotExist.
+    
+    signos = getattr(cita, 'signosvitales', None)
+    receta = getattr(cita, 'receta', None) 
     contexto = {
         "cita": cita,
         "paciente": cita.paciente,
-        "signos": signos,
-        "receta": receta
+        "signos": signos, # Será un objeto SignosVitales o None
+        "receta": receta  # Será un objeto Receta o None
     }
+    
+    # Asegúrate de que el template se llama "doctor/detalle_cita.html"
     return render(request, "doctor/detalle_cita.html", contexto)
 
 
@@ -307,13 +358,16 @@ def realizar_diagnostico(request, cita_id):
 def agregar_receta(request, cita_id):
     cita = get_object_or_404(Cita, id=cita_id)
     receta = getattr(cita, 'receta', None)
+    
+    # ✅ CORRECCIÓN: Obtener Signos Vitales de forma segura
+    signos = getattr(cita, 'signosvitales', None) 
 
     if request.method == "POST":
         form = RecetaForm(request.POST, instance=receta)
         if form.is_valid():
             nueva_receta = form.save(commit=False)
             nueva_receta.cita = cita
-            nueva_receta.doctor = request.user.doctor  # ⚡ corregido
+            nueva_receta.doctor = request.user.doctor
             nueva_receta.save()
             messages.success(request, "✅ Receta guardada correctamente.")
             return redirect('detalle_cita_doctor', cita_id=cita.id)
@@ -325,7 +379,8 @@ def agregar_receta(request, cita_id):
     return render(request, "doctor/agregar_receta.html", {
         "cita": cita,
         "paciente": cita.paciente,
-        "form": form
+        "form": form,
+        "signos": signos  # ✅ AÑADIDO: Pasar la variable 'signos' al template
     })
 
 
@@ -347,7 +402,7 @@ def generar_receta_pdf(request, cita_id):
     receta = getattr(cita, 'receta', None)
 
     if not receta:
-        messages.error(request, "No hay receta para esta cita.")
+        messages.error(request, "❌ No hay receta para esta cita.")
         return redirect('detalle_cita_doctor', cita_id=cita.id)
 
     paciente = cita.paciente
@@ -355,6 +410,7 @@ def generar_receta_pdf(request, cita_id):
     signos = getattr(cita, 'signosvitales', None)
 
     # --- ✅ Cambiar el estado de la cita a “Atendida” ---
+    # Esto es crucial para marcar la cita como finalizada.
     cita.estado = "Atendida"
     cita.save()
 
@@ -374,14 +430,23 @@ def generar_receta_pdf(request, cita_id):
     normal_style = ParagraphStyle('NormalCustom', parent=styles['Normal'], fontName='Helvetica', fontSize=11, textColor=colors.black)
 
     # --- Encabezado ---
-    logo_path = os.path.join(settings.BASE_DIR, "static", "citas", "img", "logo.png")
+    # Nota: La variable settings debe estar importada para que esto funcione.
+    # Si no tienes settings.BASE_DIR disponible, usa la ruta estática directa.
+    try:
+        from django.conf import settings
+        logo_path = os.path.join(settings.BASE_DIR, "static", "citas", "img", "logo.png")
+    except ImportError:
+        # En caso de que settings no esté importado o disponible
+        logo_path = "" # Ajusta esto a tu necesidad si no usas settings
+
     header_title = Paragraph("HOSPITAL SAN PEDRO", title_style)
     header_subtitle = Paragraph("Av. 5 de Mayo Sur Nº 29, Zacapoaxtla, Pue. • Tel: 233 314-30-84", normal_style)
 
     header_cells = []
-    if os.path.exists(logo_path):
+    if logo_path and os.path.exists(logo_path):
         header_cells = [[Image(logo_path, width=60, height=60), header_title], ["", header_subtitle]]
     else:
+        # Si no se encuentra el logo, usa solo el título y subtítulo
         header_cells = [["", header_title], ["", header_subtitle]]
 
     header_table = Table(header_cells, colWidths=[70, 360])
@@ -442,7 +507,7 @@ def generar_receta_pdf(request, cita_id):
         canv.saveState()
         canv.setStrokeColor(azul_oscuro)
         canv.setLineWidth(0.5)
-        page_width, page_height = doc.pagesize
+        page_width, page_height = doc_obj.pagesize
         canv.line(40, 40, page_width - 40, 40)
         canv.setFont("Helvetica", 9)
         canv.setFillColor(colors.black)
@@ -454,21 +519,28 @@ def generar_receta_pdf(request, cita_id):
     pdf = buffer.getvalue()
     buffer.close()
 
-    # --- ✅ Al cerrar o imprimir, redirige al Dashboard ---
-    dashboard_url = reverse('dashboard_doctor')
-
-    # Si el navegador no muestra el PDF inline, fuerza redirección
-    html_redirect = f"""
-    <html>
-        <body onload="window.open('data:application/pdf;base64,{pdf.decode('latin1')}', '_blank'); window.location.href='{dashboard_url}';">
-            <p>Generando receta... redirigiendo al panel.</p>
-        </body>
-    </html>
-    """
-
+    # ✅ CORRECCIÓN: Devolvemos el PDF como archivo adjunto.
+    # El navegador lo descargará/abrirá en una nueva pestaña (según el JS).
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="receta_{paciente.nombre}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="receta_{paciente.nombre}.pdf"'
+    
     return response
+
+
+@login_required
+def detalle_paciente(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+    return render(request, 'recepcion/detalle_paciente.html', {'paciente': paciente})
+
+
+@login_required
+def buscar_pacientes(request):
+    query = request.GET.get('q', '')
+    pacientes = Paciente.objects.filter(nombre__icontains=query) if query else []
+    return render(request, 'recepcion/buscar_pacientes.html', {
+        'pacientes': pacientes,
+        'query': query,
+    })
 
 
 @login_required
@@ -658,3 +730,141 @@ def imprimir_historial_paciente(request, paciente_id):
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="historial_{paciente.nombre}.pdf"'
     return response
+
+# ---------------------------
+# --- API REST con DRF ---
+# ---------------------------
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from rest_framework.authtoken.models import Token   
+from .serializers import RegisterSerializer, CitaSerializer, SignosVitalesSerializer
+from django.contrib.auth import get_user_model
+CustomUser = get_user_model()
+from django.db import IntegrityError # <-- ¡Importa esto!
+from django.contrib.auth import authenticate      # Para verificar usuario y contraseña
+
+
+class RegisterAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        data = request.data
+
+        username = data.get('username')
+        password = data.get('password')
+        nombre = data.get('nombre')
+        apellido_paterno = data.get('apellido_paterno')
+        apellido_materno = data.get('apellido_materno')
+        email = data.get('email')  
+        role = data.get('role', 'enfermera') 
+
+        # 1. Validar campos obligatorios
+        if not all([username, password, nombre, apellido_paterno, email]):
+            return Response({'error': 'Faltan campos obligatorios.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Verificar si el usuario ya existe (Verificación de Django)
+        if CustomUser.objects.filter(username=username).exists():
+            # Devuelve 400 antes de intentar tocar la base de datos
+            return Response({'error': 'El nombre de usuario ya existe.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3. Crear usuario con manejo de errores de base de datos
+        try:
+            user = CustomUser.objects.create_user(
+                username=username,
+                password=password,
+                email=email,
+                nombre=nombre,
+                apellido_paterno=apellido_paterno,
+                apellido_materno=apellido_materno or '',
+                role=role
+            )
+            return Response({'mensaje': 'Usuario creado correctamente. Inicia sesión.'}, status=status.HTTP_201_CREATED)
+
+        except IntegrityError:
+            # Captura el error de PostgreSQL (UniqueViolation) si la verificación anterior falla
+            # o si el email también es único y está duplicado.
+            return Response({'error': 'El nombre de usuario o correo electrónico ya están registrados.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            # Captura cualquier otro error de servidor no esperado.
+            return Response({'error': f'Error interno del servidor: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class LoginAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        user = authenticate(username=username, password=password)
+        
+        if user and hasattr(user, 'role') and user.role == 'enfermera':
+            # Ahora, 'Token' tendrá el atributo 'objects'
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key, 'username': user.username})
+        
+        return Response({'detail':'Credenciales inválidas o no eres enfermera'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    
+class CitasListAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request):
+        # CAMBIO: Usar __iexact para ignorar mayúsculas/minúsculas.
+        citas = Cita.objects.all().select_related('paciente').order_by('fecha', 'hora') 
+        
+        ser = CitaSerializer(citas, many=True)
+        return Response(ser.data)
+    
+class SignosVitalesCreateAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request):
+        # Si ya existe signos para la cita queremos actualizar, sino crear.
+        data = request.data.copy()
+        cita_id = data.get('cita')
+        if not cita_id:
+            return Response({'detail':'Se requiere cita'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            cita = Cita.objects.get(id=cita_id)
+        except Cita.DoesNotExist:
+            return Response({'detail':'Cita no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+        # buscar existente
+        signos = getattr(cita, 'signosvitales', None)
+        if signos:
+            ser = SignosVitalesSerializer(signos, data=data, partial=True)
+        else:
+            ser = SignosVitalesSerializer(data=data)
+
+        if ser.is_valid():
+            sv = ser.save()
+            # opcional: marcar cita como 'atendida'
+            cita.estado = 'atendida'
+            cita.save()
+            return Response(SignosVitalesSerializer(sv).data, status=status.HTTP_201_CREATED)
+        return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    # views.py (Ejemplo de la vista de detalle de cita)
+
+class CitaDetailAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, pk):
+        try:
+            # ✅ OPTIMIZACIÓN: Usar select_related para ambas relaciones OneToOne (directa e inversa).
+            cita = (Cita.objects.filter(pk=pk)
+                       .select_related('paciente', 'signosvitales') # <- Carga paciente y signos vitales
+                       .first())
+            
+            if not cita:
+                return Response({"detail": "Cita no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+            
+            # El serializador ahora utiliza get_signosvitales() para incluir el objeto
+            ser = CitaSerializer(cita)
+            return Response(ser.data)
+            
+        except Exception as e:
+            return Response({"detail": "Error interno del servidor: " + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+        from django.db.models import F

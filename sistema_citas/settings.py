@@ -13,6 +13,8 @@ import os
 from django.conf import global_settings
 from pathlib import Path
 
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +28,8 @@ SECRET_KEY = 'django-insecure-=r@=@&hm0jsgn74zg1i*5w7w#nvbdfozpw12@9l2)qpcrz+f9l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['192.168.15.244', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -42,8 +45,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'citas',
     'rest_framework',
+    'rest_framework.authtoken',
     
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -87,7 +102,8 @@ DATABASES = {
         'NAME': 'consul',      # Nombre de la base de datos
         'USER': 'postgres',     # Usuario de PostgreSQL
         'PASSWORD': 'Tec123',
-        'HOST': 'localhost',      # O la IP del servidor
+        'HOST': 'localhost', 
+        # O la IP del servidor
         'PORT': '5432',           # Puerto por defecto de PostgreSQL
     }
 }

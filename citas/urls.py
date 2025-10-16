@@ -2,6 +2,7 @@
 # citas/urls.py
 from django.urls import path
 from . import views
+from .views import RegisterAPIView, LoginAPIView, CitasListAPIView, SignosVitalesCreateAPIView
 
 urlpatterns = [
     # --- Autenticación y navegación principal ---
@@ -53,7 +54,15 @@ urlpatterns = [
    path('reporte-semana/', views.reporte_semana, name='reporte_semana'),
    path('reporte-mes/', views.reporte_mes, name='reporte_mes'),
 
-   path('imprimir_historial/<int:paciente_id>/', views.imprimir_historial_paciente, name='imprimir_historial_paciente')
+   path('imprimir_historial/<int:paciente_id>/', views.imprimir_historial_paciente, name='imprimir_historial_paciente'),
     
-]
 
+    #---------------------------
+    # --- API REST con DRF ---  
+    
+
+    path('api/register/', RegisterAPIView.as_view(), name='api-register'),
+    path('api/login/', LoginAPIView.as_view(), name='api-login'),
+    path('api/citas/', CitasListAPIView.as_view(), name='api-citas'),
+    path('api/signos/', SignosVitalesCreateAPIView.as_view(), name='api-signos'),
+]

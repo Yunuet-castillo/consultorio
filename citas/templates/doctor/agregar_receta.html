@@ -141,4 +141,24 @@
         </div>
     </div>
 </div>
+
+<script>
+    /**
+     * Función para abrir la descarga del PDF en una nueva pestaña/ventana
+     * y luego redirigir la pestaña actual al Dashboard del doctor.
+     */
+    function descargarYRedirigir(citaId) {
+        // 1. Construye la URL del PDF dinámicamente
+        var pdfUrl = "{% url 'generar_receta_pdf' 0 %}".replace('0', citaId);
+        
+        // 2. Abre el PDF. La vista en Django se encargará de marcar la cita como 'Atendida'.
+        window.open(pdfUrl, '_blank');
+
+        // 3. Espera un breve momento (0.5 segundos) para que el navegador procese la descarga
+        //    y luego redirige la pestaña actual al dashboard.
+        setTimeout(function() {
+            window.location.href = "{% url 'dashboard_doctor' %}";
+        }, 500); 
+    }
+</script>
 {% endblock %}

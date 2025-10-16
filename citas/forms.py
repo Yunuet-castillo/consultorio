@@ -70,6 +70,9 @@ class PacienteForm(forms.ModelForm):
 # -------------------------
 # Formulario de Cita
 # -------------------------
+from django.core.exceptions import ValidationError
+from datetime import datetime, time, timedelta
+
 class CitaForm(forms.ModelForm):
     doctor_user = forms.ModelChoiceField(
         queryset=Doctor.objects.all(),
@@ -80,7 +83,6 @@ class CitaForm(forms.ModelForm):
     class Meta:
         model = Cita
         fields = [
-            'paciente', 
             'fecha',
             'hora',
             'recordatorio_activado',
@@ -90,11 +92,62 @@ class CitaForm(forms.ModelForm):
             'fecha': forms.DateInput(attrs={'type': 'date', 'min': date.today().isoformat()}),
             'hora': forms.TimeInput(attrs={'type': 'time'}),
         }
-    
+
+    def __init__(self, *args, **kwargs):
+        # recibir paciente automáticamente desde la vista
+        self.paciente = kwargs.pop('paciente', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha = cleaned_data.get('fecha')
+        hora = cleaned_data.get('hora')
+        doctor = cleaned_data.get('doctor_user')
+
+        if not fecha or not hora or not doctor:
+            return cleaned_data
+
+        # Rango horario permitido: 9:30 AM a 4:00 PM
+        hora_inicio = time(9, 30)
+        hora_fin = time(16, 0)
+
+        if not (hora_inicio <= hora <= hora_fin):
+            raise ValidationError("⏰ Solo se pueden agendar citas entre 9:30 AM y 4:00 PM.")
+
+        # Intervalo mínimo de 15 minutos
+        citas_existentes = Cita.objects.filter(fecha=fecha, doctor=doctor)
+        for cita in citas_existentes:
+            diferencia = abs(datetime.combine(date.today(), cita.hora) - datetime.combine(date.today(), hora))
+            if diferencia < timedelta(minutes=15):
+                raise ValidationError(f"⚠️ Ya existe una cita para ese horario ({cita.hora.strftime('%H:%M')}). "
+                                      "Debe dejar al menos 15 minutos de diferencia.")
+
+        # Validar máximo de citas por día (ejemplo: 20 citas diarias por doctor)
+        MAX_CITAS_POR_DIA = 20
+        if citas_existentes.count() >= MAX_CITAS_POR_DIA:
+            # Calcular horas disponibles
+            horas_disponibles = []
+            hora_actual = hora_inicio
+            while hora_actual <= hora_fin:
+                if not Cita.objects.filter(fecha=fecha, doctor=doctor, hora=hora_actual).exists():
+                    horas_disponibles.append(hora_actual.strftime("%H:%M"))
+                hora_actual = (datetime.combine(date.today(), hora_actual) + timedelta(minutes=15)).time()
+
+            horas_str = ", ".join(horas_disponibles) if horas_disponibles else "Ninguna"
+            raise ValidationError(
+                f"📅 Este día ya tiene el máximo de citas asignadas. Por favor, seleccione otra fecha.\n"
+                f"🕒 Horas disponibles: {horas_str}"
+            )
+
+        return cleaned_data
+
     def save(self, commit=True):
         doctor_user = self.cleaned_data.get('doctor_user')
         cita = super().save(commit=False)
-        cita.doctor = doctor_user  # asigna el modelo Doctor
+        cita.doctor = doctor_user
+
+        if self.paciente:
+            cita.paciente = self.paciente  # asigna paciente automáticamente
 
         if commit:
             cita.save()

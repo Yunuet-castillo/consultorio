@@ -805,13 +805,35 @@ class LoginAPIView(APIView):
         
         return Response({'detail':'Credenciales inválidas o no eres enfermera'}, status=status.HTTP_401_UNAUTHORIZED)
     
+from datetime import datetime, timedelta
     
 class CitasListAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
-        # CAMBIO: Usar __iexact para ignorar mayúsculas/minúsculas.
-        citas = Cita.objects.all().select_related('paciente').order_by('fecha', 'hora') 
+        # 1. Consulta base
+        citas = Cita.objects.all().select_related('paciente').order_by('fecha', 'hora')
         
+        # 2. Obtener el parámetro 'date' de la URL (Ej: '2025-10-17')
+        target_date_str = request.query_params.get('date') 
+
+        if target_date_str:
+            try:
+                # 3. FILTRADO CORREGIDO: Usamos el campo 'fecha' que sí existe.
+                
+                # Si 'fecha' es un DateField, Django puede filtrar por el string directo.
+                # Utilizamos 'fecha__exact' o simplemente 'fecha'
+                citas = citas.filter(fecha=target_date_str)
+                
+                # NOTA: La línea original de ordenación ya usa 'fecha' y 'hora', 
+                # lo que confirma que son campos separados.
+                
+            except Exception:
+                # Manejar cualquier error de conversión de fecha si fuera necesario, 
+                # aunque 'fecha=target_date_str' debería ser robusto si el formato es 'YYYY-MM-DD'.
+                pass 
+                
+        # 4. Serializar y devolver los datos
         ser = CitaSerializer(citas, many=True)
         return Response(ser.data)
     

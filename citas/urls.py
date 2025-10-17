@@ -65,4 +65,5 @@ urlpatterns = [
     path('api/login/', LoginAPIView.as_view(), name='api-login'),
     path('api/citas/', CitasListAPIView.as_view(), name='api-citas'),
     path('api/signos/', SignosVitalesCreateAPIView.as_view(), name='api-signos'),
+    path('citas/', CitasListAPIView.as_view(), name='citas-list'),
 ]

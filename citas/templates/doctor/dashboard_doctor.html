@@ -1,58 +1,121 @@
 {% extends "base.html" %}
 
-{% block title %}Sitio Doctor{% endblock %}
+{% block title %}Panel del Doctor{% endblock %}
 
 {% block extra_head %}
 <style>
-    /* Colores y estilos personalizados */
-    body { background-color: #EAF2F8; line-height: 1.55; }
-
-    .navbar-custom { background-color: #2E86C1; }
-
-    .card-header-custom { 
-        background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%); 
-        color: #fff; 
-        border-radius: 14px 14px 0 0; 
-        padding: 0.9rem 1.25rem; 
+    /* 🌈 Estilo general */
+    body {
+        background: linear-gradient(135deg, #EAF6FB 0%, #D6EAF8 100%);
+        font-family: "Segoe UI", sans-serif;
     }
 
-    .card-custom { 
-        background-color: #AED6F1; 
-        border-radius: 14px; 
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06); 
-        margin-bottom: 30px; 
+    h2, h3 {
+        font-weight: 700;
+        color: #154360;
     }
 
-    .btn-primary-custom { 
-        background-color: #4A90E2; 
-        color: #fff; 
-        box-shadow: 0 6px 14px rgba(74,144,226,0.25); 
-        transition: all 0.12s ease; 
-    }
-    .btn-primary-custom:hover { 
-        background-color: #357ABD; 
-        transform: translateY(-1px); 
-    }
-    .btn-pill { border-radius: 9999px; padding: 0.4rem 0.85rem; }
-
-    .table-custom thead { 
-        background-color: #5DADE2; 
-        color: #fff; 
-        text-transform: uppercase; 
-        font-size: 0.85rem; 
+    /* 🩺 Tarjetas generales */
+    .card-custom {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background-color: #ffffff;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .badge-confirmada { background-color: #4A90E2; }
-    .badge-pendiente { background-color: #5DADE2; color: #000; }
-    .badge-cancelada { background-color: #2E86C1; color: #fff; }
-    .badge-atendida { background-color: #2ECC71; color: #fff; } /* ✅ verde para atendida */
-
-    /* Resaltado temporal */
-    .table-warning { 
-        animation: highlight 3s ease-in-out; 
+    .card-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
     }
 
-    @keyframes highlight {
+    /* 🔹 Encabezados */
+    .card-header-custom {
+        background: linear-gradient(135deg, #2471A3 0%, #3498DB 100%);
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        padding: 1rem 1.25rem;
+    }
+
+    /* 🧩 Buscador */
+    .input-group input {
+        border: 2px solid #D6EAF8;
+        border-radius: 50px 0 0 50px;
+        padding-left: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .input-group input:focus {
+        border-color: #3498DB;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-primary-custom {
+        background-color: #3498DB;
+        color: #fff;
+        border-radius: 0 50px 50px 0;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.25s ease;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: #2E86C1;
+        transform: scale(1.03);
+    }
+
+    /* 📋 Tabla */
+    .table-custom thead {
+        background-color: #3498DB;
+        color: white;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .table-custom tbody tr:hover {
+        background-color: #EBF5FB;
+        transition: background-color 0.2s ease;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+    }
+
+    /* 🏷️ Etiquetas */
+    .badge {
+        padding: 0.45em 0.7em;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-confirmada { background-color: #5DADE2; color: white; }
+    .badge-pendiente { background-color: #F4D03F; color: #000; }
+    .badge-cancelada { background-color: #C0392B; color: white; }
+    .badge-atendida { background-color: #2ECC71; color: white; }
+
+    /* 🔘 Botones pequeños */
+    .btn-pill {
+        border-radius: 999px;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.8rem;
+        margin: 0 2px;
+    }
+
+    .btn-pill:hover {
+        background-color: #2E86C1;
+        color: white;
+    }
+
+    /* ✨ Animación de nueva cita */
+    .table-warning {
+        animation: flashRow 2.5s ease-in-out;
+    }
+
+    @keyframes flashRow {
         0% { background-color: #FFF59D; }
         100% { background-color: transparent; }
     }
@@ -60,39 +123,39 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-5">
 
-    <!-- Bienvenida -->
-    <div class="card mb-4 card-custom shadow-sm">
+    <!-- 🩺 Bienvenida -->
+    <div class="card card-custom mb-4">
         <div class="card-body">
-            <h2 class="card-title mb-1">Bienvenido, Dr. {{ doctor.user.get_full_name }}</h2>
-            <p class="mb-0">Panel de control</p>
+            <h2>Bienvenido, Dr. {{ doctor.user.get_full_name }}</h2>
+            <p class="text-muted mb-0">Panel de control - Gestión de citas y pacientes</p>
         </div>
     </div>
 
-    <!-- 🔹 Buscador de pacientes -->
-    <div class="card mt-4 card-custom shadow-sm">
+    <!-- 🔍 Buscador -->
+    <div class="card card-custom mb-4">
         <div class="card-header card-header-custom">
-            <h3>Buscar Paciente</h3>
+            <h3 class="mb-0"><i class="fa-solid fa-magnifying-glass"></i> Buscar Paciente</h3>
         </div>
         <div class="card-body">
-            <form method="get" action="{% url 'buscar_pacientes' %}">
-                <div class="input-group mb-3">
+            <form method="get" action="{% url 'buscar_pacientes_doctor' %}">
+                <div class="input-group">
                     <input type="text" name="q" class="form-control" placeholder="Nombre, Apellido o Teléfono" value="{{ query }}">
-                    <button type="submit" class="btn btn-primary-custom btn-pill">Buscar</button>
+                    <button type="submit" class="btn btn-primary-custom">Buscar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Mis citas -->
-    <div class="card shadow-sm card-custom">
+    <!-- 📅 Citas -->
+    <div class="card card-custom">
         <div class="card-header card-header-custom">
-            <h3>Mis citas</h3>
+            <h3 class="mb-0"><i class="fa-solid fa-calendar-check"></i> Mis Citas</h3>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover mb-0 table-custom align-middle">
+                <table class="table table-hover table-custom align-middle">
                     <thead>
                         <tr>
                             <th>Paciente</th>
@@ -122,13 +185,19 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a class="btn btn-sm btn-primary-custom btn-pill" href="{% url 'detalle_cita_doctor' cita.id %}">Detalles</a>
-                                <a class="btn btn-sm btn-primary-custom btn-pill" href="{% url 'generar_receta_pdf' cita.id %}">Imprimir Receta</a>
+                                <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn btn-primary-custom btn-sm btn-pill">
+                                    <i class="fa-solid fa-eye"></i> Detalles
+                                </a>
+                                <a href="{% url 'generar_receta_pdf' cita.id %}" class="btn btn-success btn-sm btn-pill">
+                                    <i class="fa-solid fa-file-pdf"></i> Receta
+                                </a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center py-3">No tienes citas programadas.</td>
+                            <td colspan="5" class="text-center text-muted py-3">
+                                <i class="fa-solid fa-circle-info"></i> No tienes citas programadas.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -136,19 +205,16 @@
             </div>
         </div>
     </div>
-
 </div>
 
-<!-- ✅ Script para enfocar automáticamente la siguiente cita pendiente -->
+<!-- ✨ Animación para enfocar próxima cita pendiente -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const filaPendiente = document.querySelector('tr:has(.badge-pendiente)');
     if (filaPendiente) {
         filaPendiente.scrollIntoView({ behavior: 'smooth', block: 'center' });
         filaPendiente.classList.add('table-warning');
-        setTimeout(() => filaPendiente.classList.remove('table-warning'), 3000);
     }
 });
 </script>
-
 {% endblock %}

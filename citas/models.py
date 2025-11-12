@@ -44,7 +44,7 @@ class Doctor(models.Model):
     """
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     especialidad = models.CharField(max_length=100)
-    cedula_profesional = models.CharField(max_length=20, unique=True)
+    cedula_profesional = models.CharField(max_length=20, unique=True, blank=True, null=True)
     default="Lunes a Viernes de 9:00 a.m - 4:00 p.m",
     verbose_name="Horario de Consulta"
 
@@ -53,26 +53,29 @@ class Doctor(models.Model):
 
 class Paciente(models.Model):
     nombre = models.CharField(max_length=100)
-    apellido = models.CharField(max_length=100)
-    edad = models.IntegerField(null=True, blank=True)
-    fecha_nacimiento = models.DateField(default=date(1900, 1, 1))
-    lugar_origen = models.CharField(max_length=100, blank=True, null=True)
+    apellido_paterno = models.CharField(max_length=100)
+    apellido_materno = models.CharField(max_length=100, blank=True, null=True)
+    edad = models.IntegerField(blank=True, null=True)  # valor por defecto temporal
+    fecha_nacimiento = models.DateField()
+    lugar_origen = models.CharField(max_length=150, blank=True, null=True)  # valor por defecto temporal
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    primera_cita = models.BooleanField(default=True)
-    numero = models.CharField(max_length=10, unique=True, blank=True) # Campo numero para Paciente
+    primera_cita = models.BooleanField(default=False)
+    numero = models.CharField(max_length=10, unique=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if not hasattr(self, 'numero') or not self.numero:
+        if self.fecha_nacimiento:
+            today = date.today()
+            self.edad = today.year - self.fecha_nacimiento.year - (
+                (today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
+            )
+        if not self.numero:
             last = Paciente.objects.all().order_by('id').last()
-            if last:
-                next_id = last.id + 1
-            else:
-                next_id = 1
-            self.numero = f"P{next_id:04d}" # Ej: P0001, P0002, etc.
+            next_id = (last.id + 1) if last else 1
+            self.numero = f"P{next_id:04d}"
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.nombre} {self.apellido}"
+        return f"{self.nombre} {self.apellido_paterno} {self.apellido_materno or ''}"
 
 
 # -------------------------

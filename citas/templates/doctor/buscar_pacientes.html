@@ -15,62 +15,102 @@
         box-shadow: 0 6px 14px rgba(74,144,226,0.25);
         text-decoration: none;
         margin-bottom: 20px;
+        transition: all 0.2s ease-in-out;
     }
     .btn-back:hover {
         background-color: #357ABD;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
         box-shadow: 0 10px 20px rgba(74,144,226,0.35);
     }
 
     /* Formulario de búsqueda */
+    .search-form {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
     .search-form .form-control {
         border-radius: 50px 0 0 50px;
+        border: 1px solid #ccc;
+        padding: 0.6rem 1rem;
+        width: 300px;
     }
     .search-form .btn {
         border-radius: 0 50px 50px 0;
+        background-color: #4A90E2;
+        color: white;
+        border: none;
+        padding: 0.6rem 1rem;
+        transition: all 0.2s ease-in-out;
+    }
+    .search-form .btn:hover {
+        background-color: #357ABD;
+    }
+
+    /* Tabla */
+    .table {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .table thead {
+        background-color: #4A90E2;
+        color: white;
+    }
+    .table tbody tr:hover {
+        background-color: #f6f9ff;
+        transition: 0.3s;
+    }
+
+    h2, h4 {
+        color: #333;
+        text-align: center;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Botón regresar al dashboard -->
-    <a href="{% url 'dashboard_doctor' %}" class="btn-back">
-        <i class="fas fa-arrow-left"></i> Regresar al inicio
-    </a>
+    <a href="{% url 'doctor_dashboard' %}" class="btn-back">⬅️ Regresar</a>
 
+    <h2 class="mb-4">Buscar Pacientes</h2>
 
-    <!-- Resultados de búsqueda -->
-    <div class="card card-custom shadow-sm p-3">
-        <h4>Resultados de búsqueda</h4>
-        {% if pacientes %}
-            <div class="table-responsive">
-                <table class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Edad</th>
-                            <th>Teléfono</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for paciente in pacientes %}
-                        <tr>
-                            <td>{{ paciente.nombre }} {{ paciente.apellido }}</td>
-                            <td>{{ paciente.edad }}</td>
-                            <td>{{ paciente.telefono }}</td>
-                            <td>
-                                <a href="{% url 'detalle_paciente' paciente.id %}" class="btn btn-sm btn-primary">Ver Detalle</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p class="mt-2">No se encontraron pacientes con "{{ query }}".</p>
-        {% endif %}
-    </div>
+    <form method="get" action="{% url 'buscar_pacientes_doctor' %}" class="search-form">
+        <input type="text" name="q" placeholder="Buscar por nombre, apellido o número" 
+               value="{{ query }}" class="form-control" />
+        <button type="submit" class="btn">Buscar</button>
+    </form>
+
+    <hr>
+
+    {% if pacientes %}
+        <h4 class="mb-3">Resultados:</h4>
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Teléfono</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pacientes %}
+                <tr>
+                    <td>{{ p.nombre }}</td>
+                    <td>{{ p.apellido }}</td>
+                    <td>{{ p.numero }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'agendar_cita' p.id %}" class="btn btn-success btn-sm">
+                            📅 Agendar cita
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-muted text-center mt-4">No se encontraron pacientes registrados.</p>
+    {% endif %}
 </div>
 {% endblock %}

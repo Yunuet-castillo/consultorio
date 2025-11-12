@@ -8,15 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="{% static 'citas/img/logo.png' %}">
     <style>
+        /* ===================== ESTILOS PRINCIPALES ===================== */
         body { font-family: 'Roboto', sans-serif; background: #EAF2F8; margin: 0; padding: 0; color: #1C1C1C; }
-        /* Header con gradiente sutil y sombra suave */
         #header { background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%); color: #FFFFFF; padding: 15px 30px; height: 100px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         .logo-container { display: flex; align-items: center; }
         .logo { height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
-        .logo-placeholder { display: none; width: 80px; height: 80px; background: #EAF2F8; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold; color: #2E86C1; border-radius: 5px; }
         .hospital-name { color: white; font-size: 22px; font-weight: bold; line-height: 1.2; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; }
         .container { padding: 30px; max-width: 1200px; margin: auto; }
-        /* Botón principal estilo pill */
         .btn { display: inline-block; padding: 12px 25px; background: #4A90E2; color: #fff; border-radius: 9999px; text-decoration: none; font-size: 15px; transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease; margin-bottom: 20px; box-shadow: 0 6px 14px rgba(74,144,226,0.25); }
         .btn i { margin-right: 6px; }
         .btn:hover { background: #5DADE2; transform: translateY(-1px); box-shadow: 0 10px 18px rgba(93,173,226,0.28); }
@@ -24,8 +22,7 @@
         .messages li { background: #AED6F1; color: #1C1C1C; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(46,134,193,0.35); box-shadow: 0 6px 14px rgba(0,0,0,0.06); }
         h2 { margin-top: 30px; font-size: 20px; color: #1C1C1C; margin-bottom: 15px; }
         h2 i { color: #4A90E2; margin-right: 10px; }
-        /* Tabla en tarjeta con cabecera destacada */
-        .table-wrapper { background: #AED6F1; border: 1px solid rgba(46,134,193,0.35); border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); overflow: hidden; }
+        .table-wrapper { background: #AED6F1; border: 1px solid rgba(46,134,193,0.35); border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 30px; }
         .table-caption { background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%); color: #fff; padding: 14px 20px; font-weight: 600; font-size: 16px; letter-spacing: 0.3px; }
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
@@ -34,148 +31,170 @@
         table tr:nth-child(even) { background: #EAF2F8; }
         table tr:hover { background: rgba(213,231,244,0.6); transition: background-color 0.15s ease; }
         .action-links a, .action-links form { margin: 0 5px; text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 6px; color: white; display: inline-flex; align-items: center; transition: transform 0.2s ease; border: none; cursor: pointer; }
-        .action-links a i, .action-links button i { margin-right: 4px; }
-        .action-links a:hover, .action-links button:hover { transform: translateY(-2px); }
         .edit { background: #4A90E2; }
-        .edit:hover { background: #5DADE2; }
         .cancel { background: #d63031; }
-        .cancel:hover { background: #ff7675; }
-        .vitales { background: #f1c40f; }
-        .vitales:hover { background: #f4d03f; }
-        .cuestionario { background: #27ae60; }
-        .cuestionario:hover { background: #2ecc71; }
-        .receta { background: #9b59b6; }
-        .receta:hover { background: #a461b6; }
-        .empty-row { text-align: center; color: #1C1C1C; font-style: italic; }
-        .user-info { margin: 30px 0 10px 0; text-align: center; }
-        .user-info h2 { color: #1C1C1C; margin-bottom: 5px; margin-top: 0; }
-        .user-info p { color: #1C1C1C; margin: 0; font-size: 16px; }
-        .report-section { margin-top: 40px; padding: 20px; background: #D6EAF8; border-radius: 12px; }
-        .report-section h3 { color: #2E86C1; margin-bottom: 15px; }
-        .report-buttons form { display: inline-block; margin-right: 10px; }
-        /* Badges de estado */
         .status-badge { display: inline-block; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         .status-confirmada { background: #4A90E2; }
         .status-pendiente { background: #FFC107; color: #333; }
         .status-cancelada { background: #2E86C1; }
         .status-atendida { background: #2ECC71; }
-        /* --- Reportes: estilo similar a módulos de inicio --- */
-    .report-container { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 4px; }
-    .report-card {
-        flex: 1;
-        min-width: 220px;
-        background: #AED6F1;
-        border: 1px solid rgba(46,134,193,0.35);
-        border-radius: 14px;
-        padding: 18px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-        display: flex; align-items: center; justify-content: space-between;
-    }
-    .report-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.12); }
-    .report-info { display: flex; align-items: center; gap: 12px; color: #1C1C1C; }
-    .report-icon { color: #4A90E2; font-size: 24px; }
-    .report-title { font-weight: 600; margin: 0; }
-    .report-link {
-        text-decoration: none;
-        background: #4A90E2; color: #fff; padding: 8px 14px; border-radius: 9999px;
-        box-shadow: 0 6px 14px rgba(74,144,226,0.25);
-        transition: background 0.12s ease, transform 0.12s ease;
-        white-space: nowrap;
-    }
-    .report-link:hover { background: #357ABD; transform: translateY(-1px); color: #fff; }
-        /* Responsividad */
-        @media (max-width: 768px) {
-            #header { height: auto; padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
-            .container { padding: 18px; }
-        }
+
+        /* Tabs / Viñetas */
+        .tab-container { margin-bottom: 30px; }
+        .tab-buttons { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-buttons button { padding: 10px 20px; border: none; border-radius: 12px; background: #4A90E2; color: white; cursor: pointer; transition: 0.2s; }
+        .tab-buttons button.active { background: #357ABD; }
+        .tab-buttons button:hover { background: #5DADE2; }
+        .tab-content { display: none; background: #D6EAF8; border: 1px solid rgba(46,134,193,0.3); padding: 20px; border-radius: 12px; }
+        .tab-content.active { display: block; }
+        .tab-content input { padding: 10px; border-radius: 8px; border: 1px solid rgba(46,134,193,0.3); margin-right: 10px; }
+        .tab-content button { padding: 10px 20px; border-radius: 8px; border: none; background: #27ae60; color: white; cursor: pointer; }
+        .tab-content button:hover { background: #2ecc71; }
+        
+        /* Tarjetas de reportes */
+       /* Tarjetas de reportes */
+.report-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.report-card {
+    background: linear-gradient(180deg, #EAF2F8 0%, #D6EAF8 100%);
+    border: 1px solid rgba(46,134,193,0.3);
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(74,144,226,0.15);
+    padding: 22px;
+    width: 290px;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.report-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 24px rgba(74,144,226,0.25);
+}
+
+.report-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.report-icon {
+    font-size: 28px;
+    color: #2E86C1;
+}
+
+.report-title {
+    font-weight: bold;
+    color: #1C1C1C;
+    margin: 0;
+}
+
+.report-link {
+    background: #4A90E2;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 9999px;
+    text-decoration: none;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.report-link:hover {
+    background: #2E86C1;
+    transform: translateY(-1px);
+}
+
+.report-form {
+    margin-top: 15px;
+}
+
+.report-form input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(46,134,193,0.35);
+    border-radius: 10px;
+    background: #FFFFFF;
+    font-size: 15px;
+    color: #1C1C1C;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.report-form input[type="date"]:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 6px rgba(74,144,226,0.4);
+    outline: none;
+}
+
+.report-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+        
+        /* Formularios en reportes */
+        .report-form { margin-top: 15px; }
+        .report-form input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .report-actions { display: flex; gap: 10px; justify-content: center; }
     </style>
 </head>
 <body>
-    <div id="header">
-        <div class="logo-container">
-            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
-            <div class="logo-placeholder">HSP</div>
-            <div class="hospital-name">Hospital<br>San Pedro</div>
-        </div>
-        <a href="{% url 'logout' %}" class="btn"><i class="fas fa-arrow-left"></i> Salir</a>
+<div id="header">
+    <div class="logo-container">
+        <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo">
+        <div class="hospital-name">Hospital<br>San Pedro</div>
     </div>
-    <div class="container">
-        <div class="user-info">
-            <h2>Bienvenido {{ request.user.get_full_name }}</h2>
-            <p>Tu rol es: {{ request.user.role }}</p>
-        </div>
-        
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li class="{{ message.tags }}">
-                        <i class="fa-solid fa-circle-info"></i> {{ message }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+    <a href="{% url 'logout' %}" class="btn"><i class="fas fa-arrow-left"></i> Salir</a>
+</div>
 
-          <!-- 🔷 Reportes de Citas Atendidas (estilo módulos de inicio) -->
-    <div class="card card-custom shadow-sm mb-4">
-        <div class="card-header card-header-custom">
-            <h3 class="mb-0">Reportes de Citas Atendidas</h3>
-        </div>
-        <div class="card-body">
-            <div class="report-container">
-                <div class="report-card">
-                    <div class="report-info">
-                        <i class="fas fa-calendar-day report-icon"></i>
-                        <div>
-                            <p class="report-title">Reporte Diario</p>
-                            <small>Resumen de citas atendidas hoy</small>
-                        </div>
-                    </div>
-                    <a href="{% url 'reporte_dia' %}" class="report-link">Ver reporte</a>
-                </div>
-
-                <div class="report-card">
-                    <div class="report-info">
-                        <i class="fas fa-calendar-week report-icon"></i>
-                        <div>
-                            <p class="report-title">Reporte Semanal</p>
-                            <small>Comparativo de la última semana</small>
-                        </div>
-                    </div>
-                    <a href="{% url 'reporte_semana' %}" class="report-link">Ver reporte</a>
-                </div>
-
-                <div class="report-card">
-                    <div class="report-info">
-                        <i class="fas fa-calendar-alt report-icon"></i>
-                        <div>
-                            <p class="report-title">Reporte Mensual</p>
-                            <small>Tendencia del mes en curso</small>
-                        </div>
-                    </div>
-                    <a href="{% url 'reporte_mes' %}" class="report-link">Ver reporte</a>
-                </div>
-            </div>
-        </div>
+<div class="container">
+    <div class="user-info">
+        <h2>Bienvenida {{ request.user.get_full_name }}</h2>
+        <p>Rol: {{ request.user.role }}</p>
     </div>
 
-        {% if request.user.role == 'administradora' %}
-            <a href="{% url 'agendar_paciente' %}" class="btn"><i class="fa-solid fa-calendar-plus"></i> Agendar Nueva Cita</a>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}"><i class="fa-solid fa-circle-info"></i> {{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 
+    {% if request.user.role == 'administradora' %}
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="active" onclick="openTab(event,'citas')"><i class="fa-solid fa-calendar-check"></i> Agregar paciente</button>
+            <button onclick="openTab(event,'buscar')"><i class="fa-solid fa-user-check"></i> Buscar paciente</button>
+            <button onclick="openTab(event,'reportes')"><i class="fa-solid fa-chart-line"></i> Reportes</button>
+        </div>
+
+        <!-- TAB CITAS -->
+        <div id="citas" class="tab-content active">
+            <h2><i class="fa-solid fa-square-plus"></i> Agregar Nuevos Pacientes</h2>
+            <a href="{% url 'agendar_paciente' %}" class="btn"><i class="fa-solid fa-calendar-plus"></i> Agregar Nuevo Paciente</a>
+            
             <div class="table-wrapper">
-                <div class="table-caption"><i class="fas fa-list-alt" style="margin-right:8px;"></i> Citas Programadas para {{ fecha_actual|date:"l, j F Y" }}</div>
+                <div class="table-caption"><i class="fas fa-list-alt"></i> Citas Programadas</div>
                 {% if citas %}
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID de Paciente</th>
-                                <th>Nombre del Paciente</th>
-                                <th>Doctor</th>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th>ID Paciente</th><th>Nombre</th><th>Doctor</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -186,7 +205,6 @@
                                 <td>{{ cita.doctor.user.get_full_name }}</td>
                                 <td>{{ cita.fecha }}</td>
                                 <td>{{ cita.hora }}</td>
-
                                 <td>
                                     {% if cita.estado == 'Confirmada' %}
                                         <span class="status-badge status-confirmada">{{ cita.estado }}</span>
@@ -202,12 +220,8 @@
                                 </td>
                                 <td class="action-links">
                                     {% if cita.estado == 'Pendiente' or cita.estado == 'Confirmada' %}
-                                        <a href="{% url 'modificar_cita' cita.id %}" class="edit">
-                                            <i class="fa-solid fa-pen-to-square"></i> Editar
-                                        </a>
-                                        <a href="{% url 'cancelar_cita' cita.id %}" class="cancel">
-                                            <i class="fa-solid fa-ban"></i> Cancelar
-                                        </a>
+                                        <a href="{% url 'modificar_cita' cita.id %}" class="edit"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
+                                        <a href="{% url 'cancelar_cita' cita.id %}" class="cancel"><i class="fa-solid fa-ban"></i> Cancelar</a>
                                     {% else %}
                                         <span>{{ cita.estado }}</span>
                                     {% endif %}
@@ -218,15 +232,265 @@
                     </table>
                 </div>
                 {% else %}
-                    <div style="padding:16px;">No hay citas programadas.</div>
+                <div style="padding:16px;">No hay citas programadas.</div>
                 {% endif %}
             </div>
+        </div>
 
-            <!-- 🔹 Sección de Reportes -->
+        <!-- TAB BUSCAR PACIENTE -->
+<div id="buscar" class="tab-content">
+    <h2><i class="fa-solid fa-magnifying-glass"></i> Buscar paciente</h2>
+    <form method="POST" action="{% url 'dashboard_administradora' %}">
+        {% csrf_token %}
+        <input type="text" name="buscar" placeholder="Nombre, apellido, número o teléfono" required>
+        <button type="submit"><i class="fa-solid fa-search"></i> Buscar</button>
+    </form>
 
-
-
+    {% if resultado %}
+        {% if resultado|length > 0 %}
+            <div class="table-wrapper" style="margin-top:20px;">
+                <div class="table-caption"><i class="fa-solid fa-users"></i> Resultados de búsqueda</div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre completo</th>
+                                <th>Teléfono</th>
+                                <th>Agendar Cita</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for paciente in resultado %}
+                            <tr>
+                                <td>{{ paciente.id }}</td>
+                                <td>{{ paciente.nombre }} {{ paciente.apellido_paterno }} {{ paciente.apellido_materno }}</td>
+                                <td>{{ paciente.telefono }}</td>
+                                <td>
+                                    <form method="POST" action="{% url 'agendar_paciente_existente' paciente.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn"><i class="fa-solid fa-calendar-plus"></i> Agendar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div style="margin-top:20px; padding:16px; background:#F5B7B1; border-radius:8px; color:#922B21;">
+                <i class="fa-solid fa-triangle-exclamation"></i> No se encontró ningún paciente con esos datos.
+                <br>
+                <a href="{% url 'registrar_paciente' %}" class="btn" style="margin-top:10px;">
+                    <i class="fa-solid fa-user-plus"></i> Registrar nuevo paciente
+                </a>
+            </div>
         {% endif %}
+    {% endif %}
+</div>
+
+
+        <!-- TAB REPORTES -->
+        <div id="reportes" class="tab-content">
+            <h2><i class="fa-solid fa-chart-bar"></i> Reportes de Citas</h2>
+
+            <div class="report-container">
+                <!-- Diario -->
+               <div class="report-card">
+    <div class="report-info">
+        <i class="fas fa-calendar-day report-icon"></i>
+        <div>
+            <p class="report-title">Reporte Diario</p>
+            <small>Selecciona la fecha</small>
+        </div>
     </div>
+    <form method="GET" action="{% url 'reporte_dia' %}" class="report-form">
+        <input type="date" id="fecha-diaria" name="fecha" required>
+        <div class="report-actions">
+            <button type="submit" name="descargar" value="1" class="report-link" style="background:#2ecc71;">
+                <i class="fa-solid fa-download"></i> Descargar
+            </button>
+        </div>
+    </form>
+</div>
+                <!-- Semanal -->
+                <div class="report-card">
+                    <div class="report-info">
+                        <i class="fas fa-calendar-week report-icon"></i>
+                        <div>
+                            <p class="report-title">Reporte Semanal</p>
+                            <small>Selecciona una fecha</small>
+                        </div>
+                    </div>
+                    <form method="GET" action="{% url 'reporte_semana' %}" class="report-form">
+                        <input type="date" name="fecha" required>
+                        <div class="report-actions">
+                            <button type="submit" name="descargar" value="1" class="report-link" style="background:#2ecc71;">
+                                <i class="fa-solid fa-download"></i> Descargar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Mensual -->
+                <div class="report-card">
+                    <div class="report-info">
+                        <i class="fas fa-calendar-alt report-icon"></i>
+                        <div>
+                            <p class="report-title">Reporte Mensual</p>
+                            <small>Selecciona una fecha</small>
+                        </div>
+                    </div>
+                    <form method="GET" action="{% url 'reporte_mes' %}" class="report-form">
+                        <input type="date" name="fecha" required>
+                        <div class="report-actions">
+                            <button type="submit" name="descargar" value="1" class="report-link" style="background:#2ecc71;">
+                                <i class="fa-solid fa-download"></i> Descargar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if citas_report %}
+            <div class="table-wrapper" style="margin-top:30px;">
+                <div class="table-caption"><i class="fa-solid fa-list-alt"></i> Reportes Filtrados</div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Paciente</th>
+                                <th>Nombre completo</th>
+                                <th>Doctor</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in citas_report %}
+                            <tr>
+                                <td>{{ cita.paciente.numero }}</td>
+                                <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
+                                <td>{{ cita.doctor.user.get_full_name }}</td>
+                                <td>{{ cita.fecha }}</td>
+                                <td>{{ cita.hora }}</td>
+                                <td>
+                                    {% if cita.estado == 'Confirmada' %}
+                                        <span class="status-badge status-confirmada">{{ cita.estado }}</span>
+                                    {% elif cita.estado == 'Pendiente' %}
+                                        <span class="status-badge status-pendiente">{{ cita.estado }}</span>
+                                    {% elif cita.estado == 'Cancelada' %}
+                                        <span class="status-badge status-cancelada">{{ cita.estado }}</span>
+                                    {% elif cita.estado == 'Atendida' %}
+                                        <span class="status-badge status-atendida">{{ cita.estado }}</span>
+                                    {% else %}
+                                        <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function openTab(evt, tabName) {
+    // Ocultar todas las pestañas
+    const tabcontent = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+    }
+
+    // Quitar "active" de todos los botones
+    const tabbuttons = document.querySelectorAll(".tab-buttons button");
+    for (let i = 0; i < tabbuttons.length; i++) {
+        tabbuttons[i].classList.remove("active");
+    }
+
+    // Mostrar la pestaña seleccionada
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+
+    // 🧠 Guardar la pestaña actual
+    localStorage.setItem("activeTab", tabName);
+}
+
+// 🔄 Al cargar la página
+document.addEventListener("DOMContentLoaded", function() {
+    const activeTab = localStorage.getItem("activeTab") || "citas"; // por defecto "Agregar paciente"
+    
+    // Desactivar todas las pestañas y botones
+    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+    document.querySelectorAll(".tab-buttons button").forEach(btn => btn.classList.remove("active"));
+
+    // Activar la pestaña y botón guardados
+    const activeTabElement = document.getElementById(activeTab);
+    const activeButton = document.querySelector(`.tab-buttons button[onclick*="${activeTab}"]`);
+
+    if (activeTabElement) activeTabElement.classList.add("active");
+    if (activeButton) activeButton.classList.add("active");
+});
+</script>
+
+
+
+
+<script>
+function openTab(evt, tabName) {
+    let i, tabcontent, tabbuttons;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+    }
+    tabbuttons = document.querySelectorAll(".tab-buttons button");
+    for (i = 0; i < tabbuttons.length; i++) {
+        tabbuttons[i].classList.remove("active");
+    }
+    document.getElementById(tabName).classList.add("active");
+    if (evt) evt.currentTarget.classList.add("active");
+}
+ 
+// ✅ NUEVO: mantener la pestaña activa después del POST
+document.addEventListener('DOMContentLoaded', function() {
+    const activeTab = "{{ tab_activa|default:'citas' }}";  // ← Django pasa el nombre del tab
+    const tabs = document.querySelectorAll('.tab-content');
+    const buttons = document.querySelectorAll('.tab-buttons button');
+
+    // Oculta todos los tabs
+    tabs.forEach(tab => tab.classList.remove('active'));
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    // Activa el tab correcto
+    const targetTab = document.getElementById(activeTab);
+    const targetButton = Array.from(buttons).find(btn => 
+        btn.getAttribute('onclick')?.includes(activeTab)
+    );
+
+    if (targetTab) targetTab.classList.add('active');
+    if (targetButton) targetButton.classList.add('active');
+});
+</script>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    const fechaActual = `${año}-${mes}-${dia}`;
+    document.getElementById('fecha-diaria').value = fechaActual;
+});
+</script>
 </body>
+
 </html>

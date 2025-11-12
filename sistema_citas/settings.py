@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-=r@=@&hm0jsgn74zg1i*5w7w#nvbdfozpw12@9l2)qpcrz+f9l
 DEBUG = True
 
 #ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['192.168.15.244', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.15.211', 'localhost', '127.0.0.1','187.141.79.58']
 
 
 # Application definition
@@ -103,7 +103,6 @@ DATABASES = {
         'USER': 'postgres',     # Usuario de PostgreSQL
         'PASSWORD': 'Tec123',
         'HOST': 'localhost', 
-        # O la IP del servidor
         'PORT': '5432',           # Puerto por defecto de PostgreSQL
     }
 }
@@ -154,3 +153,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'citas.CustomUser'
+LOGIN_URL = '/login/'   
+
+# Tiempo de vida de la cookie de sesión en segundos (por ejemplo, 10 años)
+SESSION_COOKIE_AGE = 10 * 365 * 24 * 60 * 60  # 10 años
+
+# La sesión NO se cierra al cerrar el navegador
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

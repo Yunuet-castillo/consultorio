@@ -8,11 +8,15 @@ from datetime import date
 # -------------------------
 class LoginForm(forms.Form):
     username = forms.CharField(label="Usuario")
-    role = forms.ChoiceField(
-        choices=[('', '---Elige tu rol---')] + list(CustomUser.Roles.choices),
-        label="Rol"
-    )
+    role = forms.ChoiceField(label="Rol")
     password = forms.CharField(widget=forms.PasswordInput, label="Contraseña")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Excluir el rol "enfermera" de la lista
+        roles = [r for r in CustomUser.Roles.choices if r[0] != "enfermera"]
+        self.fields["role"].choices = [('', '---Elige tu rol---')] + roles
+
 
 # -------------------------
 # Formulario de Registro
@@ -50,9 +54,10 @@ class PacienteForm(forms.ModelForm):
         model = Paciente
         fields = [
             'nombre',
-            'apellido',
-            'edad',
+            'apellido_paterno',
+            'apellido_materno',
             'fecha_nacimiento',
+            'edad',
             'lugar_origen',
             'telefono',
             'primera_cita'
@@ -66,6 +71,7 @@ class PacienteForm(forms.ModelForm):
         if fecha_nacimiento and fecha_nacimiento > date.today():
             raise forms.ValidationError("La fecha de nacimiento no puede ser una fecha futura.")
         return fecha_nacimiento
+
 
 # -------------------------
 # Formulario de Cita
@@ -86,7 +92,7 @@ class CitaForm(forms.ModelForm):
             'fecha',
             'hora',
             'recordatorio_activado',
-            'estado',
+           
         ]
         widgets = {
             'fecha': forms.DateInput(attrs={'type': 'date', 'min': date.today().isoformat()}),

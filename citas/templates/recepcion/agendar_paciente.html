@@ -15,8 +15,6 @@
             margin: 0;
             padding: 0;
             color: #1C1C1C;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
         #header {
             background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%);
@@ -28,39 +26,10 @@
             align-items: center;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-        .logo {
-            height: 80px;
-            width: auto;
-            margin-right: 15px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-        .logo-placeholder {
-            display: none;
-            width: 80px;
-            height: 80px;
-            background: #EAF2F8;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-weight: bold;
-            color: #2E86C1;
-            border-radius: 5px;
-        }
-        .hospital-name {
-            color: white;
-            font-size: 22px;
-            font-weight: bold;
-            line-height: 1.2;
-            text-transform: uppercase;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+        .logo-container { display: flex; align-items: center; }
+        .logo { height: 80px; margin-right: 15px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .logo-placeholder { display: none; width: 80px; height: 80px; background: #EAF2F8; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold; color: #2E86C1; border-radius: 5px; }
+        .hospital-name { color: white; font-size: 22px; font-weight: bold; line-height: 1.2; text-transform: uppercase; }
         .container {
             background: #AED6F1;
             border-radius: 14px;
@@ -72,97 +41,72 @@
             margin: 40px auto;
             border: 1px solid rgba(46,134,193,0.35);
         }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 6px;
-            color: #1C1C1C;
-            font-weight: 700;
-        }
-        .icon {
-            font-size: 45px;
-            color: #4A90E2;
-            margin-bottom: 10px;
-        }
-        form {
-            text-align: left;
-        }
-        form p {
-            margin-bottom: 14px;
-        }
+        h1 { font-size: 24px; margin-bottom: 6px; font-weight: 700; }
+        .icon { font-size: 45px; color: #4A90E2; margin-bottom: 10px; }
+        form { text-align: left; }
+        form p { margin-bottom: 14px; }
         input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(46,134,193,0.55);
-            font-size: 14px;
-            background-color: #EAF2F8;
-            color: #1C1C1C;
-            box-sizing: border-box;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(46,134,193,0.55);
+            font-size: 14px; background-color: #EAF2F8; color: #1C1C1C;
+            box-sizing: border-box; transition: 0.15s;
         }
-        input:focus, select:focus, textarea:focus {
-            border-color: #4A90E2;
-            outline: none;
-            box-shadow: 0 0 0 0.2rem rgba(74,144,226,0.28);
-        }
+        input:focus { border-color: #4A90E2; box-shadow: 0 0 0 0.2rem rgba(74,144,226,0.28); outline: none; }
         button {
-            background-color: #4A90E2;
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 9999px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
-            width: 100%;
-            margin-top: 10px;
+            background-color: #4A90E2; color: white; border: none; padding: 14px 20px;
+            border-radius: 9999px; font-size: 16px; cursor: pointer; width: 100%; margin-top: 10px;
             box-shadow: 0 8px 18px rgba(74,144,226,0.20);
         }
-        button:hover {
-            background-color: #5DADE2;
-            transform: translateY(-1px);
-            box-shadow: 0 12px 22px rgba(93,173,226,0.25);
+        button:hover { background-color: #5DADE2; transform: translateY(-1px); }
+        .back-link { display: inline-block; margin-top: 18px; color: #4A90E2; text-decoration: none; font-size: 15px; font-weight: bold; }
+        .back-link i { margin-right: 5px; }
+        .back-link:hover { color: #5DADE2; text-decoration: underline; }
+
+        /* 🔹 Estilos para autocompletado animado */
+        .autocomplete { position: relative; width: 100%; }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) scaleY(0);
+            width: 500px;
+            background: #fff;
+            max-height: 150px;
+            overflow-y: auto;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+
+            /* Animación suave */
+            opacity: 0;
+            transform-origin: top;
+            transition: all 0.25s ease-in-out;
+            pointer-events: none;
         }
-        button:focus { outline: none; box-shadow: 0 0 0 0.25rem rgba(74,144,226,0.35); }
-        .back-link {
-            display: inline-block;
-            margin-top: 18px;
-            color: #4A90E2;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: bold;
-            transition: color 0.15s ease;
+
+        .autocomplete-items.show {
+            opacity: 1;
+            transform: translateX(-50%) scaleY(1);
+            pointer-events: auto;
         }
-        .back-link i {
-            margin-right: 5px;
+
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
-        .back-link:hover {
-            color: #5DADE2;
-            text-decoration: underline;
+
+        .autocomplete-items div:hover {
+            background-color: #EAF2F8;
+            color: #2E86C1;
+            font-weight: 500;
         }
-        h2 {
-            color: #1C1C1C;
-            font-size: 18px;
-            margin-bottom: 10px;
-            margin-top: 18px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-        }
-        .errorlist {
-            color: #b00020;
-            list-style-type: none;
-            padding: 0;
-            margin-top: 6px;
-            font-size: 14px;
-        }
-        @media (max-width: 600px) {
-            .container {
-                padding: 22px;
-                width: 95%;
-            }
-            .logo {
-                height: 50px;
-            }
+
+        .autocomplete-active {
+            background-color: #4A90E2 !important;
+            color: #fff;
         }
     </style>
 </head>
@@ -181,7 +125,6 @@
         <h1>Registrar Nuevo Paciente</h1>
         <form method="post">
             {% csrf_token %}
-            
             {% if paciente_form.non_field_errors %}
                 <ul class="errorlist">
                     {% for error in paciente_form.non_field_errors %}
@@ -189,14 +132,103 @@
                     {% endfor %}
                 </ul>
             {% endif %}
-
             {{ paciente_form.as_p }}
-
             <button type="submit">Siguiente (Agendar Cita)</button>
         </form>
         <a href="{% url 'dashboard_administradora' %}" class="back-link">
             <i class="fa-solid fa-arrow-left"></i> Volver al Inicio
         </a>
     </div>
+
+    <!-- Script para calcular edad automáticamente -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fechaInput = document.getElementById("id_fecha_nacimiento");
+        const edadInput = document.getElementById("id_edad");
+        fechaInput.addEventListener("change", function() {
+            const fechaNacimiento = new Date(this.value);
+            const hoy = new Date();
+            let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+            const m = hoy.getMonth() - fechaNacimiento.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < fechaNacimiento.getDate())) edad--;
+            edadInput.value = edad;
+        });
+    });
+    </script>
+
+    <!-- Script de autocompletado para municipios de Puebla -->
+    <script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const input = document.getElementById("id_lugar_origen");
+        if (!input) return;
+
+        const response = await fetch("{% static 'js/puebla.json' %}");
+        const data = await response.json();
+
+        const lugares = [];
+        for (const municipio in data) {
+            data[municipio].forEach(pueblo => lugares.push(`${pueblo}`));
+        }
+
+        let currentFocus;
+
+        input.addEventListener("input", function() {
+            const val = this.value.trim();
+            closeAllLists();
+            if (!val) return false;
+            currentFocus = -1;
+
+            const list = document.createElement("DIV");
+            list.setAttribute("class", "autocomplete-items show");
+            this.parentNode.appendChild(list);
+
+            lugares.forEach(function(item) {
+                if (item.toLowerCase().includes(val.toLowerCase())) {
+                    const itemDiv = document.createElement("DIV");
+                    const startIndex = item.toLowerCase().indexOf(val.toLowerCase());
+                    const endIndex = startIndex + val.length;
+
+                    itemDiv.innerHTML =
+                        item.substring(0, startIndex) +
+                        "<strong>" + item.substring(startIndex, endIndex) + "</strong>" +
+                        item.substring(endIndex);
+
+                    itemDiv.addEventListener("click", function() {
+                        input.value = item;
+                        closeAllLists();
+                    });
+                    list.appendChild(itemDiv);
+                }
+            });
+        });
+
+        input.addEventListener("keydown", function(e) {
+            let x = document.querySelector(".autocomplete-items");
+            if (x) x = x.getElementsByTagName("div");
+            if (e.keyCode === 40) { currentFocus++; addActive(x); }
+            else if (e.keyCode === 38) { currentFocus--; addActive(x); }
+            else if (e.keyCode === 13) { e.preventDefault(); if (currentFocus > -1 && x) x[currentFocus].click(); }
+        });
+
+        function addActive(x) {
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = x.length - 1;
+            x[currentFocus].classList.add("autocomplete-active");
+        }
+        function removeActive(x) {
+            for (let i = 0; i < x.length; i++) x[i].classList.remove("autocomplete-active");
+        }
+        function closeAllLists(elmnt) {
+            const items = document.getElementsByClassName("autocomplete-items");
+            for (let i = 0; i < items.length; i++) {
+                if (elmnt !== items[i] && elmnt !== input) items[i].parentNode.removeChild(items[i]);
+            }
+        }
+        document.addEventListener("click", function(e) { closeAllLists(e.target); });
+    });
+    </script>
+
 </body>
 </html>

@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -132,15 +133,62 @@ def logout_view(request):
 # --- Dashboards por rol ---
 # ---------------------------
 from datetime import date
-
+from django.db.models import Q
 @login_required
 @user_passes_test(is_administradora)
 def dashboard_administradora(request):
     fecha_actual = date.today()
-    # citas cuyo día sea hoy o posterior
     citas = Cita.objects.filter(fecha__gte=fecha_actual).order_by('fecha', 'hora')
-    contexto = {'citas': citas, 'fecha_actual': fecha_actual}
+    resultado = None
+    mensaje = None
+    tab_activa = 'citas'
+
+    if request.method == 'POST':
+        buscar = request.POST.get('buscar', '').strip()
+        paciente_id = request.POST.get('paciente_id')
+
+        # Si se presionó "Agendar"
+        if paciente_id:
+            request.session['paciente_id'] = paciente_id
+            return redirect('agendar_cita')
+
+        # Si se realizó una búsqueda
+        if buscar:
+            resultado = Paciente.objects.filter(
+                Q(nombre__icontains=buscar) |
+                Q(apellido_paterno__icontains=buscar) |
+                Q(apellido_materno__icontains=buscar) |
+                Q(telefono__icontains=buscar) |
+                Q(numero__icontains=buscar) |
+                Q(id__icontains=buscar)
+            )
+
+            if not resultado.exists():
+                mensaje = "⚠️ No se encontró ningún paciente con ese dato."
+
+            tab_activa = 'buscar'
+
+    contexto = {
+        'citas': citas,
+        'fecha_actual': fecha_actual,
+        'resultado': resultado,
+        'mensaje': mensaje,
+        'tab_activa': tab_activa,
+    }
     return render(request, 'recepcion/dashboard.html', contexto)
+
+
+
+
+
+
+@login_required
+@user_passes_test(is_administradora)
+def agendar_paciente_existente(request, paciente_id):
+    # Guardar el paciente en sesión para usarlo en el formulario de agendar cita
+    request.session['paciente_id'] = paciente_id
+    return redirect('agendar_cita')
+
 
 
 @login_required
@@ -534,68 +582,141 @@ def detalle_paciente(request, paciente_id):
 
 
 @login_required
-def buscar_pacientes(request):
-    query = request.GET.get('q', '')
-    pacientes = Paciente.objects.filter(nombre__icontains=query) if query else []
-    return render(request, 'recepcion/buscar_pacientes.html', {
+def buscar_pacientes_doctor(request):
+    query = request.GET.get('q', '').strip()
+
+    if query:
+        pacientes = Paciente.objects.filter(
+            Q(nombre__icontains=query) |
+            Q(apellido_paterno__icontains=query) |
+            Q(apellido_materno__icontains=query) |
+            Q(numero__icontains=query)
+        ).order_by('nombre')
+    else:
+        # si no se busca nada, mostrar todos
+        pacientes = Paciente.objects.all().order_by('nombre')
+
+    return render(request, 'doctor/buscar_pacientes.html', {
         'pacientes': pacientes,
         'query': query,
     })
 
-
-@login_required
-def detalle_paciente(request, paciente_id):
-    paciente = get_object_or_404(Paciente, id=paciente_id)
-    return render(request, 'recepcion/detalle_paciente.html', {'paciente': paciente})
-
-
-@login_required
-def buscar_pacientes(request):
-    query = request.GET.get('q', '')
-    pacientes = Paciente.objects.filter(nombre__icontains=query) if query else []
-    return render(request, 'recepcion/buscar_pacientes.html', {
-        'pacientes': pacientes,
-        'query': query,
-    })
-# ---------------------------
+    #--------------------
 # --- Reportes en PDF ---
 # ---------------------------
 import io
 from django.http import FileResponse
 from datetime import timedelta
-
+from django.utils import timezone
+# 📄 Función general para crear el PDF
 def generar_pdf_reporte(titulo, citas):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
+
     story = [Paragraph(titulo, styles['Title']), Spacer(1, 12)]
+
+    # Encabezados de tabla
     data = [["Paciente", "Doctor", "Fecha", "Estado"]]
+
+    # Agregar datos de las citas
     for c in citas:
-        data.append([f"{c.paciente.nombre} {c.paciente.apellido}", c.doctor.user.get_full_name(), str(c.fecha), c.estado])
+        try:
+            # Nombre completo del paciente (según campos disponibles)
+            nombre_paciente = ""
+            if hasattr(c.paciente, "nombre") and hasattr(c.paciente, "apellido_paterno"):
+                nombre_paciente = f"{c.paciente.nombre} {c.paciente.apellido_paterno} {getattr(c.paciente, 'apellido_materno', '')}".strip()
+            elif hasattr(c.paciente, "nombre_completo"):
+                nombre_paciente = c.paciente.nombre_completo
+            elif hasattr(c.paciente, "nombre"):
+                nombre_paciente = c.paciente.nombre
+            else:
+                nombre_paciente = "Paciente desconocido"
+
+            nombre_doctor = c.doctor.user.get_full_name() if hasattr(c.doctor, 'user') else "Doctor no asignado"
+
+            data.append([
+                nombre_paciente,
+                nombre_doctor,
+                str(c.fecha),
+                c.estado
+            ])
+        except Exception as e:
+            print("Error al procesar cita:", e)
+
     story.append(Table(data))
     doc.build(story)
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename=f"{titulo}.pdf")
 
+
+# 📆 Reporte Diario
 def reporte_dia(request):
-    from .models import Cita
-    hoy = date.today()
-    citas = Cita.objects.filter(fecha=hoy, estado="Atendida")
-    return generar_pdf_reporte(f"Reporte Diario - {hoy}", citas)
+    fecha_str = request.GET.get('fecha')
+    if fecha_str:
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+    else:
+        fecha = date.today()
 
+    citas = Cita.objects.filter(fecha=fecha)
+    
+    if 'descargar' in request.GET:
+        return generar_pdf_reporte(f"Reporte Diario - {fecha}", citas)
+
+    return render(request, 'dashboard_administradora.html', {
+        'tab_activa': 'reportes',
+        'citas_report': citas,
+    })
+
+
+# 📅 Reporte Semanal
 def reporte_semana(request):
-    from .models import Cita
-    hoy = date.today()
-    inicio = hoy - timedelta(days=7)
-    citas = Cita.objects.filter(fecha__range=[inicio, hoy], estado="Atendida")
-    return generar_pdf_reporte(f"Reporte Semanal ({inicio} a {hoy})", citas)
+    fecha_str = request.GET.get('fecha')
+    if fecha_str:
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+    else:
+        fecha = date.today()
 
+    # Calcula el rango de la semana (lunes a domingo)
+    inicio_semana = fecha - timedelta(days=fecha.weekday())
+    fin_semana = inicio_semana + timedelta(days=6)
+
+    citas = Cita.objects.filter(fecha__range=(inicio_semana, fin_semana))
+
+    if 'descargar' in request.GET:
+        return generar_pdf_reporte(f"Reporte Semanal - Semana del {inicio_semana} al {fin_semana}", citas)
+
+    return render(request, 'dashboard_administradora.html', {
+        'tab_activa': 'reportes',
+        'citas_report': citas,
+    })
+
+
+# 🗓️ Reporte Mensual
 def reporte_mes(request):
-    from .models import Cita
-    hoy = date.today()
-    inicio = hoy.replace(day=1)
-    citas = Cita.objects.filter(fecha__range=[inicio, hoy], estado="Atendida")
-    return generar_pdf_reporte(f"Reporte Mensual ({inicio} a {hoy})", citas)
+    fecha_str = request.GET.get('fecha')
+    if fecha_str:
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+    else:
+        fecha = date.today()
+
+    # Calcula inicio y fin del mes
+    inicio_mes = fecha.replace(day=1)
+    if fecha.month == 12:
+        fin_mes = fecha.replace(year=fecha.year + 1, month=1, day=1) - timedelta(days=1)
+    else:
+        fin_mes = fecha.replace(month=fecha.month + 1, day=1) - timedelta(days=1)
+
+    citas = Cita.objects.filter(fecha__range=(inicio_mes, fin_mes))
+
+    if 'descargar' in request.GET:
+        return generar_pdf_reporte(f"Reporte Mensual - {fecha.strftime('%B %Y')}", citas)
+
+    return render(request, 'dashboard_administradora.html', {
+        'tab_activa': 'reportes',
+        'citas_report': citas,
+    })
+
 
 def detalle_paciente(request, paciente_id):
     paciente = get_object_or_404(Paciente, id=paciente_id)
@@ -785,7 +906,7 @@ class RegisterAPIView(APIView):
             # Captura el error de PostgreSQL (UniqueViolation) si la verificación anterior falla
             # o si el email también es único y está duplicado.
             return Response({'error': 'El nombre de usuario o correo electrónico ya están registrados.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         except Exception as e:
             # Captura cualquier otro error de servidor no esperado.
             return Response({'error': f'Error interno del servidor: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -795,25 +916,27 @@ class LoginAPIView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        
+
         user = authenticate(username=username, password=password)
-        
+
         if user and hasattr(user, 'role') and user.role == 'enfermera':
             # Ahora, 'Token' tendrá el atributo 'objects'
             token, _ = Token.objects.get_or_create(user=user)
             return Response({'token': token.key, 'username': user.username})
-        
+
         return Response({'detail':'Credenciales inválidas o no eres enfermera'}, status=status.HTTP_401_UNAUTHORIZED)
     
 from datetime import datetime, timedelta
-    
+
 class CitasListAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        # CAMBIO: Usar __iexact para ignorar mayúsculas/minúsculas.
+        citas = Cita.objects.all().select_related('paciente').order_by('fecha', 'hora') 
         # 1. Consulta base
         citas = Cita.objects.all().select_related('paciente').order_by('fecha', 'hora')
-        
+
         # 2. Obtener el parámetro 'date' de la URL (Ej: '2025-10-17')
         target_date_str = request.query_params.get('date') 
 
@@ -870,23 +993,22 @@ class SignosVitalesCreateAPIView(APIView):
 
 class CitaDetailAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get(self, request, pk):
         try:
             # ✅ OPTIMIZACIÓN: Usar select_related para ambas relaciones OneToOne (directa e inversa).
             cita = (Cita.objects.filter(pk=pk)
                        .select_related('paciente', 'signosvitales') # <- Carga paciente y signos vitales
                        .first())
-            
+
             if not cita:
                 return Response({"detail": "Cita no encontrada"}, status=status.HTTP_404_NOT_FOUND)
-            
+
             # El serializador ahora utiliza get_signosvitales() para incluir el objeto
             ser = CitaSerializer(cita)
             return Response(ser.data)
-            
+
         except Exception as e:
             return Response({"detail": "Error interno del servidor: " + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
         
         from django.db.models import F

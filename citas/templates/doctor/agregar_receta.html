@@ -3,101 +3,290 @@
 {% block title %}Agregar/Editar Receta{% endblock %}
 
 {% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-    body { background-color: #EAF2F8; line-height: 1.55; }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body { 
+        background: linear-gradient(135deg, #EAF2F8 0%, #D5E7F4 50%, #EAF2F8 100%);
+        background-attachment: fixed;
+        position: relative;
+        line-height: 1.55;
+        font-family: "Poppins", "Roboto", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 50%, rgba(74, 144, 226, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(46, 134, 193, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 20%, rgba(93, 173, 226, 0.06) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .container {
+        position: relative;
+        z-index: 1;
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
     /* Módulo estilo Signos vitales con animación */
     .module-card {
-        background-color: #AED6F1;
-        border-radius: 14px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-        margin-bottom: 20px;
+        background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.5);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
+                    inset 0 1px 0 rgba(255,255,255,0.6);
+        margin-bottom: 25px;
         overflow: hidden;
         opacity: 0;
         transform: translateY(20px);
-        animation: fadeInUp 0.5s forwards;
+        animation: fadeInUpCard 0.6s ease-out forwards;
+        transition: all 0.3s ease;
     }
-    @keyframes fadeInUp {
+
+    .module-card:nth-child(1) { animation-delay: 0.1s; }
+    .module-card:nth-child(2) { animation-delay: 0.2s; }
+    
+    @keyframes fadeInUpCard {
         to { opacity: 1; transform: translateY(0); }
     }
+
+    .module-card:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12), 
+                    inset 0 1px 0 rgba(255,255,255,0.8);
+        transform: translateY(-2px);
+    }
+    
     .module-card header {
-        background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%);
+        background: linear-gradient(135deg, rgba(46,134,193,0.95) 0%, rgba(74,144,226,0.9) 50%, rgba(46,134,193,1) 100%);
         color: #fff;
-        padding: 12px 18px;
+        padding: 18px 25px;
         font-weight: 600;
-        font-size: 16px;
+        font-size: 17px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
+        gap: 12px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        position: relative;
     }
+
+    .module-card header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    }
+
+    .module-card header i {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
     .module-card .body {
-        padding: 15px 18px;
+        padding: 25px;
         color: #1C1C1C;
     }
 
     .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 10px 20px;
+        gap: 15px 20px;
     }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(255,255,255,0.6);
+        backdrop-filter: blur(5px);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.5);
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .info-item:hover {
+        background: rgba(255,255,255,0.8);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
     .info-item i {
         color: #4A90E2;
-        margin-right: 8px;
+        margin-right: 12px;
+        font-size: 18px;
+        transition: transform 0.3s ease;
+    }
+
+    .info-item:hover i {
+        transform: scale(1.2);
     }
 
     /* Botones estilo moderno con animación */
     .btn-primary-custom {
-        background: linear-gradient(135deg, #4A90E2, #357ABD);
+        background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 50%, #4A90E2 100%);
+        background-size: 200% 200%;
         color: #fff;
         font-weight: 600;
-        padding: 0.45rem 1rem;
+        padding: 12px 24px;
         border-radius: 50px;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         box-shadow: 0 6px 14px rgba(74,144,226,0.25);
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
-        border: none;
+        border: 2px solid rgba(255,255,255,0.2);
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
+
+    .btn-primary-custom::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary-custom:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary-custom i {
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s ease;
+    }
+
+    .btn-primary-custom:hover i {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    .btn-primary-custom span {
+        position: relative;
+        z-index: 1;
+    }
+    
     .btn-primary-custom:hover {
-        transform: translateY(-2px) scale(1.02);
+        background-position: right center;
+        transform: translateY(-2px) scale(1.05);
         box-shadow: 0 10px 20px rgba(74,144,226,0.35);
     }
+    
     .btn-primary-custom:active {
-        transform: translateY(1px) scale(0.98);
+        transform: translateY(0px) scale(1.02);
         box-shadow: 0 4px 10px rgba(74,144,226,0.2);
     }
+    
     .btn-secondary-custom {
-        background: #6c757d;
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
         color: #fff;
         font-weight: 600;
-        padding: 0.45rem 1rem;
+        padding: 12px 24px;
         border-radius: 50px;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         text-decoration: none;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 4px 12px rgba(108,117,125,0.25);
     }
-    .btn-secondary-custom:hover { background: #5a6268; }
+    
+    .btn-secondary-custom:hover { 
+        background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 16px rgba(90,98,104,0.3);
+    }
 
-    .btn-pill { border-radius: 9999px; }
+    .btn-pill { border-radius: 50px; }
 
     /* Inputs */
     form p { margin-bottom: 15px; }
-    label { font-weight: 600; display: block; margin-bottom: 6px; color: #205067; }
+    
+    label { 
+        font-weight: 600; 
+        display: block; 
+        margin-bottom: 8px; 
+        color: #1C1C1C;
+        letter-spacing: 0.2px;
+    }
+    
     input[type="text"], textarea, select {
         width: 100%;
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(46,134,193,0.35);
-        background: #fff;
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 2px solid rgba(46,134,193,0.3);
+        background: rgba(234,242,248,0.8);
+        backdrop-filter: blur(5px);
         font-size: 15px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        font-family: "Poppins", "Roboto", sans-serif;
     }
+
+    input[type="text"]:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: #4A90E2;
+        box-shadow: 0 0 0 4px rgba(74,144,226,0.15),
+                    inset 0 2px 4px rgba(0,0,0,0.05);
+        transform: translateY(-1px);
+        background: rgba(234,242,248,0.95);
+    }
+    
     textarea { min-height: 120px; }
+
+    .card-custom {
+        background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.5);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
+                    inset 0 1px 0 rgba(255,255,255,0.6);
+    }
 </style>
 {% endblock %}
 
@@ -108,7 +297,7 @@
         <div class="card-body d-flex align-items-center justify-content-between">
             <h2 class="card-title mb-0">Agregar/Editar Receta</h2>
             <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn btn-primary-custom btn-pill">
-                <i class="fas fa-arrow-left"></i> Regresar a la cita
+                <i class="fas fa-arrow-left"></i><span>Regresar a la cita</span>
             </a>
         </div>
     </div>
@@ -132,8 +321,8 @@
                 {% csrf_token %}
                 {{ form.as_p }}
                 <div class="d-flex flex-wrap gap-2 mt-3">
-                    <button type="submit" class="btn-primary-custom btn-pill"><i class="fas fa-save"></i> Guardar Receta</button>
-                    <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn-secondary-custom btn-pill"><i class="fas fa-times"></i> Cancelar</a>
+                    <button type="submit" class="btn-primary-custom btn-pill"><i class="fas fa-save"></i><span>Guardar Receta</span></button>
+                    <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn-secondary-custom btn-pill"><i class="fas fa-times"></i><span>Cancelar</span></a>
                     <a href="{% url 'generar_receta_pdf' cita.id %}" class="btn btn-success">📄 Descargar Receta PDF</a>
 
                 </div>

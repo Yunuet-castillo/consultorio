@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import IntegrityError
 from .forms import ( RegistroForm, LoginForm, PacienteForm, CitaForm, SignosVitalesForm, RecetaForm, DiagnosticoForm)
-from .models import CustomUser, Paciente, Cita, Doctor, SignosVitales, Receta
+from .models import CustomUser, Paciente, Cita, Doctor, SignosVitales, Receta, Estudio
 from datetime import date
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter
@@ -179,6 +179,181 @@ def dashboard_administradora(request):
 
 
 
+from .forms import EstudioForm
+from PyPDF2 import PdfReader
+from PIL import Image
+import pytesseract
+
+def leer_pdf(ruta):
+    texto = ""
+    with open(ruta, 'rb') as f:
+        reader = PdfReader(f)
+        for page in reader.pages:
+            texto += page.extract_text() or ""
+    return texto.strip()
+
+def leer_imagen(ruta):
+    imagen = Image.open(ruta)
+    texto = pytesseract.image_to_string(imagen, lang='spa')
+    return texto.strip()
+
+def agregar_estudio(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+
+    if request.method == 'POST':
+        form = EstudioForm(request.POST, request.FILES)
+        if form.is_valid():
+            estudio = form.save(commit=False)
+            estudio.paciente = paciente
+            estudio.save()
+
+            ruta = estudio.archivo.path
+            extension = os.path.splitext(ruta)[1].lower()
+            texto_extraido = ""
+
+            # Detectar tipo de archivo
+            if extension in ['.pdf']:
+                texto_extraido = leer_pdf(ruta)
+            elif extension in ['.jpg', '.jpeg', '.png']:
+                texto_extraido = leer_imagen(ruta)
+            else:
+                texto_extraido = "Tipo de archivo no compatible para lectura automática."
+
+            estudio.texto_extraido = texto_extraido
+            estudio.save()
+
+            messages.success(request, 'Estudio agregado y leído correctamente.')
+            return redirect('detalle_paciente', paciente_id=paciente.id)
+    else:
+        form = EstudioForm()
+
+    return render(request, 'doctor/agregar_estudio.html', {'form': form, 'paciente': paciente})
+
+
+
+
+# 🔧 Ruta típica de instalación (ajústala si es diferente)
+def leer_imagen(ruta):
+    import pytesseract
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Tesseract-OCR\tesseract.exe"
+
+    imagen = Image.open(ruta)
+    texto = pytesseract.image_to_string(imagen, lang='spa')
+    return texto
+
+
+
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import Table, TableStyle
+from .models import Cita, Estudio, SignosVitales
+
+def imprimir_historial(request, cita_id):
+    cita = get_object_or_404(Cita, id=cita_id)
+    paciente = cita.paciente
+
+    signos = SignosVitales.objects.filter(cita__paciente=paciente).order_by('-cita__fecha')
+    estudios = Estudio.objects.filter(paciente=paciente).order_by('-fecha_subida')
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="historial_{paciente.nombre}.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+
+    # -------------------------------
+    # ENCABEZADO CON LOGO
+    # -------------------------------
+    try:
+        logo = ImageReader("static/citas/img/logo.png")  # CAMBIA ESTA RUTA
+        p.drawImage(logo, 40, height - 80, width=70, height=70, mask='auto')
+    except:
+        pass  # Si no hay logo, continúa sin él
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(130, height - 40, "Historial de Signos Vitales")
+
+    p.setFont("Helvetica", 11)
+    p.drawString(130, height - 60, f"Paciente: {paciente.nombre} {paciente.apellido_paterno} {paciente.apellido_materno or ''}")
+
+    y = height - 110
+
+    # -------------------------------------------------------
+    # TABLA DE SIGNOS VITALES (ESTILO PROFESIONAL)
+    # -------------------------------------------------------
+    if signos.exists():
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(40, y, "Signos Vitales")
+        y -= 20
+
+        data = [
+            ["Fecha", "Peso", "Presión", "Temp.", "Frec. Card.", "Frec. Resp.", "Oxígeno"]
+        ]
+
+        for s in signos:
+            data.append([
+                s.cita.fecha.strftime("%d/%m/%Y"),
+                f"{s.peso} kg" if s.peso else "—",
+                s.presion_arterial or "—",
+                f"{s.temperatura} °C" if s.temperatura else "—",
+                s.frecuencia_cardiaca or "—",
+                s.frecuencia_respiratoria or "—",
+                f"{s.saturacion_oxigeno}%" if s.saturacion_oxigeno else "—",
+            ])
+
+        tabla = Table(data, colWidths=[70, 55, 70, 50, 70, 70, 60])
+        tabla.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 0.8, colors.grey),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ]))
+        tabla.wrapOn(p, 40, y)
+        tabla.drawOn(p, 40, y - (20 * len(data)))
+        y -= (20 * len(data)) + 40
+    else:
+        p.drawString(40, y, "No hay signos vitales registrados.")
+        y -= 40
+
+    # -------------------------------------------------------
+    # IMÁGENES DE ESTUDIOS (MÁS RECIENTES PRIMERO)
+    # -------------------------------------------------------
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(40, y, "Estudios e Imágenes")
+    y -= 25
+
+    for estudio in estudios:
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(40, y, f"Estudio: {estudio.descripcion or 'Sin descripción'}")
+        y -= 15
+
+        p.setFont("Helvetica", 10)
+        p.drawString(40, y, f"Fecha: {estudio.fecha_subida.strftime('%d/%m/%Y %H:%M')}")
+        y -= 20
+
+        try:
+            img = ImageReader(estudio.archivo.path)
+            p.drawImage(img, 40, y - 200, width=300, height=200, preserveAspectRatio=True, mask='auto')
+            y -= 220
+        except:
+            p.drawString(40, y, "⚠ No se pudo cargar la imagen.")
+            y -= 20
+
+        if y < 120:
+            p.showPage()
+            y = height - 80
+
+    # -------------------------
+    # FINALIZAR PDF
+    # -------------------------
+    p.save()
+    return response
 
 
 

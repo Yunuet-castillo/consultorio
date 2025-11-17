@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Historial clínico de {{ paciente.nombre }}</title>
+<style>
+    body {
+        font-family: 'Helvetica', sans-serif;
+        font-size: 12px;
+        margin: 40px;
+        color: #333;
+    }
+
+    h1, h2, h3 {
+        color: #2e6ddf;
+        text-align: center;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+    }
+
+    table, th, td {
+        border: 1px solid #ccc;
+    }
+
+    th {
+        background-color: #f0f6ff;
+        text-align: left;
+        padding: 6px;
+    }
+
+    td {
+        padding: 6px;
+        vertical-align: top;
+    }
+
+    .section {
+        margin-top: 25px;
+    }
+
+    .logo {
+        width: 90px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <img src="{{ STATIC_ROOT }}/img/logo.png" class="logo">
+    <h1>Hospital San Pedro</h1>
+    <h2>Historial Clínico</h2>
+</div>
+
+<hr>
+
+<h3>👩‍⚕️ Datos del Paciente</h3>
+<p><b>Nombre:</b> {{ paciente.nombre }}</p>
+<p><b>Fecha de impresión:</b> {{ now|date:"d/m/Y H:i" }}</p>
+
+<div class="section">
+    <h3>📋 Diagnóstico</h3>
+    {% for cita in paciente.cita_set.all %}
+        <p><b>Fecha:</b> {{ cita.fecha|date:"d/m/Y" }}</p>
+        <p><b>Diagnóstico:</b> {{ cita.diagnostico|default:"Sin registro" }}</p>
+        <p><b>Instrucciones:</b> {{ cita.instrucciones|default:"N/A" }}</p>
+        <p><b>Medicamentos:</b> {{ cita.medicamentos|default:"N/A" }}</p>
+        <hr>
+    {% empty %}
+        <p>No hay diagnósticos registrados.</p>
+    {% endfor %}
+</div>
+
+<div class="section">
+    <h3>🧪 Estudios y análisis</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Archivo</th>
+                <th>Descripción</th>
+                <th>Texto leído</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for estudio in paciente.estudios.all %}
+            <tr>
+                <td>{{ estudio.fecha_subida|date:"d/m/Y" }}</td>
+                <td>{{ estudio.archivo.name }}</td>
+                <td>{{ estudio.descripcion|default:"Sin descripción" }}</td>
+                <td>{{ estudio.texto_extraido|default:"(sin texto leído)" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4">No hay estudios registrados.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

@@ -6,47 +6,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Registro - Hospital San Pedro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="{% static 'citas/img/logo.png' %}">
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: "Roboto", "Lucida Grande", "DejaVu Sans", Verdana, Arial, sans-serif;
+            font-family: "Poppins", "Roboto", "Lucida Grande", "DejaVu Sans", Verdana, Arial, sans-serif;
         }
 
         body {
-            /* Fondo principal: Azul Super Claro */
-            background-color: #EAF2F8;
+            /* Fondo principal con gradiente y patrón sutil */
+            background: linear-gradient(135deg, #EAF2F8 0%, #D5E7F4 50%, #EAF2F8 100%);
+            background-attachment: fixed;
+            position: relative;
             /* Texto: Gris muy oscuro */
             color: #1C1C1C;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(74, 144, 226, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(46, 134, 193, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(93, 173, 226, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         #header {
-            /* Navbar / Header: Azul Grisáceo con sutil gradiente */
-            background: linear-gradient(180deg, rgba(46,134,193,0.95) 0%, rgba(46,134,193,1) 100%);
+            /* Navbar / Header: Azul Grisáceo con gradiente mejorado */
+            background: linear-gradient(135deg, rgba(46,134,193,0.98) 0%, rgba(74,144,226,0.95) 50%, rgba(46,134,193,1) 100%);
             color: #FFFFFF;
             padding: 15px 30px;
             height: 100px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        #header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .logo-container {
             display: flex;
             align-items: center;
+            position: relative;
+            z-index: 1;
         }
 
         .logo {
             height: 80px;
             width: auto;
             margin-right: 15px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        .logo:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
         }
 
         .logo-placeholder {
@@ -65,53 +124,107 @@
         .hospital-name {
             color: white;
             font-size: 22px;
-            font-weight: bold;
+            font-weight: 700;
             line-height: 1.2;
             text-transform: uppercase;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255,255,255,0.1);
             display: flex;
             flex-direction: column;
             justify-content: center;
+            letter-spacing: 1px;
         }
 
         #content {
             flex: 1;
-            padding: 25px 30px;
-            /* Fondo principal: Azul Super Claro */
-            background: #EAF2F8;
+            padding: 30px 20px;
+            background: transparent;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .register-form-container {
             width: 100%;
-            max-width: 450px;
-            padding: 40px;
-            /* Tarjetas y paneles: Azul Pastel Claro */
-            background: #AED6F1;
-            border-radius: 14px;
-            box-shadow: 0 10px 28px rgba(0,0,0,0.10);
-            /* Borde: Navbar / Header: Azul Grisáceo */
-            border: 1px solid rgba(46,134,193,0.35);
+            max-width: 480px;
+            padding: 45px;
+            /* Tarjetas y paneles: Glassmorphism mejorado */
+            background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
+                        inset 0 1px 0 rgba(255,255,255,0.6),
+                        0 0 0 1px rgba(46,134,193,0.1);
+            border: 1px solid rgba(255,255,255,0.5);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInScale 0.6s ease-out 0.3s both;
+        }
+
+        .register-form-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .register-form-container:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         .register-form-container h2 {
             /* Texto: Gris muy oscuro */
             color: #1C1C1C;
-            margin-bottom: 6px;
-            font-size: 26px;
+            margin-bottom: 8px;
+            font-size: 28px;
             font-weight: 700;
+            letter-spacing: 0.3px;
+            position: relative;
         }
 
         /* Icono en el título del formulario */
         .register-form-container h2 i {
             /* Ícono: Azul Serenidad */
             color: #4A90E2;
-            margin-right: 10px;
+            margin-right: 12px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .register-subtitle {
@@ -131,7 +244,7 @@
         .register-form-container label {
             display: block;
             text-align: left;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 600;
             /* Texto: Gris muy oscuro */
             color: #1C1C1C;
@@ -141,17 +254,19 @@
         .register-form-container input,
         .register-form-container select {
             width: 100%;
-            padding: 12px;
+            padding: 14px 16px;
             /* Borde: Navbar / Header: Azul Grisáceo */
-            border: 1px solid rgba(46,134,193,0.55);
-            border-radius: 10px;
+            border: 2px solid rgba(46,134,193,0.3);
+            border-radius: 12px;
             box-sizing: border-box;
             font-size: 16px;
             /* Fondo de campo: Azul Super Claro */
-            background-color: #EAF2F8;
+            background: rgba(234,242,248,0.8);
+            backdrop-filter: blur(5px);
             /* Texto: Gris muy oscuro */
             color: #1C1C1C;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .register-form-container input:focus,
@@ -159,41 +274,79 @@
             /* Borde de foco: Azul Serenidad */
             border-color: #4A90E2;
             outline: none;
-            box-shadow: 0 0 0 0.2rem rgba(74,144,226,0.28);
+            box-shadow: 0 0 0 4px rgba(74,144,226,0.15),
+                        inset 0 2px 4px rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+            background: rgba(234,242,248,0.95);
         }
 
         .action-button {
             text-decoration: none;
-            padding: 15px 30px;
-            border-radius: 9999px;
-            font-weight: bold;
+            padding: 16px 30px;
+            border-radius: 50px;
+            font-weight: 600;
             font-size: 16px;
-            transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             margin-top: 20px;
-            border: none;
-            box-shadow: 0 8px 18px rgba(74,144,226,0.20);
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 20px rgba(74,144,226,0.3);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .action-button:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .action-button i {
             margin-right: 10px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
         }
 
-        /* Botón principal: Azul Serenidad */
+        .action-button:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .action-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Botón principal: Azul Serenidad con gradiente */
         .register-button {
-            background-color: #4A90E2;
+            background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 50%, #4A90E2 100%);
+            background-size: 200% 200%;
             color: white;
-            border: none;
         }
 
         /* Hover de botón: Azul Cielo Suave */
         .register-button:hover {
-            background-color: #5DADE2;
-            transform: translateY(-1px);
-            box-shadow: 0 12px 22px rgba(93,173,226,0.25);
+            background-position: right center;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(93,173,226,0.4), 
+                        0 0 0 4px rgba(93,173,226,0.1);
         }
 
         .register-button:focus {
@@ -203,12 +356,15 @@
 
         .errorlist {
             list-style-type: none;
-            padding: 0;
+            padding: 12px;
             margin-top: 10px;
-            margin-bottom: 6px;
-            color: #b00020;
+            margin-bottom: 10px;
+            color: #d32f2f;
             text-align: left;
             font-size: 14px;
+            background: rgba(211, 47, 47, 0.1);
+            border-left: 4px solid #d32f2f;
+            border-radius: 8px;
         }
 
         .errorlist li, .errorlist p {
@@ -219,7 +375,7 @@
 
         .login-link {
             display: block;
-            margin-top: 20px;
+            margin-top: 25px;
             font-size: 14px;
             /* Texto: Gris muy oscuro */
             color: #1C1C1C;
@@ -229,34 +385,70 @@
             /* Link: Azul Serenidad */
             color: #4A90E2;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .login-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #4A90E2;
+            transition: width 0.3s ease;
+        }
+
+        .login-link a:hover::after {
+            width: 100%;
         }
 
         .login-link a:hover {
-            text-decoration: underline;
+            color: #5DADE2;
+            transform: translateX(2px);
         }
 
         .footer {
             text-align: center;
             margin-top: 40px;
-            padding: 20px;
-            /* Borde: Navbar / Header: Azul Grisáceo */
-            border-top: 1px solid #2E86C1;
-            /* Texto: Gris muy oscuro */
+            padding: 25px;
+            border-top: 2px solid rgba(46,134,193,0.2);
             color: #1C1C1C;
             font-size: 14px;
-            /* Fondo: Fondo principal: Azul Super Claro */
-            background: #EAF2F8;
-            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(174,214,241,0.6) 0%, rgba(213,231,244,0.5) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #4A90E2, transparent);
+            border-radius: 2px;
         }
 
         @media (max-width: 768px) {
             #content {
-                padding: 10px;
+                padding: 20px 10px;
             }
             .register-form-container {
                 max-width: 100%;
-                padding: 20px;
+                padding: 30px 25px;
+            }
+
+            #header {
+                flex-direction: column;
+                height: auto;
+                padding: 15px;
             }
         }
     </style>
@@ -283,7 +475,8 @@
                 {% endif %}
                 {{ form.as_p }}
                 <button type="submit" class="action-button register-button">
-                    <i class="fas fa-user-plus"></i> Registrarme
+                    <i class="fas fa-user-plus"></i>
+                    <span>Registrarme</span>
                 </button>
             </form>
             <div class="login-link">

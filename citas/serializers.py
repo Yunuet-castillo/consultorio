@@ -37,7 +37,7 @@ class PacienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Paciente 
         # Asegúrate de que los campos coincidan con tu models.py
-        fields = ['id', 'nombre', 'apellido', 'edad', 'fecha_nacimiento', 'lugar_origen', 'telefono', 'primera_cita']
+        fields = ['id', 'nombre', 'apellido_paterno', 'apellido_materno','edad', 'fecha_nacimiento', 'lugar_origen', 'telefono', 'primera_cita']
 
 
 # ==============================================================================

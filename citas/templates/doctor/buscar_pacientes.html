@@ -1,116 +1,686 @@
-{% extends "base.html" %}
-{% block title %}Buscar Pacientes{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar Pacientes - Hospital San Pedro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{% static 'citas/img/logo.png' %}">
+    <style>
+        /* ===================== ESTILOS PRINCIPALES ===================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body { 
+            font-family: "Poppins", "Roboto", sans-serif; 
+            background: linear-gradient(135deg, #EAF2F8 0%, #D5E7F4 50%, #EAF2F8 100%);
+            background-attachment: fixed;
+            position: relative;
+            margin: 0; 
+            padding: 0; 
+            color: #1C1C1C;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
 
-{% block extra_head %}
-<style>
-    /* Botón regresar al dashboard */
-    .btn-back {
-        background-color: #4A90E2;
-        color: #fff;
-        border-radius: 50px;
-        padding: 0.45rem 1rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        box-shadow: 0 6px 14px rgba(74,144,226,0.25);
-        text-decoration: none;
-        margin-bottom: 20px;
-        transition: all 0.2s ease-in-out;
-    }
-    .btn-back:hover {
-        background-color: #357ABD;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(74,144,226,0.35);
-    }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(74, 144, 226, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(46, 134, 193, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(93, 173, 226, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Header con barra azul y logo */
+        #header { 
+            background: linear-gradient(135deg, rgba(46,134,193,0.98) 0%, rgba(74,144,226,0.95) 50%, rgba(46,134,193,1) 100%);
+            color: #FFFFFF; 
+            padding: 15px 30px; 
+            height: 100px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.6s ease-out;
+        }
 
-    /* Formulario de búsqueda */
-    .search-form {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
-    .search-form .form-control {
-        border-radius: 50px 0 0 50px;
-        border: 1px solid #ccc;
-        padding: 0.6rem 1rem;
-        width: 300px;
-    }
-    .search-form .btn {
-        border-radius: 0 50px 50px 0;
-        background-color: #4A90E2;
-        color: white;
-        border: none;
-        padding: 0.6rem 1rem;
-        transition: all 0.2s ease-in-out;
-    }
-    .search-form .btn:hover {
-        background-color: #357ABD;
-    }
+        #header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
 
-    /* Tabla */
-    .table {
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
-    .table thead {
-        background-color: #4A90E2;
-        color: white;
-    }
-    .table tbody tr:hover {
-        background-color: #f6f9ff;
-        transition: 0.3s;
-    }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .logo-container { 
+            display: flex; 
+            align-items: center; 
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo { 
+            height: 80px; 
+            width: auto; 
+            margin-right: 15px; 
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            transition: transform 0.3s ease;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
 
-    h2, h4 {
-        color: #333;
-        text-align: center;
-    }
-</style>
-{% endblock %}
+        .logo:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
 
-{% block content %}
-<div class="container mt-4">
-    <a href="{% url 'doctor_dashboard' %}" class="btn-back">⬅️ Regresar</a>
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .logo-placeholder { 
+            display: none; 
+            width: 80px; 
+            height: 80px; 
+            background: #EAF2F8; 
+            align-items: center; 
+            justify-content: center; 
+            margin-right: 15px; 
+            font-weight: bold; 
+            color: #2E86C1; 
+            border-radius: 5px; 
+        }
+        
+        .hospital-name { 
+            color: white; 
+            font-size: 22px; 
+            font-weight: 700; 
+            line-height: 1.2; 
+            text-transform: uppercase; 
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255,255,255,0.1);
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            letter-spacing: 1px;
+        }
+        
+        .container { 
+            padding: 30px; 
+            max-width: 1200px; 
+            margin: auto; 
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
 
-    <h2 class="mb-4">Buscar Pacientes</h2>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Botones */
+        .btn { 
+            display: inline-block; 
+            padding: 14px 30px; 
+            background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 50%, #4A90E2 100%);
+            background-size: 200% 200%;
+            color: #fff; 
+            border-radius: 50px; 
+            text-decoration: none; 
+            font-size: 15px; 
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            margin-bottom: 20px; 
+            box-shadow: 0 8px 20px rgba(74,144,226,0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
 
-    <form method="get" action="{% url 'buscar_pacientes_doctor' %}" class="search-form">
-        <input type="text" name="q" placeholder="Buscar por nombre, apellido o número" 
-               value="{{ query }}" class="form-control" />
-        <button type="submit" class="btn">Buscar</button>
-    </form>
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
 
-    <hr>
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn i { 
+            margin-right: 8px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
 
-    {% if pacientes %}
-        <h4 class="mb-3">Resultados:</h4>
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Teléfono</th>
-                    <th class="text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in pacientes %}
-                <tr>
-                    <td>{{ p.nombre }}</td>
-                    <td>{{ p.apellido }}</td>
-                    <td>{{ p.numero }}</td>
-                    <td class="text-center">
-                        <a href="{% url 'agendar_cita' p.id %}" class="btn btn-success btn-sm">
-                            📅 Agendar cita
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p class="text-muted text-center mt-4">No se encontraron pacientes registrados.</p>
-    {% endif %}
-</div>
-{% endblock %}
+        .btn:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn:hover { 
+            background-position: right center;
+            transform: translateY(-3px) scale(1.05); 
+            box-shadow: 0 15px 30px rgba(93,173,226,0.4), 
+                        0 0 0 4px rgba(93,173,226,0.1);
+            color: #fff; 
+        }
+        
+        .btn-back {
+            background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 50%, #4A90E2 100%);
+            background-size: 200% 200%;
+            color: #fff;
+            border-radius: 50px;
+            padding: 12px 25px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 20px rgba(74,144,226,0.3);
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-back::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-back:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-back i {
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-back:hover i {
+            transform: translateX(-3px);
+        }
+
+        .btn-back span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-back:hover {
+            background-position: right center;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(93,173,226,0.4), 
+                        0 0 0 4px rgba(93,173,226,0.1);
+            color: #fff;
+        }
+        
+        /* Información de usuario */
+        .page-title { 
+            text-align: center; 
+            margin: 30px 0 30px 0; 
+        }
+        
+        .page-title h2 { 
+            color: #1C1C1C; 
+            margin-bottom: 8px; 
+            margin-top: 0; 
+            font-size: 32px; 
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .page-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #4A90E2, transparent);
+            border-radius: 2px;
+        }
+
+        .page-title h2 i {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .page-title p { 
+            color: #1C1C1C; 
+            margin: 0; 
+            font-size: 16px; 
+        }
+        
+        /* Tarjeta de búsqueda */
+        .card-custom { 
+            background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 20px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
+                        inset 0 1px 0 rgba(255,255,255,0.6);
+            margin-bottom: 30px; 
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card-custom:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12), 
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+            transform: translateY(-2px);
+        }
+        
+        .card-header-custom { 
+            background: linear-gradient(135deg, rgba(46,134,193,0.95) 0%, rgba(74,144,226,0.9) 50%, rgba(46,134,193,1) 100%);
+            color: #fff; 
+            padding: 18px 25px; 
+            font-weight: 600; 
+            font-size: 17px; 
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .card-header-custom::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .card-body { 
+            padding: 25px; 
+        }
+        
+        /* Formulario de búsqueda */
+        .search-form { 
+            display: flex; 
+            gap: 0;
+        }
+        
+        .search-form input { 
+            flex: 1; 
+            padding: 14px 18px; 
+            border: 2px solid rgba(46,134,193,0.3); 
+            border-radius: 50px 0 0 50px; 
+            font-size: 15px;
+            background: rgba(234,242,248,0.8);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .search-form input:focus { 
+            outline: none; 
+            border-color: #4A90E2; 
+            box-shadow: 0 0 0 4px rgba(74,144,226,0.15),
+                        inset 0 2px 4px rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+            background: rgba(234,242,248,0.95);
+        }
+        
+        .search-form button { 
+            background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 50%, #4A90E2 100%);
+            background-size: 200% 200%;
+            color: #fff; 
+            border: 2px solid rgba(255,255,255,0.2);
+            padding: 14px 24px; 
+            border-radius: 0 50px 50px 0; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-form button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .search-form button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .search-form button i {
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
+
+        .search-form button:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .search-form button span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .search-form button:hover { 
+            background-position: right center;
+            transform: translateY(-2px) scale(1.02); 
+            box-shadow: 0 8px 20px rgba(93,173,226,0.35);
+        }
+        
+        /* Tabla */
+        .table-wrapper { 
+            background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 20px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
+                        inset 0 1px 0 rgba(255,255,255,0.6);
+            overflow: hidden; 
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .table-wrapper:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12), 
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+            transform: translateY(-2px);
+        }
+        
+        .table-caption { 
+            background: linear-gradient(135deg, rgba(46,134,193,0.95) 0%, rgba(74,144,226,0.9) 50%, rgba(46,134,193,1) 100%);
+            color: #fff; 
+            padding: 18px 25px; 
+            font-weight: 600; 
+            font-size: 17px; 
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .table-caption::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .table-responsive { overflow-x: auto; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        
+        table thead { background: #D5E7F4; }
+        
+        table th, table td { 
+            padding: 14px 16px; 
+            text-align: center; 
+            font-size: 14px; 
+            color: #1C1C1C; 
+            border-bottom: 1px solid rgba(46,134,193,0.2); 
+        }
+        
+        table tr {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        table tr::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #4A90E2, #5DADE2);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        table tr:nth-child(even) { background: rgba(234,242,248,0.5); }
+        
+        table tr:hover { 
+            background: linear-gradient(90deg, rgba(213,231,244,0.7), rgba(174,214,241,0.5));
+            transform: translateX(5px);
+        }
+
+        table tr:hover::before {
+            transform: scaleY(1);
+        }
+        
+        /* Botones de acción */
+        .action-links { 
+            display: flex; 
+            gap: 10px; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+        
+        .action-links a { 
+            padding: 10px 18px; 
+            border-radius: 50px; 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .action-links a i {
+            transition: transform 0.3s ease;
+        }
+
+        .action-links a:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+        
+        .btn-agendar { 
+            background: linear-gradient(135deg, #2ECC71 0%, #27ae60 100%);
+            color: #fff; 
+        }
+        
+        .btn-agendar:hover { 
+            background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
+            transform: translateY(-2px) scale(1.05); 
+            box-shadow: 0 6px 16px rgba(39,174,96,0.3);
+            color: #fff; 
+        }
+        
+        /* Mensaje sin resultados */
+        .no-results { 
+            text-align: center; 
+            padding: 50px 20px; 
+            color: #1C1C1C; 
+        }
+        
+        .no-results i { 
+            font-size: 56px; 
+            color: #4A90E2; 
+            margin-bottom: 20px; 
+            display: block;
+            animation: pulse 2s infinite;
+        }
+        
+        .no-results p { 
+            font-size: 17px; 
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        
+        /* Responsividad */
+        @media (max-width: 768px) {
+            #header { height: auto; padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .container { padding: 18px; }
+            .search-form { flex-direction: column; }
+            .search-form input { border-radius: 50px; margin-bottom: 10px; }
+            .search-form button { border-radius: 50px; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div class="logo-container">
+            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
+            <div class="logo-placeholder">HSP</div>
+            <div class="hospital-name">Hospital<br>San Pedro</div>
+        </div>
+        <a href="{% url 'logout' %}" class="btn"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
+    </div>
+
+    <div class="container">
+        <a href="{% url 'dashboard_doctor' %}" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i><span>Regresar al Dashboard</span>
+        </a>
+
+        <div class="page-title">
+            <h2><i class="fas fa-search" style="color: #4A90E2; margin-right: 10px;"></i> Buscar Pacientes</h2>
+            <p>Busca pacientes por nombre, apellido o número de teléfono</p>
+        </div>
+
+        <!-- 🔍 Formulario de Búsqueda -->
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="mb-0"><i class="fa-solid fa-magnifying-glass"></i> Búsqueda</h3>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{% url 'buscar_pacientes_doctor' %}" class="search-form">
+                    <input type="text" name="q" placeholder="Nombre, apellido o número de teléfono" 
+                           value="{{ query }}" />
+                    <button type="submit"><i class="fa-solid fa-search"></i><span>Buscar</span></button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 📋 Resultados -->
+        {% if pacientes %}
+            <div class="table-wrapper">
+                <div class="table-caption">
+                    <i class="fas fa-users"></i> Resultados de la búsqueda ({{ pacientes|length }} encontrado{{ pacientes|length|pluralize }})
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Teléfono</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in pacientes %}
+                            <tr>
+                                <td><strong>{{ p.nombre }}</strong></td>
+                                <td><strong>{{ p.apellido }}</strong></td>
+                                <td>{{ p.numero }}</td>
+                                <td class="action-links">
+                                    <a href="{% url 'detalle_paciente' p.id %}" class="btn-agendar">
+                                        <i class="fa-solid fa-eye"></i><span>Ver Detalles</span>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% elif query %}
+            <div class="table-wrapper">
+                <div class="no-results">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <p>No se encontraron pacientes con el criterio de búsqueda "<strong>{{ query }}</strong>"</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="table-wrapper">
+                <div class="no-results">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <p>Ingresa un término de búsqueda para encontrar pacientes</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

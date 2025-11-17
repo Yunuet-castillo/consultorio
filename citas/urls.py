@@ -74,4 +74,9 @@ path('doctor/dashboard/', views.dashboard_doctor, name='doctor_dashboard'),
     path('agendar/<int:paciente_id>/', views.agendar_paciente_existente, name='agendar_paciente_existente'),
 
 path('pacientes/buscar/', views.buscar_pacientes_doctor, name='buscar_pacientes_doctor'),
+
+path('doctor/paciente/<int:paciente_id>/agregar_estudio/', views.agregar_estudio, name='agregar_estudio'),
+path('doctor/cita/<int:cita_id>/imprimir_historial/', views.imprimir_historial, name='imprimir_historial'),
+
+
 ]

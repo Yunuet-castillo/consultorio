@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, Paciente, Cita, SignosVitales, Receta, Doctor
+from .models import CustomUser, Paciente, Cita, SignosVitales, Receta, Doctor, Estudio
 from datetime import date
 
 # -------------------------
@@ -195,4 +195,15 @@ class DiagnosticoForm(forms.ModelForm):
         fields = ["diagnostico"]
         widgets = {
             "diagnostico": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+        }
+
+
+
+class EstudioForm(forms.ModelForm):
+    class Meta:
+        model = Estudio
+        fields = ['archivo', 'descripcion']
+        widgets = {
+            'archivo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Descripción del estudio'}),
         }

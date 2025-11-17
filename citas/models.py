@@ -78,6 +78,19 @@ class Paciente(models.Model):
         return f"{self.nombre} {self.apellido_paterno} {self.apellido_materno or ''}"
 
 
+
+class Estudio(models.Model):
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='estudios')
+    archivo = models.FileField(upload_to='estudios/')
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+    texto_extraido = models.TextField(blank=True, null=True)
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.descripcion or 'Estudio'} - {self.paciente.nombre}"
+
+
+
 # -------------------------
 # Sección de Modelos de Citas 
 # -------------------------

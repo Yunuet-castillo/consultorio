@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Agregar estudio{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background-color: #f3f8ff;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .container {
+        max-width: 600px;
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+        margin-top: 40px;
+    }
+
+    h2 {
+        color: #2e6ddf;
+        font-weight: 600;
+        margin-bottom: 25px;
+    }
+
+    .btn-primary {
+        background-color: #2e86de;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #1b4f9c;
+    }
+
+    .btn-back {
+        background-color: #6c757d;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 18px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .btn-back:hover {
+        background-color: #5a6268;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>➕ Agregar estudio de {{ paciente.nombre }}</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_archivo" class="form-label"><b>Archivo del estudio:</b></label>
+            {{ form.archivo }}
+            <small class="form-text text-muted">Puedes subir archivos PDF, JPG, PNG.</small>
+        </div>
+
+        <div class="mb-3">
+            <label for="id_descripcion" class="form-label"><b>Descripción:</b></label>
+            {{ form.descripcion }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">📤 Guardar estudio</button>
+        <a href="{% url 'detalle_paciente' paciente.id %}" class="btn-back">⬅️ Volver</a>
+    </form>
+</div>
+{% endblock %}

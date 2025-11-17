@@ -1,161 +1,655 @@
-{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel del Doctor - {{ doctor.user.get_full_name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{% static 'citas/img/logo.png' %}">
+    <style>
+        /* ===================== ESTILOS PRINCIPALES ===================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body { 
+            font-family: "Poppins", "Roboto", sans-serif; 
+            background: linear-gradient(135deg, #EAF2F8 0%, #D5E7F4 50%, #EAF2F8 100%);
+            background-attachment: fixed;
+            position: relative;
+            margin: 0; 
+            padding: 0; 
+            color: #1C1C1C;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
 
-{% block title %}Panel del Doctor{% endblock %}
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(74, 144, 226, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(46, 134, 193, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(93, 173, 226, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Header con barra azul y logo */
+        #header { 
+            background: linear-gradient(135deg, rgba(46,134,193,0.98) 0%, rgba(74,144,226,0.95) 50%, rgba(46,134,193,1) 100%);
+            color: #FFFFFF; 
+            padding: 15px 30px; 
+            height: 100px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.6s ease-out;
+        }
 
-{% block extra_head %}
-<style>
-    /* 🌈 Estilo general */
-    body {
-        background: linear-gradient(135deg, #EAF6FB 0%, #D6EAF8 100%);
-        font-family: "Segoe UI", sans-serif;
-    }
+        #header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
 
-    h2, h3 {
-        font-weight: 700;
-        color: #154360;
-    }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .logo-container { 
+            display: flex; 
+            align-items: center; 
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo { 
+            height: 80px; 
+            width: auto; 
+            margin-right: 15px; 
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            transition: transform 0.3s ease;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
 
-    /* 🩺 Tarjetas generales */
-    .card-custom {
-        border: none;
-        border-radius: 16px;
-        overflow: hidden;
-        background-color: #ffffff;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+        .logo:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
 
-    .card-custom:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
-    }
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .logo-placeholder { 
+            display: none; 
+            width: 80px; 
+            height: 80px; 
+            background: #EAF2F8; 
+            align-items: center; 
+            justify-content: center; 
+            margin-right: 15px; 
+            font-weight: bold; 
+            color: #2E86C1; 
+            border-radius: 5px; 
+        }
+        
+        .hospital-name { 
+            color: white; 
+            font-size: 22px; 
+            font-weight: 700; 
+            line-height: 1.2; 
+            text-transform: uppercase; 
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255,255,255,0.1);
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            letter-spacing: 1px;
+        }
+        
+        .container { 
+            padding: 30px; 
+            max-width: 1200px; 
+            margin: auto; 
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
 
-    /* 🔹 Encabezados */
-    .card-header-custom {
-        background: linear-gradient(135deg, #2471A3 0%, #3498DB 100%);
-        color: #fff;
-        font-weight: 600;
-        border: none;
-        padding: 1rem 1.25rem;
-    }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Botones */
+        .btn { 
+            display: inline-block; 
+            padding: 14px 30px; 
+            background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 50%, #4A90E2 100%);
+            background-size: 200% 200%;
+            color: #fff; 
+            border-radius: 50px; 
+            text-decoration: none; 
+            font-size: 15px; 
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            margin-bottom: 20px; 
+            box-shadow: 0 8px 20px rgba(74,144,226,0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
 
-    /* 🧩 Buscador */
-    .input-group input {
-        border: 2px solid #D6EAF8;
-        border-radius: 50px 0 0 50px;
-        padding-left: 1rem;
-        transition: all 0.2s ease;
-    }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
 
-    .input-group input:focus {
-        border-color: #3498DB;
-        box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
-    }
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn i { 
+            margin-right: 8px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
 
-    .btn-primary-custom {
-        background-color: #3498DB;
-        color: #fff;
-        border-radius: 0 50px 50px 0;
-        border: none;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
-        transition: all 0.25s ease;
-    }
+        .btn:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
 
-    .btn-primary-custom:hover {
-        background-color: #2E86C1;
-        transform: scale(1.03);
-    }
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn:hover { 
+            background-position: right center;
+            transform: translateY(-3px) scale(1.05); 
+            box-shadow: 0 15px 30px rgba(93,173,226,0.4), 
+                        0 0 0 4px rgba(93,173,226,0.1);
+            color: #fff; 
+        }
+        
+        /* Mensajes */
+        .messages { 
+            margin: 20px 0; 
+            padding: 0; 
+            list-style: none; 
+        }
+        
+        .messages li { 
+            background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
+            backdrop-filter: blur(10px);
+            color: #1C1C1C; 
+            padding: 14px 18px; 
+            border-radius: 12px; 
+            margin-bottom: 12px; 
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
 
-    /* 📋 Tabla */
-    .table-custom thead {
-        background-color: #3498DB;
-        color: white;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-    }
+        .messages li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        /* Información de usuario */
+        .user-info { 
+            margin: 30px 0 30px 0; 
+            text-align: center; 
+        }
+        
+        .user-info h2 { 
+            color: #1C1C1C; 
+            margin-bottom: 8px; 
+            margin-top: 0; 
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
 
-    .table-custom tbody tr:hover {
-        background-color: #EBF5FB;
-        transition: background-color 0.2s ease;
-    }
+        .user-info h2 i {
+            animation: pulse 2s infinite;
+        }
 
-    .table td, .table th {
-        vertical-align: middle;
-    }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .user-info p { 
+            color: #1C1C1C; 
+            margin: 0; 
+            font-size: 16px; 
+        }
+        
+        /* Tarjetas */
+        .card-custom { 
+            background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 20px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
+                        inset 0 1px 0 rgba(255,255,255,0.6);
+            margin-bottom: 30px; 
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
 
-    /* 🏷️ Etiquetas */
-    .badge {
-        padding: 0.45em 0.7em;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
+        .card-custom:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12), 
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+            transform: translateY(-2px);
+        }
+        
+        .card-header-custom { 
+            background: linear-gradient(135deg, rgba(46,134,193,0.95) 0%, rgba(74,144,226,0.9) 50%, rgba(46,134,193,1) 100%);
+            color: #fff; 
+            padding: 18px 25px; 
+            font-weight: 600; 
+            font-size: 17px; 
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+        }
 
-    .badge-confirmada { background-color: #5DADE2; color: white; }
-    .badge-pendiente { background-color: #F4D03F; color: #000; }
-    .badge-cancelada { background-color: #C0392B; color: white; }
-    .badge-atendida { background-color: #2ECC71; color: white; }
+        .card-header-custom::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .card-body { 
+            padding: 25px; 
+        }
+        
+        /* Buscador */
+        .input-group { 
+            display: flex; 
+            margin-bottom: 0; 
+        }
+        
+        .input-group input { 
+            flex: 1; 
+            padding: 14px 18px; 
+            border: 2px solid rgba(46,134,193,0.3); 
+            border-radius: 50px 0 0 50px; 
+            font-size: 15px;
+            background: rgba(234,242,248,0.8);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .input-group input:focus { 
+            outline: none; 
+            border-color: #4A90E2; 
+            box-shadow: 0 0 0 4px rgba(74,144,226,0.15),
+                        inset 0 2px 4px rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+            background: rgba(234,242,248,0.95);
+        }
+        
+        .btn-primary-custom { 
+            background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 50%, #4A90E2 100%);
+            background-size: 200% 200%;
+            color: #fff; 
+            border: 2px solid rgba(255,255,255,0.2);
+            padding: 14px 24px; 
+            border-radius: 0 50px 50px 0; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
 
-    /* 🔘 Botones pequeños */
-    .btn-pill {
-        border-radius: 999px;
-        font-size: 0.85rem;
-        padding: 0.35rem 0.8rem;
-        margin: 0 2px;
-    }
+        .btn-primary-custom::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
 
-    .btn-pill:hover {
-        background-color: #2E86C1;
-        color: white;
-    }
+        .btn-primary-custom:hover::before {
+            width: 300px;
+            height: 300px;
+        }
 
-    /* ✨ Animación de nueva cita */
-    .table-warning {
-        animation: flashRow 2.5s ease-in-out;
-    }
+        .btn-primary-custom i {
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
 
-    @keyframes flashRow {
-        0% { background-color: #FFF59D; }
-        100% { background-color: transparent; }
-    }
-</style>
-{% endblock %}
+        .btn-primary-custom:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
 
-{% block content %}
-<div class="container mt-5">
+        .btn-primary-custom span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-primary-custom:hover { 
+            background-position: right center;
+            transform: translateY(-2px) scale(1.02); 
+            box-shadow: 0 8px 20px rgba(93,173,226,0.35);
+        }
+        
+        /* Tabla */
+        .table-wrapper { 
+            background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 20px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
+                        inset 0 1px 0 rgba(255,255,255,0.6);
+            overflow: hidden; 
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
 
-    <!-- 🩺 Bienvenida -->
-    <div class="card card-custom mb-4">
-        <div class="card-body">
-            <h2>Bienvenido, Dr. {{ doctor.user.get_full_name }}</h2>
-            <p class="text-muted mb-0">Panel de control - Gestión de citas y pacientes</p>
+        .table-wrapper:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12), 
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+            transform: translateY(-2px);
+        }
+        
+        .table-caption { 
+            background: linear-gradient(135deg, rgba(46,134,193,0.95) 0%, rgba(74,144,226,0.9) 50%, rgba(46,134,193,1) 100%);
+            color: #fff; 
+            padding: 18px 25px; 
+            font-weight: 600; 
+            font-size: 17px; 
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .table-caption::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .table-responsive { overflow-x: auto; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        
+        table thead { background: #D5E7F4; }
+        
+        table th, table td { 
+            padding: 14px 16px; 
+            text-align: center; 
+            font-size: 14px; 
+            color: #1C1C1C; 
+            border-bottom: 1px solid rgba(46,134,193,0.2); 
+        }
+        
+        table tr {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        table tr::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #4A90E2, #5DADE2);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        table tr:nth-child(even) { background: rgba(234,242,248,0.5); }
+        
+        table tr:hover { 
+            background: linear-gradient(90deg, rgba(213,231,244,0.7), rgba(174,214,241,0.5));
+            transform: translateX(5px);
+        }
+
+        table tr:hover::before {
+            transform: scaleY(1);
+        }
+        
+        /* Badges de estado */
+        .status-badge { 
+            display: inline-block; 
+            padding: 8px 16px; 
+            border-radius: 50px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            color: #fff; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-badge:hover::before {
+            opacity: 1;
+        }
+
+        .status-badge:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        
+        .status-confirmada { 
+            background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 100%);
+        }
+        
+        .status-pendiente { 
+            background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);
+            color: #333; 
+        }
+        
+        .status-cancelada { 
+            background: linear-gradient(135deg, #2E86C1 0%, #3498db 100%);
+        }
+        
+        .status-atendida { 
+            background: linear-gradient(135deg, #2ECC71 0%, #27ae60 100%);
+        }
+        
+        /* Botones de acción */
+        .action-links { 
+            display: flex; 
+            gap: 10px; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+        
+        .action-links a { 
+            padding: 10px 18px; 
+            border-radius: 50px; 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .action-links a i { 
+            font-size: 12px; 
+            transition: transform 0.3s ease;
+        }
+
+        .action-links a:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+        
+        .btn-details { 
+            background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 100%);
+            color: #fff; 
+        }
+        
+        .btn-details:hover { 
+            background: linear-gradient(135deg, #357ABD 0%, #2E86C1 100%);
+            transform: translateY(-2px) scale(1.05); 
+            box-shadow: 0 6px 16px rgba(53,122,189,0.3);
+            color: #fff; 
+        }
+        
+        .btn-receta { 
+            background: linear-gradient(135deg, #2ECC71 0%, #27ae60 100%);
+            color: #fff; 
+        }
+        
+        .btn-receta:hover { 
+            background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
+            transform: translateY(-2px) scale(1.05); 
+            box-shadow: 0 6px 16px rgba(39,174,96,0.3);
+            color: #fff; 
+        }
+        
+        /* Animación de resaltado */
+        .table-warning { 
+            animation: highlight 3s ease-in-out; 
+        }
+        
+        @keyframes highlight {
+            0% { background-color: #FFF59D; }
+            100% { background-color: transparent; }
+        }
+        
+        /* Responsividad */
+        @media (max-width: 768px) {
+            #header { height: auto; padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .container { padding: 18px; }
+            .input-group { flex-direction: column; }
+            .input-group input { border-radius: 50px; margin-bottom: 10px; }
+            .btn-primary-custom { border-radius: 50px; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div class="logo-container">
+            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
+            <div class="logo-placeholder">HSP</div>
+            <div class="hospital-name">Hospital<br>San Pedro</div>
         </div>
+        <a href="{% url 'logout' %}" class="btn"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
     </div>
 
-    <!-- 🔍 Buscador -->
-    <div class="card card-custom mb-4">
-        <div class="card-header card-header-custom">
-            <h3 class="mb-0"><i class="fa-solid fa-magnifying-glass"></i> Buscar Paciente</h3>
+    <div class="container">
+        <div class="user-info">
+            <h2><i class="fas fa-user-md" style="color: #4A90E2; margin-right: 10px;"></i> Bienvenido, Dr. {{ doctor.user.get_full_name }}</h2>
+            <p>Panel de control - Gestión de citas y pacientes</p>
         </div>
-        <div class="card-body">
-            <form method="get" action="{% url 'buscar_pacientes_doctor' %}">
-                <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="Nombre, Apellido o Teléfono" value="{{ query }}">
-                    <button type="submit" class="btn btn-primary-custom">Buscar</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- 📅 Citas -->
-    <div class="card card-custom">
-        <div class="card-header card-header-custom">
-            <h3 class="mb-0"><i class="fa-solid fa-calendar-check"></i> Mis Citas</h3>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">
+                        <i class="fa-solid fa-circle-info"></i> {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- 🔍 Buscador de Pacientes -->
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="mb-0"><i class="fa-solid fa-magnifying-glass"></i> Buscar Paciente</h3>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{% url 'buscar_pacientes_doctor' %}">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Nombre, Apellido o Teléfono" value="{{ query }}">
+                        <button type="submit" class="btn-primary-custom"><i class="fa-solid fa-search"></i><span>Buscar</span></button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="card-body">
+
+        <!-- 📅 Mis Citas -->
+        <div class="table-wrapper">
+            <div class="table-caption"><i class="fas fa-calendar-check"></i> Mis Citas</div>
+            {% if citas %}
             <div class="table-responsive">
-                <table class="table table-hover table-custom align-middle">
+                <table>
                     <thead>
                         <tr>
                             <th>Paciente</th>
@@ -173,48 +667,49 @@
                             <td>{{ cita.hora|time:"H:i" }}</td>
                             <td>
                                 {% if cita.estado == "Confirmada" %}
-                                    <span class="badge badge-confirmada">{{ cita.estado }}</span>
+                                    <span class="status-badge status-confirmada">{{ cita.estado }}</span>
                                 {% elif cita.estado == "Pendiente" %}
-                                    <span class="badge badge-pendiente">{{ cita.estado }}</span>
+                                    <span class="status-badge status-pendiente">{{ cita.estado }}</span>
                                 {% elif cita.estado == "Cancelada" %}
-                                    <span class="badge badge-cancelada">{{ cita.estado }}</span>
+                                    <span class="status-badge status-cancelada">{{ cita.estado }}</span>
                                 {% elif cita.estado == "Atendida" %}
-                                    <span class="badge badge-atendida">{{ cita.estado }}</span>
+                                    <span class="status-badge status-atendida">{{ cita.estado }}</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">{{ cita.estado }}</span>
+                                    <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn btn-primary-custom btn-sm btn-pill">
-                                    <i class="fa-solid fa-eye"></i> Detalles
+                            <td class="action-links">
+                                <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn-details">
+                                    <i class="fa-solid fa-eye"></i><span>Detalles</span>
                                 </a>
-                                <a href="{% url 'generar_receta_pdf' cita.id %}" class="btn btn-success btn-sm btn-pill">
-                                    <i class="fa-solid fa-file-pdf"></i> Receta
+                                <a href="{% url 'generar_receta_pdf' cita.id %}" class="btn-receta">
+                                    <i class="fa-solid fa-file-pdf"></i><span>Receta</span>
                                 </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-3">
-                                <i class="fa-solid fa-circle-info"></i> No tienes citas programadas.
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% else %}
+                <div style="padding: 20px; text-align: center; color: #1C1C1C;">
+                    <i class="fa-solid fa-circle-info" style="font-size: 24px; color: #4A90E2; margin-bottom: 10px;"></i>
+                    <p style="margin: 0;">No tienes citas programadas.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
-</div>
 
-<!-- ✨ Animación para enfocar próxima cita pendiente -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const filaPendiente = document.querySelector('tr:has(.badge-pendiente)');
-    if (filaPendiente) {
-        filaPendiente.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        filaPendiente.classList.add('table-warning');
-    }
-});
-</script>
-{% endblock %}
+    <!-- ✨ Script para enfocar automáticamente la siguiente cita pendiente -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filaPendiente = document.querySelector('tr:has(.status-pendiente)');
+        if (filaPendiente) {
+            filaPendiente.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            filaPendiente.classList.add('table-warning');
+            setTimeout(() => filaPendiente.classList.remove('table-warning'), 3000);
+        }
+    });
+    </script>
+</body>
+</html>

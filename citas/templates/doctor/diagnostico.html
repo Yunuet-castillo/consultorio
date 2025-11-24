@@ -497,14 +497,17 @@
 <body>
     <div id="header">
         <div class="logo-container">
-            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
-            <div class="logo-placeholder" style="display: none; width:80px;height:80px;background:#EAF2F8;align-items:center;justify-content:center;margin-right:15px;font-weight:bold;color:#2E86C1;border-radius:5px;">HSP</div>
+            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" 
+                 onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
+            <div class="logo-placeholder" style="display: none; width:80px;height:80px;background:#EAF2F8;
+                 align-items:center;justify-content:center;margin-right:15px;font-weight:bold;color:#2E86C1;border-radius:5px;">HSP</div>
             <div class="hospital-name">Hospital<br>San Pedro</div>
         </div>
         <div id="branding">
             <h1>Diagnóstico</h1>
         </div>
     </div>
+
     <div id="container">
         <div id="sidebar">
             <h2>Paciente</h2>
@@ -516,28 +519,79 @@
                     </div>
                     <div class="accordion-content">
                         <div class="accordion-content-inner">
-                            <div class="content-item"><i class="fas fa-id-card"></i><span>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</span></div>
+                            <div class="content-item">
+                                <i class="fas fa-id-card"></i>
+                                <span>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</span>
+                            </div>
                         </div>
                     </div>
                 </li>
             </ul>
         </div>
-        <div id="content">
-            <div class="page-title"><i class="fas fa-stethoscope" style="color:#4A90E2;margin-right:8px;"></i>Diagnóstico de {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</div>
 
+        <div id="content">
+            <div class="page-title">
+                <i class="fas fa-stethoscope" style="color:#4A90E2;margin-right:8px;"></i>
+                Diagnóstico de {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+            </div>
+
+            <!-- Diagnóstico actual -->
             <section class="module">
-                <header><i class="fas fa-file-medical"></i> Formulario de diagnóstico</header>
+                <header><i class="fas fa-stethoscope"></i> Diagnóstico actual</header>
                 <div class="body">
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                        <div class="form-actions">
-                            <button type="submit" class="btn"><i class="fas fa-save"></i><span>Guardar Diagnóstico</span></button>
-                            <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn secondary"><i class="fas fa-times"></i><span>Cancelar</span></a>
-                        </div>
-            </form>
+                    {% if historial %}
+                        <p>{{ historial.0.texto }}</p>
+                        <small>
+                            {{ historial.0.fecha|date:"d/m/Y H:i" }} 
+                            {% if historial.0.doctor %} - {{ historial.0.doctor.get_full_name|default:historial.0.doctor.username }}{% endif %}
+                        </small>
+                    {% else %}
+                        <p style="color:#666; font-style:italic;">No hay diagnóstico registrado.</p>
+                    {% endif %}
                 </div>
             </section>
+
+            <!-- Historial completo -->
+            <section class="module">
+                <header><i class="fas fa-history"></i> Historial de diagnósticos</header>
+                <div class="body">
+                    {% if historial %}
+                        <ul>
+                            {% for diag in historial %}
+                                <li>
+                                    <strong>{{ diag.fecha|date:"d/m/Y H:i" }}</strong> - {{ diag.texto }}
+                                    {% if diag.doctor %} (<em>{{ diag.doctor.get_full_name|default:diag.doctor.username }}</em>){% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="color:#666; font-style:italic;">No hay diagnósticos anteriores.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+           <!-- Formulario para nuevo diagnóstico -->
+<section class="module">
+    <header><i class="fas fa-file-medical"></i> Nuevo diagnóstico</header>
+    <div class="body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_diagnostico">Escribe el diagnóstico:</label>
+                <textarea name="diagnostico" id="id_diagnostico" class="form-control" rows="4"
+                    placeholder="Ingrese el diagnóstico aquí...">{{ cita.diagnostico_actual }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn"><i class="fas fa-save"></i> Guardar Diagnóstico</button>
+                <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+    
         </div>
     </div>
 </body>

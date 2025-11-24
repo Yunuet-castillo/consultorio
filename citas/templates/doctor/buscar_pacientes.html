@@ -634,53 +634,53 @@
         </div>
 
         <!-- 📋 Resultados -->
-        {% if pacientes %}
-            <div class="table-wrapper">
-                <div class="table-caption">
-                    <i class="fas fa-users"></i> Resultados de la búsqueda ({{ pacientes|length }} encontrado{{ pacientes|length|pluralize }})
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Apellido</th>
-                                <th>Teléfono</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in pacientes %}
-                            <tr>
-                                <td><strong>{{ p.nombre }}</strong></td>
-                                <td><strong>{{ p.apellido }}</strong></td>
-                                <td>{{ p.numero }}</td>
-                                <td class="action-links">
-                                    <a href="{% url 'detalle_paciente' p.id %}" class="btn-agendar">
-                                        <i class="fa-solid fa-eye"></i><span>Ver Detalles</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {% elif query %}
-            <div class="table-wrapper">
-                <div class="no-results">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <p>No se encontraron pacientes con el criterio de búsqueda "<strong>{{ query }}</strong>"</p>
-                </div>
-            </div>
-        {% else %}
-            <div class="table-wrapper">
-                <div class="no-results">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <p>Ingresa un término de búsqueda para encontrar pacientes</p>
-                </div>
-            </div>
-        {% endif %}
+       {% if pacientes_con_cita %}
+<div class="table-wrapper">
+    <div class="table-caption">
+        <i class="fas fa-users"></i> Resultados de la búsqueda ({{ pacientes_con_cita|length }} encontrado{{ pacientes_con_cita|length|pluralize }})
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in pacientes_con_cita %}
+                {% with p=item.paciente c=item.ultima_cita %}
+                <tr>
+                    <td><strong>{{ p.nombre }}</strong></td>
+                    <td><strong>{{ p.apellido_paterno }} {{ p.apellido_materno }}</strong></td>
+                    <td>{{ p.numero }}</td>
+                    <td class="action-links">
+                        {% if c %}
+                            <!-- SI TIENE CITA: botón para ver detalle -->
+                            <a href="{% url 'detalle_cita_doctor' c.id %}" class="btn-agendar">
+                                <i class="fa-solid fa-eye"></i><span>Ver Detalles</span>
+                            </a>
+                        {% else %}
+                            <!-- SI NO TIENE: crear cita -->
+                            <a href="{% url 'agendar_paciente_existente' p.id %}">
+                                <i class="fa-solid fa-calendar-plus"></i><span>Crear Cita</span>
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+
     </div>
 </body>
 </html>

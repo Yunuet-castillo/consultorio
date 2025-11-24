@@ -28,8 +28,8 @@ SECRET_KEY = 'django-insecure-=r@=@&hm0jsgn74zg1i*5w7w#nvbdfozpw12@9l2)qpcrz+f9l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-#ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['192.168.15.213', 'localhost', '127.0.0.1','187.141.79.58']
+ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['192.168.15.213', 'localhost', '127.0.0.1','187.141.79.58']
 
 
 # Application definition
@@ -160,3 +160,4 @@ SESSION_COOKIE_AGE = 10 * 365 * 24 * 60 * 60  # 10 años
 
 # La sesión NO se cierra al cerrar el navegador
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

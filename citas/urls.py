@@ -30,7 +30,6 @@ urlpatterns = [
     path('dashboard/doctor/cita/<int:cita_id>/', views.detalle_cita_doctor, name='detalle_cita_doctor'),
     path('dashboard/doctor/cita/<int:cita_id>/diagnostico/', views.realizar_diagnostico, name='realizar_diagnostico'),
     path('dashboard/doctor/cita/<int:cita_id>/receta/', views.agregar_receta, name='crear_receta'),
-    path('dashboard/doctor/cita/<int:cita_id>/receta-pdf/', views.generar_receta_pdf, name='receta_pdf'),
 
     # --- Mis citas ---
     #path('mis-citas/', views.mis_citas, name='mis_citas'),
@@ -42,7 +41,6 @@ urlpatterns = [
     path('dashboard/doctor/cita/<int:cita_id>/diagnostico/', views.realizar_diagnostico, name='realizar_diagnostico'),
     path('dashboard/doctor/cita/<int:cita_id>/receta/', views.agregar_receta, name='agregar_receta'),
     path('dashboard/doctor/cita/<int:cita_id>/receta/pdf/', views.generar_receta_pdf, name='generar_receta_pdf'),
-    path('cita/<int:cita_id>/receta/pdf/', views.generar_receta_pdf, name='generar_receta_pdf'),
     path('paciente/<int:paciente_id>/', views.detalle_paciente, name='detalle_paciente'),
     path("dashboard/doctor/", views.dashboard_doctor, name="dashboard_doctor"),
    # path("buscar_pacientes/", views.buscar_pacientes, name="buscar_pacientes"),
@@ -51,11 +49,10 @@ urlpatterns = [
     #path("buscar_pacientes/", views.buscar_pacientes, name="buscar_pacientes"),
     path("paciente/<int:paciente_id>/", views.detalle_paciente, name="detalle_paciente"),
 
-   path('reporte-dia/', views.reporte_dia, name='reporte_dia'),
-   path('reporte-semana/', views.reporte_semana, name='reporte_semana'),
-   path('reporte-mes/', views.reporte_mes, name='reporte_mes'),
+        path('reporte-dia/', views.reporte_dia, name='reporte_dia'),
+    path('reporte-semana/', views.reporte_semana, name='reporte_semana'),
+    path('reporte-mes/', views.reporte_mes, name='reporte_mes'),
 
-   path('imprimir_historial/<int:paciente_id>/', views.imprimir_historial_paciente, name='imprimir_historial_paciente'),
 
 
     #---------------------------
@@ -68,15 +65,16 @@ urlpatterns = [
     path('api/signos/', SignosVitalesCreateAPIView.as_view(), name='api-signos'),
     path('citas/', CitasListAPIView.as_view(), name='citas-list'),
     path('agendar-cita/', views.agendar_cita, name='agendar_cita'),
-     path('agendar-paciente/', views.agendar_paciente, name='agendar_paciente'),
-       path('agendar-cita/<int:paciente_id>/', views.agendar_cita, name='agendar_cita'),
-path('doctor/dashboard/', views.dashboard_doctor, name='doctor_dashboard'),
+    path('agendar-paciente/', views.agendar_paciente, name='agendar_paciente'),
+    path('agendar-cita/<int:paciente_id>/', views.agendar_cita, name='agendar_cita'),
+    path('doctor/dashboard/', views.dashboard_doctor, name='doctor_dashboard'),
     path('agendar/<int:paciente_id>/', views.agendar_paciente_existente, name='agendar_paciente_existente'),
 
 path('pacientes/buscar/', views.buscar_pacientes_doctor, name='buscar_pacientes_doctor'),
 
 path('doctor/paciente/<int:paciente_id>/agregar_estudio/', views.agregar_estudio, name='agregar_estudio'),
 path('doctor/cita/<int:cita_id>/imprimir_historial/', views.imprimir_historial, name='imprimir_historial'),
+path('dashboard/doctor/cita/<int:cita_id>/', views.detalle_cita_doctor, name='detalle_cita_doctor'),
 
 
 ]

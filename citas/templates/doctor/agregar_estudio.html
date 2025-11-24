@@ -1,26 +1,50 @@
 {% extends "base.html" %}
-{% block title %}Agregar estudio{% endblock %}
+{% block title %}Agregar Estudio{% endblock %}
 
 {% block extra_head %}
 <style>
+    .logout-btn, .btn-logout, a[href*="logout"] {
+        display: none !important;
+    }
     body {
-        background-color: #f3f8ff;
+        background: linear-gradient(to bottom right, #e4f0ff, #f7faff);
         font-family: 'Poppins', sans-serif;
     }
 
-    .container {
-        max-width: 600px;
-        background: white;
-        border-radius: 16px;
-        padding: 30px;
-        box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-        margin-top: 40px;
+    .page-wrapper {
+        max-width: 900px;
+        margin: 40px auto;
     }
 
-    h2 {
-        color: #2e6ddf;
+    .header-card {
+        background: linear-gradient(90deg, #2e86de, #4a9dfc);
+        color: white;
+        padding: 18px 25px;
+        border-radius: 15px 15px 0 0;
+        font-size: 20px;
         font-weight: 600;
-        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .content-card {
+        background: white;
+        padding: 30px;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2e6ddf;
+    }
+
+    input, textarea, select {
+        border-radius: 10px !important;
+        padding: 8px 12px !important;
+        border: 1px solid #d0d7e0;
+        width: 100%;
     }
 
     .btn-primary {
@@ -29,6 +53,7 @@
         border-radius: 12px;
         padding: 10px 18px;
         transition: 0.3s;
+        font-size: 15px;
     }
 
     .btn-primary:hover {
@@ -42,33 +67,118 @@
         padding: 10px 18px;
         text-decoration: none;
         transition: 0.3s;
+        font-size: 15px;
+        margin-left: 10px;
     }
 
     .btn-back:hover {
         background-color: #5a6268;
     }
+
+    /* Contenedor de mensajes flotantes apilados */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px; /* espacio entre mensajes */
+        z-index: 9999;
+    }
+
+    .toast-message {
+        min-width: 250px;
+        padding: 15px 20px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.5s ease;
+    }
+
+    .toast-message.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .toast-message.success {
+        background-color: #28a745;
+    }
+
+    .toast-message.error {
+        background-color: #dc3545;
+    }
+
+    .toast-message.info {
+        background-color: #17a2b8;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>➕ Agregar estudio de {{ paciente.nombre }}</h2>
+<div class="page-wrapper">
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="id_archivo" class="form-label"><b>Archivo del estudio:</b></label>
-            {{ form.archivo }}
-            <small class="form-text text-muted">Puedes subir archivos PDF, JPG, PNG.</small>
-        </div>
+    <div class="header-card">
+        ➕ Agregar Estudio — {{ paciente.nombre }}
+    </div>
 
-        <div class="mb-3">
-            <label for="id_descripcion" class="form-label"><b>Descripción:</b></label>
-            {{ form.descripcion }}
-        </div>
+    <div class="content-card">
 
-        <button type="submit" class="btn btn-primary">📤 Guardar estudio</button>
-        <a href="{% url 'detalle_paciente' paciente.id %}" class="btn-back">⬅️ Volver</a>
-    </form>
+        <!-- Formulario -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label"><b>Archivo del estudio:</b></label>
+                {{ form.archivo }}
+                <small class="form-text text-muted">Formatos permitidos: PDF, JPG, PNG.</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label"><b>Descripción:</b></label>
+                {{ form.descripcion }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">📤 Guardar estudio</button>
+
+            <!-- Volver a detalle de cita -->
+            <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn-back">⬅️ Volver</a>
+        </form>
+
+    </div>
 </div>
+
+<!-- Mensajes flotantes apilados -->
+{% if messages %}
+  <div class="toast-container">
+    {% for message in messages %}
+      <div class="toast-message {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}">
+        {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toasts = document.querySelectorAll('.toast-message');
+    toasts.forEach((toast, index) => {
+        // Mostrar con retraso para animación
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, index * 200);
+
+        // Ocultar después de 4 segundos
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000 + index * 200);
+    });
+});
+</script>
 {% endblock %}

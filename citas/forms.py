@@ -192,10 +192,11 @@ class RecetaForm(forms.ModelForm):
 class DiagnosticoForm(forms.ModelForm):
     class Meta:
         model = Cita
-        fields = ["diagnostico"]
+        fields = ['diagnostico']
         widgets = {
-            "diagnostico": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+            'diagnostico': forms.Textarea(attrs={'class': 'form-control', 'rows': 4})
         }
+
 
 
 

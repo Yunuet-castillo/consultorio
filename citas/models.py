@@ -112,9 +112,11 @@ class Cita(models.Model):
     creada_en = models.DateTimeField(auto_now_add=True)
 
     # Diagnósticos
-    diagnostico = models.TextField(blank=True, null=True)  # Diagnóstico anterior
-    nuevo_diagnostico = models.TextField(blank=True, null=True)  # Nuevo diagnóstico
-
+    diagnostico = models.TextField(null=True, blank=True)
+    diagnostico_anterior = models.TextField(null=True, blank=True)
+    nuevo_diagnostico = models.TextField(null=True, blank=True)
+    medicamentos = models.TextField(null=True, blank=True)
+    instrucciones = models.TextField(null=True, blank=True)
     def __str__(self):
         return f"Cita de {self.paciente} con {self.doctor} el {self.fecha} a las {self.hora}"
 
@@ -141,7 +143,23 @@ class SignosVitales(models.Model):
     def __str__(self):
         return f"Signos vitales de {self.cita.paciente} - {self.cita.fecha}"
 
+from django.contrib.auth.models import User
+from django.conf import settings
+class DiagnosticoHistorico(models.Model):
+    cita = models.ForeignKey('Cita', on_delete=models.CASCADE, related_name='historial_diagnosticos')
+    doctor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True
+    )
+    texto = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"{self.fecha.strftime('%d/%m/%Y %H:%M')} - {self.doctor.username if self.doctor else 'Desconocido'}"
 
 class SignosVitalesSerializer(serializers.ModelSerializer):
     class Meta:

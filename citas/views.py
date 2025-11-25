@@ -15,7 +15,7 @@ import os
 from django.conf import settings
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from datetime import timedelta
+from datetime import datetime, date, timedelta
 # ---------------------------
 # --- Funciones de rol ---
 # ---------------------------
@@ -1045,7 +1045,8 @@ def buscar_pacientes_doctor(request):
             Q(nombre__icontains=query) |
             Q(apellido_paterno__icontains=query) |
             Q(apellido_materno__icontains=query) |
-            Q(numero__icontains=query)
+            Q(numero__icontains=query) |
+            Q(telefono__icontains=query)        # ← ✔️ Busca por teléfono
         ).order_by('nombre')
     else:
         pacientes = Paciente.objects.all().order_by('nombre')
@@ -1063,6 +1064,7 @@ def buscar_pacientes_doctor(request):
         'pacientes_con_cita': pacientes_con_cita,
         'query': query,
     })
+
 
     #--------------------
 # --- Reportes en PDF ---
@@ -1083,67 +1085,93 @@ def reporte_mes(request):
 # ---------------------------
 # --- Reportes en PDF ---
 # ---------------------------
-def is_administradora(user):
-    return user.groups.filter(name='Administradora').exists()
-
 
 import io
-from django.http import FileResponse
-# from datetime import timedelta # La importación de timedelta DEBE estar al inicio
+from django.http import FileResponse, HttpResponse
+from datetime import datetime, date, timedelta
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import Cita
 
-# 📄 Función general para crear el PDF (generalmente solo necesita @login_required)
+# ✅ FUNCIÓN CORREGIDA - usa el campo role en lugar de grupos
+def is_administradora(user):
+    return user.is_authenticated and user.role.lower() == 'administradora'
+
+# 📄 Función general para crear el PDF
 def generar_pdf_reporte(titulo, citas):
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
     styles = getSampleStyleSheet()
 
-    titulo_estilo = ParagraphStyle(
-        'Titulo',
-        fontName="Helvetica-Bold",
+    # Estilos
+    title_style = ParagraphStyle(
+        'Title',
+        parent=styles['Heading1'],
         fontSize=16,
-        alignment=1,  # Centrado
-        spaceAfter=20,
-        textColor=colors.HexColor("#1a365d")
+        spaceAfter=30,
+        textColor=colors.HexColor("#1a365d"),
+        alignment=1
     )
-
-    story = [Paragraph(titulo, titulo_estilo), Spacer(1, 20)]
-
-    data = [["Paciente", "Doctor", "Fecha", "Estado"]]
-
-    for c in citas:
-        try:
-            nombre_paciente = ""
-            if hasattr(c.paciente, "nombre") and hasattr(c.paciente, "apellido_paterno"):
-                nombre_paciente = f"{c.paciente.nombre} {c.paciente.apellido_paterno} {getattr(c.paciente, 'apellido_materno', '')}".strip()
-            else:
-                nombre_paciente = "Paciente desconocido"
-
-            nombre_doctor = c.doctor.user.get_full_name() if c.doctor and hasattr(c.doctor, 'user') else "Doctor no asignado"
-
-            data.append([nombre_paciente, nombre_doctor, c.fecha.strftime('%d/%m/%Y'), c.estado])
-        except Exception as e:
-            print(f"Error al procesar cita (ID: {getattr(c, 'id', 'N/A')}):", e)
-            data.append(["Error", "Error", "Error", "Error"])
-
-    tabla = Table(data, colWidths=[200, 150, 80, 80])
-    tabla.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#2d5a8c")),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#e6f2ff")),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor("#1a365d"))
-    ]))
-    story.append(tabla)
-
+    
+    story = []
+    
+    # Título
+    story.append(Paragraph(titulo, title_style))
+    story.append(Spacer(1, 20))
+    
+    if citas.exists():
+        # Encabezados de tabla
+        data = [["Paciente", "Doctor", "Fecha", "Hora", "Estado"]]
+        
+        for cita in citas:
+            paciente_nombre = f"{cita.paciente.nombre} {cita.paciente.apellido_paterno} {cita.paciente.apellido_materno or ''}"
+            doctor_nombre = cita.doctor.user.get_full_name() if cita.doctor else "No asignado"
+            
+            data.append([
+                paciente_nombre,
+                doctor_nombre,
+                cita.fecha.strftime('%d/%m/%Y'),
+                cita.hora.strftime('%H:%M') if hasattr(cita.hora, 'strftime') else str(cita.hora),
+                cita.estado
+            ])
+        
+        # Crear tabla
+        table = Table(data, colWidths=[180, 150, 80, 60, 80])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#2d5a8c")),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#f8f9fa")),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor("#dee2e6"))
+        ]))
+        story.append(table)
+    else:
+        # Mensaje cuando no hay citas
+        no_data_style = ParagraphStyle(
+            'NoData',
+            parent=styles['BodyText'],
+            fontSize=12,
+            textColor=colors.gray,
+            alignment=1
+        )
+        story.append(Paragraph("No hay citas para el período seleccionado.", no_data_style))
+    
     doc.build(story)
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename=f"{titulo}.pdf")
+    
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{titulo.replace(" ", "_")}.pdf"'
+    return response
 
 # 📆 Reporte Diario
 @login_required
@@ -1157,12 +1185,11 @@ def reporte_dia(request):
         fecha = date.today()
 
     citas = Cita.objects.filter(fecha=fecha)
-
     return generar_pdf_reporte(f"Reporte Diario - {fecha}", citas)
 
 # 📅 Reporte Semanal
 @login_required
-@user_passes_test(is_administradora)
+@user_passes_test(is_administradora) 
 def reporte_semana(request):
     fecha_str = request.GET.get('fecha')
     
@@ -1175,11 +1202,7 @@ def reporte_semana(request):
     fin_semana = inicio_semana + timedelta(days=6)
 
     citas = Cita.objects.filter(fecha__range=(inicio_semana, fin_semana))
-
-    return generar_pdf_reporte(
-        f"Reporte Semanal - Semana del {inicio_semana.strftime('%d/%m/%Y')} al {fin_semana.strftime('%d/%m/%Y')}", 
-        citas
-    )
+    return generar_pdf_reporte(f"Reporte Semanal - {inicio_semana} a {fin_semana}", citas)
 
 # 🗓️ Reporte Mensual
 @login_required
@@ -1193,19 +1216,13 @@ def reporte_mes(request):
         fecha = date.today()
 
     inicio_mes = fecha.replace(day=1)
-
     if fecha.month == 12:
         fin_mes = fecha.replace(year=fecha.year + 1, month=1, day=1) - timedelta(days=1)
     else:
         fin_mes = fecha.replace(month=fecha.month + 1, day=1) - timedelta(days=1)
 
     citas = Cita.objects.filter(fecha__range=(inicio_mes, fin_mes))
-
-    return generar_pdf_reporte(
-        f"Reporte Mensual - {fecha.strftime('%B %Y')}",
-        citas
-    )
-
+    return generar_pdf_reporte(f"Reporte Mensual - {fecha.strftime('%B %Y')}", citas)
 
 
 

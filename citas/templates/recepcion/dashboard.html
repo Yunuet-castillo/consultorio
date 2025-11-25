@@ -796,71 +796,103 @@
         <div id="reportes" class="tab-content">
             <h2><i class="fa-solid fa-chart-bar"></i> Reportes de Citas</h2>
 
-            <div class="report-container">
-                <!-- Diario -->
-                <div class="report-card">
-                    <div class="report-info">
-                        <i class="fas fa-calendar-day report-icon"></i>
-                        <div>
-                            <p class="report-title">Reporte Diario</p>
-                            <small>Selecciona la fecha</small>
-                        </div>
-                    </div>
-                    <form method="GET" action="{% url 'reporte_dia' %}" class="report-form">
-                        <input type="date" id="fecha-diaria" name="fecha" required>
-                        <div class="report-actions">
-                            <button type="submit" class="report-link" style="background:#2ecc71;">
-                                <i class="fa-solid fa-download"></i> Descargar PDF
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Semanal -->
-                <div class="report-card">
-                    <div class="report-info">
-                        <i class="fas fa-calendar-week report-icon"></i>
-                        <div>
-                            <p class="report-title">Reporte Semanal</p>
-                            <small>Selecciona una fecha de la semana</small>
-                        </div>
-                    </div>
-                    <form method="GET" action="{% url 'reporte_semana' %}" class="report-form">
-                        <input type="date" id="fecha-semanal" name="fecha" required>
-                        <div class="report-actions">
-                            <button type="submit" class="report-link" style="background:#2ecc71;">
-                                <i class="fa-solid fa-download"></i> Descargar PDF
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Mensual -->
-                <div class="report-card">
-                    <div class="report-info">
-                        <i class="fas fa-calendar-alt report-icon"></i>
-                        <div>
-                            <p class="report-title">Reporte Mensual</p>
-                            <small>Selecciona cualquier día del mes</small>
-                        </div>
-                    </div>
-                    <form method="GET" action="{% url 'reporte_mes' %}" class="report-form">
-                        <input type="date" id="fecha-mensual" name="fecha" required>
-                        <div class="report-actions">
-                            <button type="submit" class="report-link" style="background:#2ecc71;">
-                                <i class="fa-solid fa-download"></i> Descargar PDF
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <!-- REEMPLAZA LOS FORMULARIOS DE REPORTES POR ESTO -->
+<div class="report-container">
+    <!-- Diario -->
+    <div class="report-card">
+        <div class="report-info">
+            <i class="fas fa-calendar-day report-icon"></i>
+            <div>
+                <p class="report-title">Reporte Diario</p>
+                <small>Descargar reporte del día</small>
             </div>
         </div>
+        <input type="date" id="fecha-diaria" value="{{ hoy }}" class="report-date">
+        <div class="report-actions">
+            <button onclick="descargarReporte('diario')" class="report-link" style="background:#2ecc71;">
+                <i class="fa-solid fa-download"></i> Descargar PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Semanal -->
+    <div class="report-card">
+        <div class="report-info">
+            <i class="fas fa-calendar-week report-icon"></i>
+            <div>
+                <p class="report-title">Reporte Semanal</p>
+                <small>Descargar reporte semanal</small>
+            </div>
+        </div>
+        <input type="date" id="fecha-semanal" value="{{ hoy }}" class="report-date">
+        <div class="report-actions">
+            <button onclick="descargarReporte('semanal')" class="report-link" style="background:#2ecc71;">
+                <i class="fa-solid fa-download"></i> Descargar PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Mensual -->
+    <div class="report-card">
+        <div class="report-info">
+            <i class="fas fa-calendar-alt report-icon"></i>
+            <div>
+                <p class="report-title">Reporte Mensual</p>
+                <small>Descargar reporte mensual</small>
+            </div>
+        </div>
+        <input type="date" id="fecha-mensual" value="{{ hoy }}" class="report-date">
+        <div class="report-actions">
+            <button onclick="descargarReporte('mensual')" class="report-link" style="background:#2ecc71;">
+                <i class="fa-solid fa-download"></i> Descargar PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+
     </div>
     {% endif %}
 </div>
-
-<!-- SCRIPT PARA MANEJO DE PESTAÑAS -->
 <script>
+function descargarReporte(tipo) {
+    let fechaInput, url;
+    
+    switch(tipo) {
+        case 'diario':
+            fechaInput = document.getElementById('fecha-diaria');
+            url = "{% url 'reporte_dia' %}";
+            break;
+        case 'semanal':
+            fechaInput = document.getElementById('fecha-semanal');
+            url = "{% url 'reporte_semana' %}";
+            break;
+        case 'mensual':
+            fechaInput = document.getElementById('fecha-mensual');
+            url = "{% url 'reporte_mes' %}";
+            break;
+    }
+    
+    const fecha = fechaInput.value;
+    const urlCompleta = `${url}?fecha=${fecha}`;
+    
+    console.log(`📤 Descargando reporte ${tipo}:`, urlCompleta);
+    
+    // Abrir en nueva pestaña
+    window.open(urlCompleta, '_blank');
+}
+
+// Fecha actual por defecto
+document.addEventListener('DOMContentLoaded', function() {
+    const hoy = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('.report-date').forEach(input => {
+        input.value = hoy;
+    });
+});
+</script>
+<!-- REEMPLAZA TODO EL SCRIPT EXISTENTE CON ESTE CÓDIGO -->
+<script>
+// Función para cambiar pestañas
 function openTab(evt, tabName) {
     const tabcontent = document.getElementsByClassName("tab-content");
     const tabbuttons = document.querySelectorAll(".tab-buttons button");
@@ -872,74 +904,110 @@ function openTab(evt, tabName) {
 
     document.getElementById(tabName).classList.add("active");
     evt.currentTarget.classList.add("active");
-
     localStorage.setItem("activeTab", tabName);
 }
 
-// Mantener pestaña activa después de recargar
+// Cuando el DOM esté completamente cargado
 document.addEventListener("DOMContentLoaded", function() {
+    console.log('✅ Dashboard cargado correctamente');
+    
+    // 1. Configurar pestañas activas
     const activeTab = localStorage.getItem("activeTab") || "citas";
-
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-    document.querySelectorAll(".tab-buttons button").forEach(btn => btn.classList.remove("active"));
-
     const targetTab = document.getElementById(activeTab);
     const targetButton = document.querySelector(`.tab-buttons button[onclick*="${activeTab}"]`);
+    
+    if (targetTab) {
+        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+        targetTab.classList.add("active");
+    }
+    if (targetButton) {
+        document.querySelectorAll(".tab-buttons button").forEach(btn => btn.classList.remove("active"));
+        targetButton.classList.add("active");
+    }
 
-    if (targetTab) targetTab.classList.add("active");
-    if (targetButton) targetButton.classList.add("active");
-});
-
-// Fecha de hoy por defecto en todos los inputs de fecha
-document.addEventListener('DOMContentLoaded', function() {
+    // 2. Establecer fecha actual en inputs de fecha
     const hoy = new Date();
     const año = hoy.getFullYear();
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
     const fechaActual = `${año}-${mes}-${dia}`;
 
-    // Establecer fecha actual en todos los inputs de fecha
     document.querySelectorAll('input[type="date"]').forEach(input => {
         input.value = fechaActual;
+        console.log(`📅 Input de fecha configurado: ${input.value}`);
     });
 
-    // Mantener pestaña activa después de enviar formularios de reportes
-    document.querySelectorAll('.report-form').forEach(form => {
-        form.addEventListener('submit', function() {
-            localStorage.setItem('activeTab', 'reportes');
-        });
-    });
-});
-</script>
-
-<script>
-// Debug: Verificar que los formularios se envíen correctamente
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Script de reportes cargado');
+    // 3. DEBUG: Verificar formularios de reportes
+    console.log('🔍 Verificando formularios de reportes...');
     
-    document.querySelectorAll('.report-form').forEach((form, index) => {
+    const reportForms = document.querySelectorAll('.report-form');
+    console.log(`📊 Formularios de reportes encontrados: ${reportForms.length}`);
+    
+    reportForms.forEach((form, index) => {
+        const button = form.querySelector('button[type="submit"]');
+        const dateInput = form.querySelector('input[type="date"]');
+        const action = form.getAttribute('action');
+        
+        console.log(`📋 Formulario ${index + 1}:`, {
+            action: action,
+            tieneBoton: !!button,
+            tieneDateInput: !!dateInput,
+            fecha: dateInput ? dateInput.value : 'N/A'
+        });
+
+        // Agregar evento de submit
         form.addEventListener('submit', function(e) {
             const fecha = this.querySelector('input[type="date"]').value;
             const action = this.getAttribute('action');
-            console.log(`📤 Enviando formulario ${index + 1}:`, {
+            
+            console.log(`📤 ENVIANDO FORMULARIO ${index + 1}:`, {
                 fecha: fecha,
                 action: action,
                 urlCompleta: `${action}?fecha=${fecha}`
             });
+            
+            // Guardar pestaña activa
+            localStorage.setItem('activeTab', 'reportes');
+            
+            // El formulario se enviará normalmente - no prevenir default
+            console.log('✅ Formulario enviándose...');
         });
     });
-    
-    // Verificar que todas las URLs existan
+
+    // 4. Verificar que las URLs de reportes existan
     const urls = [
         "{% url 'reporte_dia' %}",
-        "{% url 'reporte_semana' %}",
+        "{% url 'reporte_semana' %}", 
         "{% url 'reporte_mes' %}"
     ];
     
     urls.forEach(url => {
-        console.log(`🔗 URL disponible: ${url}`);
+        console.log(`🔗 URL de reporte disponible: ${url}`);
     });
+
+    // 5. Agregar estilos de debug temporalmente
+    const debugStyle = document.createElement('style');
+    debugStyle.textContent = `
+        .report-link {
+            cursor: pointer !important;
+            position: relative;
+            z-index: 10;
+        }
+        .report-link:active {
+            transform: scale(0.95) !important;
+        }
+        .report-form {
+            position: relative;
+            z-index: 5;
+        }
+    `;
+    document.head.appendChild(debugStyle);
+    
+    console.log('🎯 Configuración completada. Los botones de reportes deberían funcionar.');
 });
+
+// Función global para las pestañas
+window.openTab = openTab;
 </script>
 </body>
 </html>

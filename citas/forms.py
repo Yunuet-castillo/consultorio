@@ -49,6 +49,11 @@ class RegistroForm(UserCreationForm):
 # -------------------------
 # Formulario de Paciente
 # -------------------------
+from django import forms
+from django.core.exceptions import ValidationError
+from datetime import date
+from .models import Paciente
+
 class PacienteForm(forms.ModelForm):
     class Meta:
         model = Paciente
@@ -66,12 +71,35 @@ class PacienteForm(forms.ModelForm):
             'fecha_nacimiento': forms.DateInput(attrs={'type': 'date'}),
         }
 
+    # Validación: fecha no puede ser futura
     def clean_fecha_nacimiento(self):
         fecha_nacimiento = self.cleaned_data.get('fecha_nacimiento')
         if fecha_nacimiento and fecha_nacimiento > date.today():
             raise forms.ValidationError("La fecha de nacimiento no puede ser una fecha futura.")
         return fecha_nacimiento
 
+    # 🔥 Validación del teléfono (10 dígitos + no repetido)
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+
+        if not telefono:
+            raise ValidationError("Ingresa un número de teléfono.")
+
+        # Validación: exactamente 10 dígitos
+        if not telefono.isdigit() or len(telefono) != 10:
+            raise ValidationError("El número debe tener exactamente 10 dígitos.")
+
+        # Validación: evitar duplicados (pero permitir en edición)
+        qs = Paciente.objects.filter(telefono=telefono)
+
+        # Si se está editando un paciente, excluirlo de la validación
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise ValidationError("Este número de teléfono ya está registrado.")
+
+        return telefono
 
 # -------------------------
 # Formulario de Cita

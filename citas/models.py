@@ -51,31 +51,53 @@ class Doctor(models.Model):
     def __str__(self):
         return f"Dr. {self.user.get_full_name()}"
 
+from django.db import models
+from django.core.validators import RegexValidator
+from datetime import date
+
 class Paciente(models.Model):
     nombre = models.CharField(max_length=100)
     apellido_paterno = models.CharField(max_length=100)
     apellido_materno = models.CharField(max_length=100, blank=True, null=True)
-    edad = models.IntegerField(blank=True, null=True)  # valor por defecto temporal
+    edad = models.IntegerField(blank=True, null=True)
     fecha_nacimiento = models.DateField()
-    lugar_origen = models.CharField(max_length=150, blank=True, null=True)  # valor por defecto temporal
-    telefono = models.CharField(max_length=20, blank=True, null=True)
+    lugar_origen = models.CharField(max_length=150, blank=True, null=True)
+
+    telefono = models.CharField(
+        max_length=10,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\d{10}$',
+                message='El número de teléfono debe tener exactamente 10 dígitos.',
+            )
+        ]
+    )
+
     primera_cita = models.BooleanField(default=False)
+
+    # número de expediente interno: P0001, P0002...
     numero = models.CharField(max_length=10, unique=True, blank=True)
 
     def save(self, *args, **kwargs):
+        # Calcular edad automáticamente
         if self.fecha_nacimiento:
             today = date.today()
             self.edad = today.year - self.fecha_nacimiento.year - (
                 (today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day)
             )
+
+        # Generar número único P0001, P0002...
         if not self.numero:
             last = Paciente.objects.all().order_by('id').last()
             next_id = (last.id + 1) if last else 1
             self.numero = f"P{next_id:04d}"
+
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nombre} {self.apellido_paterno} {self.apellido_materno or ''}"
+
 
 
 

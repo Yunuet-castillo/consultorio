@@ -238,13 +238,7 @@ def agregar_estudio(request, paciente_id):
     })
 
 
-
-
-
-
 # 🔧 Ruta típica de instalación (ajústala si es diferente)
-
-
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -504,18 +498,19 @@ def dashboard_enfermera(request):
 def agendar_paciente(request):
     if request.method == 'POST':
         paciente_form = PacienteForm(request.POST)
+
         if paciente_form.is_valid():
             paciente = paciente_form.save()
-            # Guarda el ID del paciente en la sesión
             request.session['paciente_id'] = paciente.id
             return redirect('agendar_cita')
         else:
-            messages.error(request, "Error al registrar al paciente. Por favor, revisa los datos.")
+            messages.error(request, "Error al registrar al paciente. Revisa los campos marcados.")
     else:
         paciente_form = PacienteForm()
-    
+
     contexto = {'paciente_form': paciente_form}
     return render(request, 'recepcion/agendar_paciente.html', contexto)
+
 
 # ---------------------------
 # REGISTRO DE LA CITA (AUTOMÁTICO CON PACIENTE)
@@ -1395,3 +1390,15 @@ class CitaDetailAPIView(APIView):
         from django.db.models import F
 
 
+#from django.views.decorators.csrf import csrf_exempt
+#from django.http import JsonResponse
+
+#@csrf_exempt
+#def citas_por_doctor(request, doctor_id):
+ #   if request.method == 'GET':
+  #      citas = Cita.objects.filter(doctor_id=doctor_id).values(
+   #         'id', 
+    #        'paciente__nombre',  # Ajusta según relaciones en tu modelo
+     #       'fecha'
+      #  )
+       # return JsonResponse(list(citas), safe=False)

@@ -837,197 +837,319 @@ def generar_receta_pdf(request, cita_id):
     elements = []
     styles = getSampleStyleSheet()
 
-    # Paleta de colores
-    azul_oscuro = colors.HexColor("#1a365d")
-    azul_medio = colors.HexColor("#2d5a8c")
-    azul_claro = colors.HexColor("#e6f2ff")
-    gris_medio = colors.HexColor("#4a5568")
+    # Paleta de colores mejorada - Elegante y profesional
+    azul_oscuro = colors.HexColor("#0d47a1")  # Azul más profundo y elegante
+    azul_medio = colors.HexColor("#1976d2")   # Azul medio vibrante
+    azul_claro = colors.HexColor("#e3f2fd")   # Azul claro suave
+    azul_acento = colors.HexColor("#42a5f5")  # Azul acento
+    gris_medio = colors.HexColor("#424242")   # Gris más suave
+    gris_claro = colors.HexColor("#757575")   # Gris claro
+    blanco = colors.HexColor("#ffffff")       # Blanco puro
+    gris_fondo = colors.HexColor("#f5f5f5")   # Gris de fondo
 
     # DATOS DEFINIDOS DIRECTAMENTE
     CEDULA_PROFESIONAL = "8025534"
     ESPECIALIDAD = "GINECOLOGÍA, OBSTETRICIA, MEDICINA MATERNO-FETAL"
     HOSPITAL_NOMBRE = "Hospital San Pedro"
 
-    # Estilos personalizados
-    titulo_estilo = ParagraphStyle('Titulo', fontName="Helvetica-Bold", fontSize=18, alignment=TA_CENTER, textColor=azul_oscuro, spaceAfter=10, spaceBefore=0)
-    subtitulo_estilo = ParagraphStyle('Subtitulo', fontName="Helvetica-Bold", fontSize=11, textColor=azul_medio, spaceAfter=6, spaceBefore=8)
-    label_estilo = ParagraphStyle('Label', fontName="Helvetica-Bold", fontSize=9, textColor=azul_oscuro, spaceAfter=1)
-    normal_estilo = ParagraphStyle('Normal', fontName="Helvetica", fontSize=9, textColor=gris_medio, leading=11)
-    firma_estilo = ParagraphStyle('Firma', fontName="Helvetica-Bold", fontSize=10, textColor=azul_oscuro, alignment=TA_CENTER, spaceBefore=25)  # Aumentado de 15 a 25
+    # Estilos personalizados mejorados - más compactos
+    titulo_estilo = ParagraphStyle('Titulo', 
+        fontName="Helvetica-Bold", 
+        fontSize=20, 
+        alignment=TA_CENTER, 
+        textColor=azul_oscuro, 
+        spaceAfter=4, 
+        spaceBefore=0,
+        leading=24)
+    
+    subtitulo_estilo = ParagraphStyle('Subtitulo', 
+        fontName="Helvetica-Bold", 
+        fontSize=11, 
+        textColor=blanco, 
+        spaceAfter=6, 
+        spaceBefore=0,
+        leading=13)
+    
+    label_estilo = ParagraphStyle('Label', 
+        fontName="Helvetica-Bold", 
+        fontSize=9, 
+        textColor=azul_oscuro, 
+        spaceAfter=1,
+        leading=11)
+    
+    normal_estilo = ParagraphStyle('Normal', 
+        fontName="Helvetica", 
+        fontSize=9, 
+        textColor=gris_medio, 
+        leading=12,
+        spaceAfter=2)
+    
+    firma_estilo = ParagraphStyle('Firma', 
+        fontName="Helvetica-Bold", 
+        fontSize=10, 
+        textColor=azul_oscuro, 
+        alignment=TA_CENTER, 
+        spaceBefore=20,
+        leading=12)
+    
+    contacto_estilo = ParagraphStyle('Contacto', 
+        fontName="Helvetica", 
+        fontSize=7, 
+        textColor=gris_claro, 
+        alignment=TA_RIGHT, 
+        leading=9)
+    
+    medicamentos_estilo = ParagraphStyle('Medicamentos', 
+        fontName="Helvetica", 
+        fontSize=9, 
+        textColor=gris_medio, 
+        leading=12,
+        leftIndent=0,
+        spaceAfter=2)
 
-         # ------------------ ENCABEZADO SUPER COMPACTO ------------------
+    # ------------------ ENCABEZADO COMPACTO ------------------
     from django.conf import settings
     logo_path = os.path.join(settings.BASE_DIR, "static", "citas", "img", "logo.png")
     
-    # Encabezado en una sola línea
-    if os.path.exists(logo_path):
-        logo = Image(logo_path, width=80, height=80)  # Logo más pequeño
-        encabezado_cells = [logo, Paragraph(f"<b>{HOSPITAL_NOMBRE}</b> - Receta Médica", titulo_estilo)]
-    else:
-        encabezado_cells = [Paragraph(f"<b>{HOSPITAL_NOMBRE}</b> - Receta Médica", titulo_estilo), ""]
-
-    header_table = Table([encabezado_cells], colWidths=[50, 660])
-    header_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
-    ]))
-    elements.append(header_table)
-
-    # Información de contacto compacta - MEJOR VISUALIZACIÓN
+    # Información de contacto compacta
     contacto_text = f"""
     <b>Av. 5 de Mayo Sur Nº 29</b><br/>
     Zacapoaxtla, Pue.<br/>
-    Tel: 233 314 3084<br/>
-    Cita: {cita.fecha.strftime('%d/%m/%Y')}
+    <b>Tel:</b> 233 314 3084<br/>
+    <b>Fecha:</b> {cita.fecha.strftime('%d/%m/%Y')}
     """
-    contacto_style = ParagraphStyle('Contacto', fontName="Helvetica", fontSize=8, textColor=gris_medio, alignment=TA_RIGHT, leading=10)
     
-    # Tabla para información de contacto alineada a la derecha
-    contacto_table = Table([[Paragraph(contacto_text, contacto_style)]], colWidths=[710])
-    contacto_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+    # Encabezado: Logo | Título (centrado) | Datos del hospital (todo en una línea)
+    if os.path.exists(logo_path):
+        logo = Image(logo_path, width=70, height=70)
+        encabezado_cells = [
+            logo, 
+            Paragraph(f"<b>{HOSPITAL_NOMBRE}</b><br/><font size='12' color='#1976d2'>RECETA MÉDICA</font>", titulo_estilo),
+            Paragraph(contacto_text, contacto_estilo)
+        ]
+        col_widths = [80, 450, 180]
+    else:
+        encabezado_cells = [
+            Paragraph(f"<b>{HOSPITAL_NOMBRE}</b><br/><font size='12' color='#1976d2'>RECETA MÉDICA</font>", titulo_estilo),
+            Paragraph(contacto_text, contacto_estilo)
+        ]
+        col_widths = [530, 180]
+
+    header_table = Table([encabezado_cells], colWidths=col_widths)
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+        ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+        ('ALIGN', (2, 0), (2, 0), 'RIGHT'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (0, 0), 0),
+        ('RIGHTPADDING', (0, 0), (0, 0), 0),
+        ('LEFTPADDING', (1, 0), (1, 0), 0),
+        ('RIGHTPADDING', (1, 0), (1, 0), 0),
+        ('LEFTPADDING', (2, 0), (2, 0), 8),
     ]))
-    elements.append(contacto_table)
+    elements.append(header_table)
 
     # Línea decorativa
-    elements.append(Spacer(1, 5))
-    elements.append(Table([[""]], colWidths=[710], rowHeights=[1], style=TableStyle([('BACKGROUND', (0,0), (-1,-1), azul_medio)])))
+    elements.append(Spacer(1, 6))
+    elements.append(Table([[""]], colWidths=[710], rowHeights=[2], style=TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), azul_medio),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+    ])))
     elements.append(Spacer(1, 8))
 
-    # ------------------ INFORMACIÓN DEL PACIENTE Y MÉDICO ------------------
+    # ------------------ INFORMACIÓN DEL PACIENTE (ARRIBA) ------------------
     paciente_nombre = f"{paciente.nombre} {paciente.apellido_paterno} {paciente.apellido_materno or ''}"
     
     # Convertir fecha de nacimiento a string
     fecha_nac = getattr(paciente, 'fecha_nacimiento', None)
     fecha_nac_str = fecha_nac.strftime('%d/%m/%Y') if fecha_nac else '---'
 
+    # Información del paciente y médico - diseño compacto
     info_data = [
         [
-            Paragraph("<b>INFORMACIÓN DEL PACIENTE</b>", subtitulo_estilo),
-            Paragraph("<b>DATOS MÉDICOS</b>", subtitulo_estilo)
+            Paragraph("INFORMACIÓN DEL PACIENTE", subtitulo_estilo),
+            Paragraph("DATOS MÉDICOS", subtitulo_estilo)
         ],
         [
             Table([
                 [Paragraph("Nombre:", label_estilo), Paragraph(paciente_nombre, normal_estilo)],
                 [Paragraph("Edad:", label_estilo), Paragraph(f"{getattr(paciente, 'edad', '---')} años", normal_estilo)],
                 [Paragraph("Fecha nac.:", label_estilo), Paragraph(fecha_nac_str, normal_estilo)],
-            ], colWidths=[80, 200]),
+            ], colWidths=[80, 240]),
 
             Table([
                 [Paragraph("Médico:", label_estilo), Paragraph(f"Dr. {doctor.user.get_full_name()}", normal_estilo)],
                 [Paragraph("Especialidad:", label_estilo), Paragraph(ESPECIALIDAD, normal_estilo)],
                 [Paragraph("Cédula:", label_estilo), Paragraph(CEDULA_PROFESIONAL, normal_estilo)],
-            ], colWidths=[80, 200])
+            ], colWidths=[80, 240])
         ]
     ]
 
-    info_table = Table(info_data, colWidths=[365, 365])
+    info_table = Table(info_data, colWidths=[355, 355])
     info_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), azul_claro),
-        ('BOX', (0, 0), (-1, -1), 1, azul_medio),
+        ('BACKGROUND', (0, 0), (-1, 0), azul_medio),
+        ('BACKGROUND', (0, 1), (0, 1), blanco),
+        ('BACKGROUND', (1, 1), (1, 1), blanco),
+        ('BOX', (0, 0), (-1, -1), 1.5, azul_oscuro),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, azul_claro),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('PADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
     ]))
     elements.append(info_table)
-    elements.append(Spacer(1, 10))
+    elements.append(Spacer(1, 8))
 
     # ------------------ SIGNOS VITALES ------------------
-    # Obtener signos vitales de la base de datos
     signos_vitales_data = [
         [
-            Paragraph("<b>SIGNOS VITALES</b>", subtitulo_estilo),
-            Paragraph("<b>SIGNOS VITALES</b>", subtitulo_estilo)
+            Paragraph("SIGNOS VITALES", subtitulo_estilo),
+            Paragraph("SIGNOS VITALES", subtitulo_estilo)
         ],
         [
             Table([
                 [Paragraph("Temperatura:", label_estilo), Paragraph(f"{getattr(cita, 'temperatura', '---')} °C", normal_estilo)],
                 [Paragraph("Presión:", label_estilo), Paragraph(f"{getattr(cita, 'presion_arterial', '---')} mmHg", normal_estilo)],
                 [Paragraph("F. Cardíaca:", label_estilo), Paragraph(f"{getattr(cita, 'frecuencia_cardiaca', '---')} lpm", normal_estilo)],
-            ], colWidths=[80, 120]),
+            ], colWidths=[85, 140]),
             
             Table([
                 [Paragraph("F. Respiratoria:", label_estilo), Paragraph(f"{getattr(cita, 'frecuencia_respiratoria', '---')} rpm", normal_estilo)],
                 [Paragraph("Sat. O2:", label_estilo), Paragraph(f"{getattr(cita, 'saturacion_oxigeno', '---')}%", normal_estilo)],
                 [Paragraph("Peso:", label_estilo), Paragraph(f"{getattr(cita, 'peso', '---')} kg", normal_estilo)],
-            ], colWidths=[80, 120])
+            ], colWidths=[85, 140])
         ]
     ]
 
-    signos_vitales_table = Table(signos_vitales_data, colWidths=[365, 365])
+    signos_vitales_table = Table(signos_vitales_data, colWidths=[355, 355])
     signos_vitales_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), azul_claro),
-        ('BOX', (0, 0), (-1, -1), 1, azul_medio),
+        ('BACKGROUND', (0, 0), (-1, 0), azul_medio),
+        ('BACKGROUND', (0, 1), (0, 1), blanco),
+        ('BACKGROUND', (1, 1), (1, 1), blanco),
+        ('BOX', (0, 0), (-1, -1), 1.5, azul_oscuro),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, azul_claro),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('PADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
     ]))
     elements.append(signos_vitales_table)
-    elements.append(Spacer(1, 10))
+    elements.append(Spacer(1, 8))
 
     # ------------------ DIAGNÓSTICO ------------------
     if cita.diagnostico:
         diag_table = Table([
             [Paragraph("DIAGNÓSTICO", subtitulo_estilo)],
             [Paragraph(cita.diagnostico.replace("\n", "<br/>"), normal_estilo)]
-        ], colWidths=[730])
+        ], colWidths=[710])
         diag_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), azul_claro),
-            ('BOX', (0, 0), (-1, -1), 1, azul_medio),
+            ('BACKGROUND', (0, 0), (-1, 0), azul_medio),
+            ('BACKGROUND', (0, 1), (-1, 1), blanco),
+            ('BOX', (0, 0), (-1, -1), 1.5, azul_oscuro),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('PADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 10),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 10),
         ]))
         elements.append(diag_table)
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 8))
 
     # ------------------ MEDICAMENTOS E INDICACIONES ------------------
-        # ------------------ MEDICAMENTOS E INDICACIONES ------------------
     contenido_data = [
-        [Paragraph("<b>MEDICAMENTOS PRESCRITOS</b>", subtitulo_estilo), Paragraph("<b>INDICACIONES MÉDICAS</b>", subtitulo_estilo)]
+        [
+            Paragraph("MEDICAMENTOS PRESCRITOS", subtitulo_estilo), 
+            Paragraph("INDICACIONES MÉDICAS", subtitulo_estilo)
+        ]
     ]
     
-    medicamentos_texto = receta.medicamentos.replace("\n", "<br/>") if receta.medicamentos else "No se prescribieron medicamentos"
-    indicaciones_texto = receta.indicaciones.replace("\n", "<br/>") if receta.indicaciones else "No hay indicaciones específicas"
+    medicamentos_texto = receta.medicamentos.replace("\n", "<br/>") if receta.medicamentos else "<i>No se prescribieron medicamentos</i>"
+    indicaciones_texto = receta.indicaciones.replace("\n", "<br/>") if receta.indicaciones else "<i>No hay indicaciones específicas</i>"
     
-    contenido_data.append([Paragraph(medicamentos_texto, normal_estilo), Paragraph(indicaciones_texto, normal_estilo)])
+    contenido_data.append([
+        Paragraph(medicamentos_texto, medicamentos_estilo), 
+        Paragraph(indicaciones_texto, medicamentos_estilo)
+    ])
 
-    contenido_table = Table(contenido_data, colWidths=[365, 365])
+    contenido_table = Table(contenido_data, colWidths=[355, 355])
     contenido_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), azul_claro),
-        ('BOX', (0, 0), (-1, -1), 1, azul_medio),
+        ('BACKGROUND', (0, 0), (-1, 0), azul_medio),
+        ('BACKGROUND', (0, 1), (0, 1), blanco),
+        ('BACKGROUND', (1, 1), (1, 1), blanco),
+        ('BOX', (0, 0), (-1, -1), 1.5, azul_oscuro),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, azul_claro),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('PADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
     ]))
     elements.append(contenido_table)
-    elements.append(Spacer(1, 35))
+    elements.append(Spacer(1, 25))
 
-    # ------------------ FIRMA ------------------
+    # ------------------ FIRMA ELEGANTE ------------------
     firma_data = [
-        [Paragraph("______________________________", firma_estilo)],
-        [Paragraph(f"Dr. {doctor.user.get_full_name()}", firma_estilo)],
-        [Paragraph(f"Cédula Profesional: {CEDULA_PROFESIONAL}", normal_estilo)],
+        [Paragraph("_" * 40, firma_estilo)],
+        [Paragraph(f"<b>Dr. {doctor.user.get_full_name()}</b>", firma_estilo)],
+        [Paragraph(f"Cédula Profesional: {CEDULA_PROFESIONAL}", ParagraphStyle('FirmaDetalle', 
+            fontName="Helvetica", 
+            fontSize=8, 
+            textColor=gris_claro, 
+            alignment=TA_CENTER, 
+            spaceBefore=1))],
+        [Paragraph(ESPECIALIDAD, ParagraphStyle('FirmaEspecialidad', 
+            fontName="Helvetica-Oblique", 
+            fontSize=7, 
+            textColor=gris_claro, 
+            alignment=TA_CENTER, 
+            spaceBefore=1))],
     ]
-    firma_table = Table(firma_data, colWidths=[200])
-    firma_table.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
-    contenedor_firma = Table([[firma_table]], colWidths=[730])
-    contenedor_firma.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'RIGHT')]))
+    firma_table = Table(firma_data, colWidths=[260])
+    firma_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'), 
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+    ]))
+    contenedor_firma = Table([[firma_table]], colWidths=[710])
+    contenedor_firma.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
     elements.append(contenedor_firma)
 
-    # ------------------ FOOTER ------------------
+    # ------------------ FOOTER ELEGANTE ------------------
     def footer(canvas, doc):
         canvas.saveState()
+        # Línea superior decorativa
+        canvas.setStrokeColor(azul_medio)
+        canvas.setLineWidth(1.5)
+        canvas.line(25, 30, 767, 30)
+        # Línea inferior delgada
+        canvas.setStrokeColor(azul_acento)
+        canvas.setLineWidth(0.5)
+        canvas.line(25, 28, 767, 28)
+        
+        # Texto del footer con mejor formato
+        canvas.setFont("Helvetica-Bold", 7)
+        canvas.setFillColor(azul_oscuro)
+        canvas.drawString(25, 16, f"{HOSPITAL_NOMBRE} - Receta Médica Oficial")
+        
         canvas.setFont("Helvetica", 7)
-        canvas.setFillColor(gris_medio)
-        canvas.setStrokeColor(azul_claro)
-        # Línea en posición correcta
-        canvas.line(25, 25, 767, 25)
-        # Texto en posiciones correctas
-        canvas.drawString(25, 15, f"{HOSPITAL_NOMBRE} - Receta Médica Oficial")
-        canvas.drawCentredString(396, 15, "Documento confidencial - Uso médico exclusivo")
-        canvas.drawRightString(767, 15, f"Página {canvas.getPageNumber()}")
+        canvas.setFillColor(gris_claro)
+        canvas.drawCentredString(396, 16, "Documento confidencial - Uso médico exclusivo")
+        
+        canvas.setFont("Helvetica-Bold", 7)
+        canvas.setFillColor(azul_medio)
+        canvas.drawRightString(767, 16, f"Página {canvas.getPageNumber()}")
+        
         canvas.restoreState()
 
     # Construir el PDF

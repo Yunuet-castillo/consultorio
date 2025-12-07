@@ -150,7 +150,7 @@
             from {
                 opacity: 0;
                 transform: scale(0.95) translateY(20px);
-            }
+        }
             to {
                 opacity: 1;
                 transform: scale(1) translateY(0);
@@ -368,217 +368,124 @@
     </style>
 </head>
 <body>
-    <body>
     <div id="header">
         <div class="logo-container">
-            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" 
-                onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
+            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
             <div class="logo-placeholder">HSP</div>
             <div class="hospital-name">Hospital<br>San Pedro</div>
         </div>
     </div>
-
     <div class="container">
         <div class="icon">
             <i class="fa-solid fa-calendar-plus"></i>
         </div>
-
         <h1>Registrar Nuevo Paciente</h1>
-
         <form method="post">
             {% csrf_token %}
-
             {% if paciente_form.non_field_errors %}
-                <div class="errorlist nonfield">
+                <ul class="errorlist">
                     {% for error in paciente_form.non_field_errors %}
-                        <p>{{ error }}</p>
+                        <li>{{ error }}</li>
                     {% endfor %}
-                </div>
+                </ul>
             {% endif %}
-
-            <!-- NOMBRE -->
-            <div class="form-group">
-                {{ paciente_form.nombre.label_tag }}
-                {{ paciente_form.nombre }}
-                <div class="field-error">{{ paciente_form.nombre.errors }}</div>
-            </div>
-
-            <!-- APELLIDO PATERNO -->
-            <div class="form-group">
-                {{ paciente_form.apellido_paterno.label_tag }}
-                {{ paciente_form.apellido_paterno }}
-                <div class="field-error">{{ paciente_form.apellido_paterno.errors }}</div>
-            </div>
-
-            <!-- APELLIDO MATERNO -->
-            <div class="form-group">
-                {{ paciente_form.apellido_materno.label_tag }}
-                {{ paciente_form.apellido_materno }}
-                <div class="field-error">{{ paciente_form.apellido_materno.errors }}</div>
-            </div>
-
-            <!-- FECHA NACIMIENTO -->
-            <div class="form-group">
-                {{ paciente_form.fecha_nacimiento.label_tag }}
-                {{ paciente_form.fecha_nacimiento }}
-                <div class="field-error">{{ paciente_form.fecha_nacimiento.errors }}</div>
-            </div>
-
-            <!-- EDAD -->
-            <div class="form-group">
-                {{ paciente_form.edad.label_tag }}
-                {{ paciente_form.edad }}
-                <div class="field-error">{{ paciente_form.edad.errors }}</div>
-            </div>
-
-            <!-- LUGAR ORIGEN -->
-            <div class="form-group autocomplete-container">
-                {{ paciente_form.lugar_origen.label_tag }}
-                {{ paciente_form.lugar_origen }}
-                <div class="field-error">{{ paciente_form.lugar_origen.errors }}</div>
-            </div>
-
-            <!-- TELEFONO -->
-            <div class="form-group">
-                {{ paciente_form.telefono.label_tag }}
-                {{ paciente_form.telefono }}
-                <div class="field-error">{{ paciente_form.telefono.errors }}</div>
-            </div>
-
-            <!-- PRIMERA CITA -->
-            <div class="form-group">
-                {{ paciente_form.primera_cita.label_tag }}
-                {{ paciente_form.primera_cita }}
-                <div class="field-error">{{ paciente_form.primera_cita.errors }}</div>
-            </div>
-
-            <button type="submit">
-                <span>Siguiente (Agendar Cita)</span>
-            </button>
+            {{ paciente_form.as_p }}
+            <button type="submit"><span>Siguiente (Agendar Cita)</span></button>
         </form>
-
         <a href="{% url 'dashboard_administradora' %}" class="back-link">
             <i class="fa-solid fa-arrow-left"></i> Volver al Inicio
         </a>
     </div>
 
-    <!-- Script calcular edad automáticamente -->
+    <!-- Script para calcular edad automáticamente -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const fechaInput = document.getElementById("id_fecha_nacimiento");
-            const edadInput = document.getElementById("id_edad");
-
-            fechaInput.addEventListener("change", function() {
-                const fechaNacimiento = new Date(this.value);
-                const hoy = new Date();
-                let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-                const m = hoy.getMonth() - fechaNacimiento.getMonth();
-                if (m < 0 || (m === 0 && hoy.getDate() < fechaNacimiento.getDate())) edad--;
-                edadInput.value = edad;
-            });
+    document.addEventListener("DOMContentLoaded", function() {
+        const fechaInput = document.getElementById("id_fecha_nacimiento");
+        const edadInput = document.getElementById("id_edad");
+        fechaInput.addEventListener("change", function() {
+            const fechaNacimiento = new Date(this.value);
+            const hoy = new Date();
+            let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+            const m = hoy.getMonth() - fechaNacimiento.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < fechaNacimiento.getDate())) edad--;
+            edadInput.value = edad;
         });
+    });
     </script>
 
-    <!-- Script autocompletar municipios Puebla -->
+    <!-- Script de autocompletado para municipios de Puebla -->
     <script>
-        document.addEventListener("DOMContentLoaded", async function() {
-            const input = document.getElementById("id_lugar_origen");
-            if (!input) return;
+    document.addEventListener("DOMContentLoaded", async function() {
+        const input = document.getElementById("id_lugar_origen");
+        if (!input) return;
 
-            const response = await fetch("{% static 'js/puebla.json' %}");
-            const data = await response.json();
+        const response = await fetch("{% static 'js/puebla.json' %}");
+        const data = await response.json();
 
-            const lugares = [];
-            for (const municipio in data) {
-                data[municipio].forEach(pueblo => lugares.push(`${pueblo}`));
-            }
+        const lugares = [];
+        for (const municipio in data) {
+            data[municipio].forEach(pueblo => lugares.push(`${pueblo}`));
+        }
 
-            let currentFocus;
+        let currentFocus;
 
-            input.addEventListener("input", function() {
-                const val = this.value.trim();
-                closeAllLists();
-                if (!val) return false;
-                currentFocus = -1;
+        input.addEventListener("input", function() {
+            const val = this.value.trim();
+            closeAllLists();
+            if (!val) return false;
+            currentFocus = -1;
 
-                const list = document.createElement("DIV");
-                list.setAttribute("class", "autocomplete-items show");
-                this.parentNode.appendChild(list);
+            const list = document.createElement("DIV");
+            list.setAttribute("class", "autocomplete-items show");
+            this.parentNode.appendChild(list);
 
-                lugares.forEach(function(item) {
-                    if (item.toLowerCase().includes(val.toLowerCase())) {
-                        const itemDiv = document.createElement("DIV");
-                        const startIndex = item.toLowerCase().indexOf(val.toLowerCase());
-                        const endIndex = startIndex + val.length;
+            lugares.forEach(function(item) {
+                if (item.toLowerCase().includes(val.toLowerCase())) {
+                    const itemDiv = document.createElement("DIV");
+                    const startIndex = item.toLowerCase().indexOf(val.toLowerCase());
+                    const endIndex = startIndex + val.length;
 
-                        itemDiv.innerHTML =
-                            item.substring(0, startIndex) +
-                            "<strong>" + item.substring(startIndex, endIndex) + "</strong>" +
-                            item.substring(endIndex);
+                    itemDiv.innerHTML =
+                        item.substring(0, startIndex) +
+                        "<strong>" + item.substring(startIndex, endIndex) + "</strong>" +
+                        item.substring(endIndex);
 
-                        itemDiv.addEventListener("click", function() {
-                            input.value = item;
-                            closeAllLists();
-                        });
-                        list.appendChild(itemDiv);
-                    }
-                });
-            });
-
-            input.addEventListener("keydown", function(e) {
-                let x = document.querySelector(".autocomplete-items");
-                if (x) x = x.getElementsByTagName("div");
-                if (e.keyCode === 40) { currentFocus++; addActive(x); }
-                else if (e.keyCode === 38) { currentFocus--; addActive(x); }
-                else if (e.keyCode === 13) { e.preventDefault(); if (currentFocus > -1 && x) x[currentFocus].click(); }
-            });
-
-            function addActive(x) {
-                if (!x) return false;
-                removeActive(x);
-                if (currentFocus >= x.length) currentFocus = 0;
-                if (currentFocus < 0) currentFocus = x.length - 1;
-                x[currentFocus].classList.add("autocomplete-active");
-            }
-
-            function removeActive(x) {
-                for (let i = 0; i < x.length; i++) x[i].classList.remove("autocomplete-active");
-            }
-
-            function closeAllLists(elmnt) {
-                const items = document.getElementsByClassName("autocomplete-items");
-                for (let i = 0; i < items.length; i++) {
-                    if (elmnt !== items[i] && elmnt !== input) items[i].parentNode.removeChild(items[i]);
+                    itemDiv.addEventListener("click", function() {
+                        input.value = item;
+                        closeAllLists();
+                    });
+                    list.appendChild(itemDiv);
                 }
-            }
-
-            document.addEventListener("click", function(e) { closeAllLists(e.target); });
+            });
         });
+
+        input.addEventListener("keydown", function(e) {
+            let x = document.querySelector(".autocomplete-items");
+            if (x) x = x.getElementsByTagName("div");
+            if (e.keyCode === 40) { currentFocus++; addActive(x); }
+            else if (e.keyCode === 38) { currentFocus--; addActive(x); }
+            else if (e.keyCode === 13) { e.preventDefault(); if (currentFocus > -1 && x) x[currentFocus].click(); }
+        });
+
+        function addActive(x) {
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = x.length - 1;
+            x[currentFocus].classList.add("autocomplete-active");
+        }
+        function removeActive(x) {
+            for (let i = 0; i < x.length; i++) x[i].classList.remove("autocomplete-active");
+        }
+        function closeAllLists(elmnt) {
+            const items = document.getElementsByClassName("autocomplete-items");
+            for (let i = 0; i < items.length; i++) {
+                if (elmnt !== items[i] && elmnt !== input) items[i].parentNode.removeChild(items[i]);
+            }
+        }
+        document.addEventListener("click", function(e) { closeAllLists(e.target); });
+    });
     </script>
-
-</body>
-
-<style>
-    .field-error {
-        color: #b30000;
-        font-size: 14px;
-        padding-top: 3px;
-        margin-bottom: 5px;
-    }
-
-    .errorlist.nonfield p {
-        color: #b30000;
-        background: #ffe5e5;
-        padding: 8px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-</style>
-
 
 </body>
 </html>

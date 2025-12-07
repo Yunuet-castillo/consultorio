@@ -76,4 +76,6 @@ path('doctor/paciente/<int:paciente_id>/agregar_estudio/', views.agregar_estudio
 path('doctor/cita/<int:cita_id>/imprimir_historial/', views.imprimir_historial, name='imprimir_historial'),
 path('dashboard/doctor/cita/<int:cita_id>/', views.detalle_cita_doctor, name='detalle_cita_doctor'),
  #path('api/citas/<int:doctor_id>/', views.citas_por_doctor),
+ path("dashboard/actualizar-citas/", views.actualizar_citas, name="actualizar_citas"),
+
 ]

@@ -1,0 +1,24 @@
+{% for cita in citas %}
+<tr>
+    <td><strong>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</strong></td>
+    <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+    <td>{{ cita.hora|time:"H:i" }}</td>
+
+    <td>
+        {% if cita.signosvitales %}
+            <span class="status-badge status-lista">Cita lista</span>
+        {% else %}
+            <span class="status-badge status-espera">Esperando signos…</span>
+        {% endif %}
+    </td>
+
+    <td class="action-links">
+        <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn-details">
+            <i class="fa-solid fa-eye"></i><span>Detalles</span>
+        </a>
+        <a href="{% url 'generar_receta_pdf' cita.id %}" class="btn-receta">
+            <i class="fa-solid fa-file-pdf"></i><span>Receta</span>
+        </a>
+    </td>
+</tr>
+{% endfor %}

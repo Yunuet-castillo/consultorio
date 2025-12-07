@@ -402,7 +402,7 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
                         inset 0 1px 0 rgba(255,255,255,0.6);
             overflow: hidden; 
-            margin-bottom: 30px;
+            margin-bottom: 30px; 
             transition: all 0.3s ease;
         }
 
@@ -665,16 +665,19 @@
                             <td><strong>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</strong></td>
                             <td>{{ cita.fecha|date:"d/m/Y" }}</td>
                             <td>{{ cita.hora|time:"H:i" }}</td>
-
-                            <!-- 🔥 ESTADO ACTUALIZADO CON SIGNOS VITALES -->
                             <td>
-                                {% if cita.signosvitales %}
-                                    <span class="status-badge status-lista">Cita lista</span>
+                                {% if cita.estado == "Confirmada" %}
+                                    <span class="status-badge status-confirmada">{{ cita.estado }}</span>
+                                {% elif cita.estado == "Pendiente" %}
+                                    <span class="status-badge status-pendiente">{{ cita.estado }}</span>
+                                {% elif cita.estado == "Cancelada" %}
+                                    <span class="status-badge status-cancelada">{{ cita.estado }}</span>
+                                {% elif cita.estado == "Atendida" %}
+                                    <span class="status-badge status-atendida">{{ cita.estado }}</span>
                                 {% else %}
-                                    <span class="status-badge status-espera">Esperando signos…</span>
+                                    <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
                                 {% endif %}
                             </td>
-
                             <td class="action-links">
                                 <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn-details">
                                     <i class="fa-solid fa-eye"></i><span>Detalles</span>
@@ -707,33 +710,6 @@
             setTimeout(() => filaPendiente.classList.remove('table-warning'), 3000);
         }
     });
-
-    // 🔄 AUTO-RECARGA DEL DASHBOARD CADA 5 SEGUNDOS
-    setInterval(() => {
-        location.reload();
-    }, 5000);
     </script>
-
-    <!-- 🎨 ESTILOS NUEVOS PARA SIGNOS -->
-    <style>
-        .status-espera {
-            background: #FFC107;
-            color: #000;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        .status-lista {
-            background: #28A745;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 13px;
-        }
-    </style>
-
 </body>
 </html>

@@ -611,7 +611,7 @@
 
     <div class="container">
         <a href="{% url 'dashboard_doctor' %}" class="btn-back">
-            <i class="fa-solid fa-arrow-left"></i><span>Regresar al Inicio</span>
+            <i class="fa-solid fa-arrow-left"></i><span>Regresar al Dashboard</span>
         </a>
 
         <div class="page-title">
@@ -633,8 +633,8 @@
             </div>
         </div>
 
-       <!-- 📋 Resultados -->
-{% if pacientes_con_cita %}
+        <!-- 📋 Resultados -->
+       {% if pacientes_con_cita %}
 <div class="table-wrapper">
     <div class="table-caption">
         <i class="fas fa-users"></i> Resultados de la búsqueda ({{ pacientes_con_cita|length }} encontrado{{ pacientes_con_cita|length|pluralize }})
@@ -657,17 +657,18 @@
                 <tr>
                     <td><strong>{{ p.nombre }}</strong></td>
                     <td><strong>{{ p.apellido_paterno }} {{ p.apellido_materno }}</strong></td>
-                    <td>{{ p.telefono }}</td>
-
+                    <td>{{ p.numero }}</td>
                     <td class="action-links">
                         {% if c %}
-                            <!-- ✔ SI TIENE CITA: mostrar botón -->
+                            <!-- SI TIENE CITA: botón para ver detalle -->
                             <a href="{% url 'detalle_cita_doctor' c.id %}" class="btn-agendar">
                                 <i class="fa-solid fa-eye"></i><span>Ver Detalles</span>
                             </a>
                         {% else %}
-                            <!-- ❌ SIN CITA: solo texto -->
-                            <span style="color: #888; font-weight: bold;">Sin cita</span>
+                            <!-- SI NO TIENE: crear cita -->
+                            <a href="{% url 'agendar_paciente_existente' p.id %}">
+                                <i class="fa-solid fa-calendar-plus"></i><span>Crear Cita</span>
+                            </a>
                         {% endif %}
                     </td>
                 </tr>
@@ -678,7 +679,6 @@
     </div>
 </div>
 {% endif %}
-
 
 
     </div>

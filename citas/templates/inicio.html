@@ -807,12 +807,15 @@
             <div class="logo-placeholder" style="display: none; width:80px;height:80px;background:#EAF2F8;align-items:center;justify-content:center;margin-right:15px;font-weight:bold;color:#2E86C1;border-radius:5px;">HSP</div>
             <div class="hospital-name">Hospital<br>San Pedro</div>
         </div>
+
         <div id="branding">
             <h1>Sistema de Citas Médicas</h1>
         </div>
     </div>
 
     <div id="container">
+
+        <!-- Sidebar -->
         <div id="sidebar">
             <h2>Información</h2>
             <ul>
@@ -830,6 +833,7 @@
                         </div>
                     </div>
                 </li>
+
                 <li>
                     <div class="accordion-header">
                         <span><i class="fas fa-map-marker-alt"></i> Ubicación</span>
@@ -852,6 +856,7 @@
                         </div>
                     </div>
                 </li>
+
                 <li>
                     <div class="accordion-header">
                         <span><i class="fas fa-phone"></i> Teléfonos</span>
@@ -873,20 +878,39 @@
             </ul>
         </div>
 
+        <!-- Contenido -->
         <div id="content">
+
             <div class="welcome-message">
                 <i class="fas fa-heartbeat floating" style="color: #4A90E2; margin-right: 10px;"></i>
                 Bienvenido al Sistema de Citas del Hospital San Pedro
             </div>
 
+            <!-- Información del día -->
             <div class="dashboard-container">
+                
+                <!-- Módulo información -->
                 <div class="dashboard-module">
                     <h2><i class="fas fa-calendar-day"></i> Información del día</h2>
-                    <p><i class="fas fa-calendar-check"></i> Hoy: <strong>{{ hoy }}</strong></p>
-                    <p><i class="fas fa-clock"></i> Citas pendientes: <strong class="pulse" style="color: #4A90E2;">{{ pendientes }}</strong></p>
-                    <p><i class="fas fa-bell"></i> Próxima cita: <strong>2025-08-26 10:30:00</strong></p>
+
+                    <p><i class="fas fa-calendar-check"></i> Hoy: 
+                        <strong>{{ hoy }}</strong>
+                    </p>
+
+                    <p><i class="fas fa-clock"></i> Citas pendientes: 
+                        <strong class="pulse" style="color: #4A90E2;">{{ pendientes }}</strong>
+                    </p>
+
+                    <p><i class="fas fa-bell"></i> Próxima cita: 
+                        {% if proxima_cita %}
+                            <strong>{{ proxima_cita.fecha }} {{ proxima_cita.hora }} - {{ proxima_cita.paciente.nombre }}</strong>
+                        {% else %}
+                            <strong style="color: #888;">Sin próximas citas</strong>
+                        {% endif %}
+                    </p>
                 </div>
 
+                <!-- Módulo acceso -->
                 <div class="dashboard-module">
                     <h2><i class="fas fa-user-md"></i> Acceso al sistema</h2>
                     <p>Utilice el sistema para gestionar citas y su información.</p>
@@ -904,28 +928,35 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Tabla con citas del día -->
             <div class="module">
                 <table>
-                    <caption><i class="fas fa-list-alt"></i> Últimas citas programadas</caption>
+                    <caption><i class="fas fa-list-alt"></i> Citas de hoy</caption>
                     <thead>
                         <tr>
                             <th>Paciente</th>
-                            <th>Fecha y Hora</th>
+                            <th>Hora</th>
                             <th>Médico</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        {% for cita in citas %}
+                        {% for cita in citas_hoy %}
                         <tr>
                             <td><i class="fas fa-user" style="margin-right:5px;color:#4A90E2;"></i>{{ cita.paciente.nombre }} {{ cita.paciente.apellidos }}</td>
-                            <td>{{ cita.fecha }} {{ cita.hora }}</td>
-                            <td>{{ cita.medico.nombre }} {{ cita.medico.apellidos }}</td>
+                            <td>{{ cita.hora }}</td>
+                            <td>{{ cita.doctor.nombre }} {{ cita.doctor.apellidos }}</td>
+
                             <td>
-                                {% if cita.estado == 'pendiente' %}
-                                    <span class="status-badge status-pending">Pendiente</span>
-                                {% else %}
+                                {% if cita.estado == 'Pendiente' %}
+                                    <span class="status-badge status-pending">Esperando</span>
+                                {% elif cita.estado == 'Confirmada' %}
+                                    <span class="status-badge status-progress">Confirmada</span>
+                                {% elif cita.estado == 'Cancelada' %}
+                                    <span class="status-badge status-cancelled">Cancelada</span>
+                                {% elif cita.estado == 'Atendida' %}
                                     <span class="status-badge status-completed">Completada</span>
                                 {% endif %}
                             </td>
@@ -939,25 +970,28 @@
                 </table>
             </div>
 
+            <!-- Footer -->
             <div class="footer">
                 <i class="fas fa-hospital" style="color: #4A90E2; margin-right: 5px;"></i>
                 Hospital San Pedro © 2025 - Sistema de Citas Médicas
             </div>
+
         </div>
     </div>
 
-   <script>
+    <!-- Script del acordeón -->
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const accordionHeaders = document.querySelectorAll('.accordion-header');
-            accordionHeaders.forEach(header => {
-                header.addEventListener('click', function() {
-                    accordionHeaders.forEach(h => { if(h!==header){h.classList.remove('active'); h.nextElementSibling.style.maxHeight=null;}});
-                    this.classList.toggle('active');
-                    const content = this.nextElementSibling;
+            const headers = document.querySelectorAll('.accordion-header');
+            headers.forEach(h => {
+                h.addEventListener('click', function() {
+                    headers.forEach(o => { if(o!==h){o.classList.remove('active'); o.nextElementSibling.style.maxHeight=null;}});
+                    h.classList.toggle('active');
+                    const content = h.nextElementSibling;
                     content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
-                });
+                })
             });
-            if(accordionHeaders.length>0){accordionHeaders[0].click();}
+            if(headers.length>0){ headers[0].click(); }
         });
     </script>
 </body>

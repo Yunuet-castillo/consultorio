@@ -42,20 +42,30 @@ def redirect_by_role(user):
 # ---------------------------
 def inicio(request):
     hoy = date.today()
-    
-    # Filtrar solo las citas del día actual
-    citas = Cita.objects.filter(fecha=hoy).order_by('hora')
-    
-    # Contar las pendientes del día
-    pendientes = citas.filter(estado='pendiente').count()
-    
+
+    # Citas de HOY
+    citas_hoy = Cita.objects.filter(
+        fecha=hoy
+    ).order_by('hora')
+
+    # Citas pendientes de HOY
+    pendientes_hoy = citas_hoy.filter(estado='Pendiente').count()
+
+    # Próxima cita (después de HOY)
+    proxima_cita = Cita.objects.filter(
+        fecha__gt=hoy
+    ).order_by('fecha', 'hora').first()
+
     contexto = {
-        'citas': citas,
-        'hoy': hoy, 
-        'pendientes': pendientes
+        'hoy': hoy,
+        'citas_hoy': citas_hoy,
+        'pendientes': pendientes_hoy,
+        'proxima_cita': proxima_cita,
     }
-    
+
     return render(request, 'inicio.html', contexto)
+
+
 
 # ---------------------------
 # --- Dashboard genérico ---
@@ -625,6 +635,8 @@ def registrar_signos_vitales(request, cita_id):
 # ---------------------------
 # --- Gestión de Diagnóstico y Recetas ---
 # ---------------------------
+
+
 # ---------------------------
 # Detalle de la cita para doctor
 # ---------------------------
@@ -638,44 +650,50 @@ def detalle_cita_doctor(request, cita_id):
         id=cita_id
     )
 
-    # Si envían un POST para guardar diagnóstico
+    # Guardar diagnóstico nuevo
     if request.method == "POST":
-        nuevo = request.POST.get("diagnostico")
+        texto = request.POST.get("diagnostico", "").strip()
 
+        if texto:
+            # Guardar en histórico
+            DiagnosticoHistorico.objects.create(
+                cita=cita,
+                doctor=request.user,
+                texto=texto
+            )
 
-        if nuevo and nuevo.strip() != "":
-            # Mover el diagnóstico actual como anterior
-            if cita.diagnostico:
-                cita.diagnostico_anterior = cita.diagnostico
-
-            # Guardar el nuevo diagnóstico
-            cita.diagnostico = nuevo
+            # Actual — guardar en Cita
+            cita.diagnostico = texto
             cita.save()
 
             messages.success(request, "Diagnóstico actualizado correctamente.")
             return redirect("detalle_cita_doctor", cita_id=cita.id)
 
-    # Obtener signos vitales y receta
+    # Signos vitales
     signos = getattr(cita, "signosvitales", None)
     receta = getattr(cita, "receta", None)
 
-    # Traer diagnóstico de la cita anterior del mismo paciente
-    diagnostico_anterior = (
-        Cita.objects.filter(paciente=cita.paciente)
-        .exclude(id=cita.id)
-        .order_by("-fecha", "-hora")
-        .first()
-    )
+    # Nuevo: historial REAL de diagnósticos
+    historial = DiagnosticoHistorico.objects.filter(
+        cita=cita
+    ).order_by("-fecha")
 
     contexto = {
         "cita": cita,
         "paciente": cita.paciente,
         "signos": signos,
         "receta": receta,
-        "diagnostico_anterior": diagnostico_anterior,
+
+        # Nuevo
+        "historial": historial,
     }
 
     return render(request, "doctor/detalle_cita.html", contexto)
+
+
+
+
+
 
 
 
@@ -1061,20 +1079,6 @@ def buscar_pacientes_doctor(request):
     })
 
 
-    #--------------------
-# --- Reportes en PDF ---
-# ---------------------------
-def reporte_dia(request):
-    print("Entró a reporte_dia")  # Se verá en consola
-    return render(request, "reportes/reporte_dia.html")
-
-def reporte_semana(request):
-    print("Entró a reporte_semana")  # Se verá en consola
-    return render(request, "reportes/reporte_semana.html")
-
-def reporte_mes(request):
-    print("Entró a reporte_mes")  # Se verá en consola
-    return render(request, "reportes/reporte_mes.html")
 
 
 # ---------------------------
@@ -1225,6 +1229,17 @@ def detalle_paciente(request, paciente_id):
     paciente = get_object_or_404(Paciente, id=paciente_id)
     return render(request, 'doctor/detalle_paciente.html', {'paciente': paciente})
 
+
+def actualizar_citas(request):
+    doctor = request.user.doctor
+    hoy = date.today()
+
+    citas = Cita.objects.filter(
+        doctor=doctor,
+        fecha=hoy  # ← SOLO citas del día actual
+    ).order_by("hora")
+
+    return render(request, "doctor/partials/tabla_citas.html", {"citas": citas})
 
 
 

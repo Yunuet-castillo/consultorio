@@ -730,31 +730,49 @@
                 </form>
             </div>
 
-            <!-- Historial de diagnósticos -->
-            <div class="col-md-6">
-                <h5>Historial de diagnósticos</h5>
+           <!-- Historial de diagnósticos -->
+<div class="col-md-6">
+    <h5>Historial de diagnósticos</h5>
 
-                {% if historial %}
-                    <ul>
-                        {% for diag in historial %}
-                            <li>
-                                <strong>{{ diag.fecha|date:"d/m/Y H:i" }}:</strong>
-                                {{ diag.texto }}
-                                {% if diag.doctor %}
-                                    - <em>{{ diag.doctor.username }}</em>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p style="color:#666; font-style:italic;">No hay diagnósticos anteriores.</p>
-                {% endif %}
+    {% if historial %}
+        <div class="table-responsive" style="margin-top: 15px;">
+            <table class="table table-hover" style="border-collapse: collapse; width: 100%;">
+                <thead style="background-color: #4A90E2; color: white;">
+                    <tr>
+                        <th style="padding: 12px; border: 1px solid #ddd;">Fecha</th>
+                        <th style="padding: 12px; border: 1px solid #ddd;">Diagnóstico</th>
+                        <th style="padding: 12px; border: 1px solid #ddd;">Médico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for diag in historial %}
+                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 12px; border: 1px solid #ddd; vertical-align: top;">
+                            <strong>{{ diag.fecha|date:"d/m/Y H:i" }}</strong>
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd; vertical-align: top;">
+                            {{ diag.texto }}
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd; vertical-align: top;">
+                            {% if diag.doctor %}
+                                <em>{{ diag.doctor.get_full_name|default:diag.doctor.email }}</em>
+                            {% else %}
+                                <em style="color: #999;">No especificado</em>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="color:#666; font-style:italic;">No hay diagnósticos anteriores.</p>
+    {% endif %}
 
-                <a href="{% url 'agregar_estudio' cita.paciente.id %}" class="btn btn-secondary mt-2">
-                    ➕ Agregar análisis
-                </a>
-            </div>
-
+    <a href="{% url 'agregar_estudio' cita.paciente.id %}" class="btn btn-secondary mt-2">
+        ➕ Agregar análisis
+    </a>
+</div>
         </div>
     </div>
 </div>

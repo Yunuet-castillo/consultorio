@@ -678,322 +678,379 @@
     {% endif %}
 
     {% if request.user.role == 'administradora' %}
-    <div class="tab-container">
-        <div class="tab-buttons">
-            <button class="active" onclick="openTab(event,'citas')"><i class="fa-solid fa-calendar-check"></i> Agregar paciente</button>
-            <button onclick="openTab(event,'buscar')"><i class="fa-solid fa-user-check"></i> Buscar paciente</button>
-            <button onclick="openTab(event,'reportes')"><i class="fa-solid fa-chart-line"></i> Reportes</button>
-        </div>
+<div class="tab-container">
 
-        <!-- TAB CITAS -->
-        <div id="citas" class="tab-content active">
-            <h2><i class="fa-solid fa-square-plus"></i> Agregar Nuevos Pacientes</h2>
-            <a href="{% url 'agendar_paciente' %}" class="btn"><i class="fa-solid fa-calendar-plus"></i> Agregar Nuevo Paciente</a>
-            
-            <div class="table-wrapper">
-                <div class="table-caption"><i class="fas fa-list-alt"></i> Citas Programadas</div>
-                {% if citas %}
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID Paciente</th><th>Nombre</th><th>Doctor</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cita in citas %}
-                            <tr>
-                                <td>{{ cita.paciente.numero }}</td>
-                                <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
-                                <td>{{ cita.doctor.user.get_full_name }}</td>
-                                <td>{{ cita.fecha }}</td>
-                                <td>{{ cita.hora }}</td>
-                                <td>
-                                    {% if cita.estado == 'Confirmada' %}
-                                        <span class="status-badge status-confirmada">{{ cita.estado }}</span>
-                                    {% elif cita.estado == 'Pendiente' %}
-                                        <span class="status-badge status-pendiente">{{ cita.estado }}</span>
-                                    {% elif cita.estado == 'Cancelada' %}
-                                        <span class="status-badge status-cancelada">{{ cita.estado }}</span>
-                                    {% elif cita.estado == 'Atendida' %}
-                                        <span class="status-badge status-atendida">{{ cita.estado }}</span>
-                                    {% else %}
-                                        <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
-                                    {% endif %}
-                                </td>
-                                <td class="action-links">
-                                    {% if cita.estado == 'Pendiente' or cita.estado == 'Confirmada' %}
-                                        <a href="{% url 'modificar_cita' cita.id %}" class="edit"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
-                                        <a href="{% url 'cancelar_cita' cita.id %}" class="cancel"><i class="fa-solid fa-ban"></i> Cancelar</a>
-                                    {% else %}
-                                        <span>{{ cita.estado }}</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div style="padding:16px;">No hay citas programadas.</div>
-                {% endif %}
-            </div>
-        </div>
+    <!-- BOTONES -->
+    <div class="tab-buttons">
+        <button class="active" onclick="openTab(event,'citas')">
+            <i class="fa-solid fa-calendar-check"></i> Citas programadas
+        </button>
 
-        <!-- TAB BUSCAR PACIENTE -->
-<div id="buscar" class="tab-content">
-    <h2><i class="fa-solid fa-magnifying-glass"></i> Buscar paciente</h2>
-    <form method="POST" action="{% url 'dashboard_administradora' %}">
-        {% csrf_token %}
-        <input type="text" name="buscar" placeholder="Nombre, apellido, número o teléfono" required>
-        <button type="submit"><i class="fa-solid fa-search"></i> Buscar</button>
-    </form>
+        <button onclick="openTab(event,'agregar')">
+            <i class="fa-solid fa-user-plus"></i> Agregar paciente
+        </button>
 
-    {% if resultado %}
-        {% if resultado|length > 0 %}
-            <div class="table-wrapper" style="margin-top:20px;">
-                <div class="table-caption"><i class="fa-solid fa-users"></i> Resultados de búsqueda</div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre completo</th>
-                                <th>Teléfono</th>
-                                <th>Agendar Cita</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for paciente in resultado %}
-                            <tr>
-                                <td>{{ paciente.id }}</td>
-                                <td>{{ paciente.nombre }} {{ paciente.apellido_paterno }} {{ paciente.apellido_materno }}</td>
-                                <td>{{ paciente.telefono }}</td>
-                                <td>
-                                    <form method="POST" action="{% url 'agendar_paciente_existente' paciente.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn"><i class="fa-solid fa-calendar-plus"></i> Agendar</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {% else %}
-            <div style="margin-top:20px; padding:16px; background:#F5B7B1; border-radius:8px; color:#922B21;">
-                <i class="fa-solid fa-triangle-exclamation"></i> No se encontró ningún paciente con esos datos.
-                <br>
-                <a href="{% url 'registrar_paciente' %}" class="btn" style="margin-top:10px;">
-                    <i class="fa-solid fa-user-plus"></i> Registrar nuevo paciente
-                </a>
-            </div>
-        {% endif %}
-    {% endif %}
-</div>
+        <button onclick="openTab(event,'buscar')">
+            <i class="fa-solid fa-user-check"></i> Buscar paciente
+        </button>
 
-
-        <!-- TAB REPORTES -->
-        <div id="reportes" class="tab-content">
-            <h2><i class="fa-solid fa-chart-bar"></i> Reportes de Citas</h2>
-
-            <div class="report-container">
-                <!-- Diario -->
-               <div class="report-card">
-    <div class="report-info">
-        <i class="fas fa-calendar-day report-icon"></i>
-        <div>
-            <p class="report-title">Reporte Diario</p>
-            <small>Selecciona la fecha</small>
-        </div>
+        <button onclick="openTab(event,'reportes')">
+            <i class="fa-solid fa-chart-line"></i> Reportes
+        </button>
     </div>
-    <form method="GET" action="{% url 'reporte_dia' %}" class="report-form">
-        <input type="date" id="fecha-diaria" name="fecha" required>
-        <div class="report-actions">
-            <button type="submit" name="descargar" value="1" class="report-link" style="background:#2ecc71;">
-                <i class="fa-solid fa-download"></i> Descargar
-            </button>
-        </div>
-    </form>
-</div>
-                <!-- Semanal -->
-                <div class="report-card">
-                    <div class="report-info">
-                        <i class="fas fa-calendar-week report-icon"></i>
-                        <div>
-                            <p class="report-title">Reporte Semanal</p>
-                            <small>Selecciona una fecha</small>
-                        </div>
-                    </div>
-                    <form method="GET" action="{% url 'reporte_semana' %}" class="report-form">
-                        <input type="date" name="fecha" required>
-                        <div class="report-actions">
-                            <button type="submit" name="descargar" value="1" class="report-link" style="background:#2ecc71;">
-                                <i class="fa-solid fa-download"></i> Descargar
-                            </button>
-                        </div>
-                    </form>
-                </div>
 
-                <!-- Mensual -->
-                <div class="report-card">
-                    <div class="report-info">
-                        <i class="fas fa-calendar-alt report-icon"></i>
-                        <div>
-                            <p class="report-title">Reporte Mensual</p>
-                            <small>Selecciona una fecha</small>
-                        </div>
-                    </div>
-                    <form method="GET" action="{% url 'reporte_mes' %}" class="report-form">
-                        <input type="date" name="fecha" required>
-                        <div class="report-actions">
-                            <button type="submit" name="descargar" value="1" class="report-link" style="background:#2ecc71;">
-                                <i class="fa-solid fa-download"></i> Descargar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <!-- TAB 1: CITAS PROGRAMADAS -->
+    <div id="citas" class="tab-content active">
+        <h2><i class="fa-solid fa-calendar-check"></i> Citas Programadas</h2>
 
-            {% if citas_report %}
-            <div class="table-wrapper" style="margin-top:30px;">
-                <div class="table-caption"><i class="fa-solid fa-list-alt"></i> Reportes Filtrados</div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID Paciente</th>
-                                <th>Nombre completo</th>
-                                <th>Doctor</th>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cita in citas_report %}
-                            <tr>
-                                <td>{{ cita.paciente.numero }}</td>
-                                <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido_paterno}}{{ cita.paciente.apellido_materno}}</td>
-                                <td>{{ cita.doctor.user.get_full_name }}</td>
-                                <td>{{ cita.fecha }}</td>
-                                <td>{{ cita.hora }}</td>
-                                <td>
-                                    {% if cita.estado == 'Confirmada' %}
-                                        <span class="status-badge status-confirmada">{{ cita.estado }}</span>
-                                    {% elif cita.estado == 'Pendiente' %}
-                                        <span class="status-badge status-pendiente">{{ cita.estado }}</span>
-                                    {% elif cita.estado == 'Cancelada' %}
-                                        <span class="status-badge status-cancelada">{{ cita.estado }}</span>
-                                    {% elif cita.estado == 'Atendida' %}
-                                        <span class="status-badge status-atendida">{{ cita.estado }}</span>
-                                    {% else %}
-                                        <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="table-wrapper">
+            <div class="table-caption"><i class="fas fa-list-alt"></i> Citas Programadas</div>
+
+            {% if citas %}
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Paciente</th>
+                            <th>Nombre</th>
+                            <th>Doctor</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for cita in citas %}
+                        <tr>
+                            <td>{{ cita.paciente.numero }}</td>
+                            <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
+                            <td>{{ cita.doctor.user.get_full_name }}</td>
+                            <td>{{ cita.fecha }}</td>
+                            <td>{{ cita.hora }}</td>
+
+                            <td>
+                                {% if cita.estado == 'Confirmada' %}
+                                    <span class="status-badge status-confirmada">{{ cita.estado }}</span>
+                                {% elif cita.estado == 'Pendiente' %}
+                                    <span class="status-badge status-pendiente">{{ cita.estado }}</span>
+                                {% elif cita.estado == 'Cancelada' %}
+                                    <span class="status-badge status-cancelada">{{ cita.estado }}</span>
+                                {% elif cita.estado == 'Atendida' %}
+                                    <span class="status-badge status-atendida">{{ cita.estado }}</span>
+                                {% else %}
+                                    <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="action-links">
+                                {% if cita.estado == 'Pendiente' or cita.estado == 'Confirmada' %}
+                                    <a href="{% url 'modificar_cita' cita.id %}" class="edit">
+                                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                                    </a>
+                                    <a href="{% url 'cancelar_cita' cita.id %}" class="cancel">
+                                        <i class="fa-solid fa-ban"></i> Cancelar
+                                    </a>
+                                {% else %}
+                                    <span>{{ cita.estado }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
             </div>
+            {% else %}
+                <div style="padding:16px;">No hay citas programadas.</div>
             {% endif %}
         </div>
     </div>
-    {% endif %}
-</div>
 
+    <!-- TAB 2: AGREGAR PACIENTE -->
+    <div id="agregar" class="tab-content">
+        <h2><i class="fa-solid fa-user-plus"></i> Registrar / Agendar Paciente</h2>
+
+        <a href="{% url 'agendar_paciente' %}" class="btn">
+            <i class="fa-solid fa-calendar-plus"></i> Agregar Nuevo Paciente
+        </a>
+    </div>
+
+    <!-- TAB 3: BUSCAR PACIENTE -->
+    <div id="buscar" class="tab-content">
+        <h2><i class="fa-solid fa-magnifying-glass"></i> Buscar paciente</h2>
+
+        <form method="POST" action="{% url 'dashboard_administradora' %}">
+            {% csrf_token %}
+            <input type="text" name="buscar" placeholder="Nombre, apellido, número o teléfono" required>
+            <button type="submit"><i class="fa-solid fa-search"></i> Buscar</button>
+        </form>
+
+        {% if resultado %}
+            {% if resultado|length > 0 %}
+                <div class="table-wrapper" style="margin-top:20px;">
+                    <div class="table-caption"><i class="fa-solid fa-users"></i> Resultados de búsqueda</div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre completo</th>
+                                    <th>Teléfono</th>
+                                    <th>Agendar Cita</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for paciente in resultado %}
+                                <tr>
+                                    <td>{{ paciente.id }}</td>
+                                    <td>{{ paciente.nombre }} {{ paciente.apellido_paterno }} {{ paciente.apellido_materno }}</td>
+                                    <td>{{ paciente.telefono }}</td>
+                                    <td>
+                                        <a href="{% url 'agendar_paciente_existente' paciente.id %}" class="btn">
+                                            <i class="fa-solid fa-calendar-plus"></i> Agendar
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            {% else %}
+                <div style="margin-top:20px; padding:16px; background:#F5B7B1; border-radius:8px; color:#922B21;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> No se encontró ningún paciente.
+                    <br>
+                    <a href="{% url 'registrar_paciente' %}" class="btn" style="margin-top:10px;">
+                        <i class="fa-solid fa-user-plus"></i> Registrar nuevo paciente
+                    </a>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- TAB 4: REPORTES -->
+    <div id="reportes" class="tab-content">
+        <h2><i class="fa-solid fa-chart-bar"></i> Reportes de Citas</h2>
+
+        <div class="report-container">
+
+            <!-- Reporte Diario -->
+            <div class="report-card">
+                <div class="report-info">
+                    <i class="fas fa-calendar-day report-icon"></i>
+                    <div>
+                        <p class="report-title">Reporte Diario</p>
+                        <small>Descargar reporte del día</small>
+                    </div>
+                </div>
+                <input type="date" id="fecha-diaria" value="{{ hoy }}" class="report-date">
+                <div class="report-actions">
+                    <button onclick="descargarReporte('diario')" class="report-link" style="background:#2ecc71;">
+                        <i class="fa-solid fa-download"></i> Descargar PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reporte Semanal -->
+            <div class="report-card">
+                <div class="report-info">
+                    <i class="fas fa-calendar-week report-icon"></i>
+                    <div>
+                        <p class="report-title">Reporte Semanal</p>
+                        <small>Descargar reporte de la semana</small>
+                    </div>
+                </div>
+                <input type="date" id="fecha-semanal" value="{{ hoy }}" class="report-date">
+                <div class="report-actions">
+                    <button onclick="descargarReporte('semanal')" class="report-link" style="background:#2ecc71;">
+                        <i class="fa-solid fa-download"></i> Descargar PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reporte Mensual -->
+            <div class="report-card">
+                <div class="report-info">
+                    <i class="fas fa-calendar-alt report-icon"></i>
+                    <div>
+                        <p class="report-title">Reporte Mensual</p>
+                        <small>Descargar reporte mensual</small>
+                    </div>
+                </div>
+                <input type="month" id="fecha-mensual" class="report-date">
+                <div class="report-actions">
+                    <button onclick="descargarReporte('mensual')" class="report-link" style="background:#2ecc71;">
+                        <i class="fa-solid fa-download"></i> Descargar PDF
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endif %}
+
+</div>
 <script>
+function descargarReporte(tipo) {
+    let fechaInput, url;
+    
+    switch(tipo) {
+        case 'diario':
+            fechaInput = document.getElementById('fecha-diaria');
+            url = "{% url 'reporte_dia' %}";
+            break;
+        case 'semanal':
+            fechaInput = document.getElementById('fecha-semanal');
+            url = "{% url 'reporte_semana' %}";
+            break;
+        case 'mensual':
+            fechaInput = document.getElementById('fecha-mensual');
+            url = "{% url 'reporte_mes' %}";
+            break;
+    }
+    
+    const fecha = fechaInput.value;
+    const urlCompleta = `${url}?fecha=${fecha}`;
+    
+    console.log(`📤 Descargando reporte ${tipo}:`, urlCompleta);
+    
+    // Abrir en nueva pestaña
+    window.open(urlCompleta, '_blank');
+}
+
+// Fecha actual por defecto
+document.addEventListener('DOMContentLoaded', function() {
+    const hoy = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('.report-date').forEach(input => {
+        input.value = hoy;
+    });
+});
+</script>
+<!-- REEMPLAZA TODO EL SCRIPT EXISTENTE CON ESTE CÓDIGO -->
+<script>
+// Función para cambiar pestañas
 function openTab(evt, tabName) {
-    // Ocultar todas las pestañas
     const tabcontent = document.getElementsByClassName("tab-content");
+    const tabbuttons = document.querySelectorAll(".tab-buttons button");
+
     for (let i = 0; i < tabcontent.length; i++) {
         tabcontent[i].classList.remove("active");
     }
+    tabbuttons.forEach(btn => btn.classList.remove("active"));
 
-    // Quitar "active" de todos los botones
-    const tabbuttons = document.querySelectorAll(".tab-buttons button");
-    for (let i = 0; i < tabbuttons.length; i++) {
-        tabbuttons[i].classList.remove("active");
-    }
-
-    // Mostrar la pestaña seleccionada
     document.getElementById(tabName).classList.add("active");
     evt.currentTarget.classList.add("active");
-
-    // 🧠 Guardar la pestaña actual
     localStorage.setItem("activeTab", tabName);
 }
 
-// 🔄 Al cargar la página
+// Cuando el DOM esté completamente cargado
 document.addEventListener("DOMContentLoaded", function() {
-    const activeTab = localStorage.getItem("activeTab") || "citas"; // por defecto "Agregar paciente"
+    console.log('✅ Dashboard cargado correctamente');
     
-    // Desactivar todas las pestañas y botones
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-    document.querySelectorAll(".tab-buttons button").forEach(btn => btn.classList.remove("active"));
-
-    // Activar la pestaña y botón guardados
-    const activeTabElement = document.getElementById(activeTab);
-    const activeButton = document.querySelector(`.tab-buttons button[onclick*="${activeTab}"]`);
-
-    if (activeTabElement) activeTabElement.classList.add("active");
-    if (activeButton) activeButton.classList.add("active");
-});
-</script>
-
-
-
-
-<script>
-function openTab(evt, tabName) {
-    let i, tabcontent, tabbuttons;
-    tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].classList.remove("active");
-    }
-    tabbuttons = document.querySelectorAll(".tab-buttons button");
-    for (i = 0; i < tabbuttons.length; i++) {
-        tabbuttons[i].classList.remove("active");
-    }
-    document.getElementById(tabName).classList.add("active");
-    if (evt) evt.currentTarget.classList.add("active");
-}
- 
-// ✅ NUEVO: mantener la pestaña activa después del POST
-document.addEventListener('DOMContentLoaded', function() {
-    const activeTab = "{{ tab_activa|default:'citas' }}";  // ← Django pasa el nombre del tab
-    const tabs = document.querySelectorAll('.tab-content');
-    const buttons = document.querySelectorAll('.tab-buttons button');
-
-    // Oculta todos los tabs
-    tabs.forEach(tab => tab.classList.remove('active'));
-    buttons.forEach(btn => btn.classList.remove('active'));
-
-    // Activa el tab correcto
+    // 1. Configurar pestañas activas
+    const activeTab = localStorage.getItem("activeTab") || "citas";
     const targetTab = document.getElementById(activeTab);
-    const targetButton = Array.from(buttons).find(btn => 
-        btn.getAttribute('onclick')?.includes(activeTab)
-    );
+    const targetButton = document.querySelector(`.tab-buttons button[onclick*="${activeTab}"]`);
+    
+    if (targetTab) {
+        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+        targetTab.classList.add("active");
+    }
+    if (targetButton) {
+        document.querySelectorAll(".tab-buttons button").forEach(btn => btn.classList.remove("active"));
+        targetButton.classList.add("active");
+    }
 
-    if (targetTab) targetTab.classList.add('active');
-    if (targetButton) targetButton.classList.add('active');
-});
-</script>
-
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+    // 2. Establecer fecha actual en inputs de fecha
     const hoy = new Date();
     const año = hoy.getFullYear();
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
     const fechaActual = `${año}-${mes}-${dia}`;
-    document.getElementById('fecha-diaria').value = fechaActual;
+
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+        input.value = fechaActual;
+        console.log(`📅 Input de fecha configurado: ${input.value}`);
+    });
+
+    // 3. DEBUG: Verificar formularios de reportes
+    console.log('🔍 Verificando formularios de reportes...');
+    
+    const reportForms = document.querySelectorAll('.report-form');
+    console.log(`📊 Formularios de reportes encontrados: ${reportForms.length}`);
+    
+    reportForms.forEach((form, index) => {
+        const button = form.querySelector('button[type="submit"]');
+        const dateInput = form.querySelector('input[type="date"]');
+        const action = form.getAttribute('action');
+        
+        console.log(`📋 Formulario ${index + 1}:`, {
+            action: action,
+            tieneBoton: !!button,
+            tieneDateInput: !!dateInput,
+            fecha: dateInput ? dateInput.value : 'N/A'
+        });
+
+        // Agregar evento de submit
+        form.addEventListener('submit', function(e) {
+            const fecha = this.querySelector('input[type="date"]').value;
+            const action = this.getAttribute('action');
+            
+            console.log(`📤 ENVIANDO FORMULARIO ${index + 1}:`, {
+                fecha: fecha,
+                action: action,
+                urlCompleta: `${action}?fecha=${fecha}`
+            });
+            
+            // Guardar pestaña activa
+            localStorage.setItem('activeTab', 'reportes');
+            
+            // El formulario se enviará normalmente - no prevenir default
+            console.log('✅ Formulario enviándose...');
+        });
+    });
+
+    // 4. Verificar que las URLs de reportes existan
+    const urls = [
+        "{% url 'reporte_dia' %}",
+        "{% url 'reporte_semana' %}", 
+        "{% url 'reporte_mes' %}"
+    ];
+    
+    urls.forEach(url => {
+        console.log(`🔗 URL de reporte disponible: ${url}`);
+    });
+
+    // 5. Agregar estilos de debug temporalmente
+    const debugStyle = document.createElement('style');
+    debugStyle.textContent = `
+        .report-link {
+            cursor: pointer !important;
+            position: relative;
+            z-index: 10;
+        }
+        .report-link:active {
+            transform: scale(0.95) !important;
+        }
+        .report-form {
+            position: relative;
+            z-index: 5;
+        }
+    `;
+    document.head.appendChild(debugStyle);
+    
+    console.log('🎯 Configuración completada. Los botones de reportes deberían funcionar.');
 });
+
+// Función global para las pestañas
+window.openTab = openTab;
 </script>
 </body>
-
 </html>

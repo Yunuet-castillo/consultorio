@@ -655,185 +655,175 @@
     </style>
 </head>
 <body>
+
+<!-- ================= HEADER ================= -->
 <div id="header">
     <div class="logo-container">
         <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo">
         <div class="hospital-name">Hospital<br>San Pedro</div>
     </div>
-    <a href="{% url 'logout' %}" class="btn"><i class="fas fa-arrow-left"></i><span>Salir</span></a>
+    <a href="{% url 'logout' %}" class="btn">
+        <i class="fas fa-arrow-left"></i><span>Salir</span>
+    </a>
 </div>
 
 <div class="container">
-    <div class="user-info">
-        <h2>Bienvenida {{ request.user.get_full_name }}</h2>
-        <p>Rol: {{ request.user.role }}</p>
-    </div>
 
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li class="{{ message.tags }}"><i class="fa-solid fa-circle-info"></i> {{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+<!-- ================= USUARIO ================= -->
+<div class="user-info">
+    <h2>Bienvenida {{ request.user.get_full_name }}</h2>
+    <p>Rol: {{ request.user.role }}</p>
+</div>
 
-    {% if request.user.role == 'administradora' %}
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+        <li class="{{ message.tags }}">
+            <i class="fa-solid fa-circle-info"></i> {{ message }}
+        </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if request.user.role == 'administradora' %}
 <div class="tab-container">
 
-    <!-- BOTONES -->
-    <div class="tab-buttons">
-        <button class="active" onclick="openTab(event,'citas')">
-            <i class="fa-solid fa-calendar-check"></i> Citas programadas
-        </button>
+<!-- ================= BOTONES ================= -->
+<div class="tab-buttons">
+    <button class="active" onclick="openTab(event,'citas')">
+        <i class="fa-solid fa-calendar-check"></i> Citas programadas
+    </button>
+    <button onclick="openTab(event,'agregar')">
+        <i class="fa-solid fa-user-plus"></i> Agregar paciente
+    </button>
+    <button onclick="openTab(event,'buscar')">
+        <i class="fa-solid fa-user-check"></i> Buscar paciente
+    </button>
+    <button onclick="openTab(event,'reportes')">
+        <i class="fa-solid fa-chart-line"></i> Reportes
+    </button>
+</div>
 
-        <button onclick="openTab(event,'agregar')">
-            <i class="fa-solid fa-user-plus"></i> Agregar paciente
-        </button>
+<!-- ================= TAB CITAS ================= -->
+<div id="citas" class="tab-content active">
+    <h2><i class="fa-solid fa-calendar-check"></i> Citas Programadas</h2>
 
-        <button onclick="openTab(event,'buscar')">
-            <i class="fa-solid fa-user-check"></i> Buscar paciente
-        </button>
-
-        <button onclick="openTab(event,'reportes')">
-            <i class="fa-solid fa-chart-line"></i> Reportes
-        </button>
-    </div>
-
-    <!-- TAB 1: CITAS PROGRAMADAS -->
-    <div id="citas" class="tab-content active">
-        <h2><i class="fa-solid fa-calendar-check"></i> Citas Programadas</h2>
-
-        <div class="table-wrapper">
-            <div class="table-caption"><i class="fas fa-list-alt"></i> Citas Programadas</div>
-
-            {% if citas %}
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID Paciente</th>
-                            <th>Nombre</th>
-                            <th>Doctor</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for cita in citas %}
-                        <tr>
-                            <td>{{ cita.paciente.numero }}</td>
-                            <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
-                            <td>{{ cita.doctor.user.get_full_name }}</td>
-                            <td>{{ cita.fecha }}</td>
-                            <td>{{ cita.hora }}</td>
-
-                            <td>
-                                {% if cita.estado == 'Confirmada' %}
-                                    <span class="status-badge status-confirmada">{{ cita.estado }}</span>
-                                {% elif cita.estado == 'Pendiente' %}
-                                    <span class="status-badge status-pendiente">{{ cita.estado }}</span>
-                                {% elif cita.estado == 'Cancelada' %}
-                                    <span class="status-badge status-cancelada">{{ cita.estado }}</span>
-                                {% elif cita.estado == 'Atendida' %}
-                                    <span class="status-badge status-atendida">{{ cita.estado }}</span>
-                                {% else %}
-                                    <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
-                                {% endif %}
-                            </td>
-
-                            <td class="action-links">
-                                {% if cita.estado == 'Pendiente' or cita.estado == 'Confirmada' %}
-                                    <a href="{% url 'modificar_cita' cita.id %}" class="edit">
-                                        <i class="fa-solid fa-pen-to-square"></i> Editar
-                                    </a>
-                                    <a href="{% url 'cancelar_cita' cita.id %}" class="cancel">
-                                        <i class="fa-solid fa-ban"></i> Cancelar
-                                    </a>
-                                {% else %}
-                                    <span>{{ cita.estado }}</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-
-                </table>
-            </div>
-            {% else %}
-                <div style="padding:16px;">No hay citas programadas.</div>
-            {% endif %}
+    <div class="table-wrapper">
+        <div class="table-caption">
+            <i class="fas fa-list-alt"></i> Citas Programadas
         </div>
-    </div>
 
-    <!-- TAB 2: AGREGAR PACIENTE -->
-    <div id="agregar" class="tab-content">
-        <h2><i class="fa-solid fa-user-plus"></i> Registrar / Agendar Paciente</h2>
-
-        <a href="{% url 'agendar_paciente' %}" class="btn">
-            <i class="fa-solid fa-calendar-plus"></i> Agregar Nuevo Paciente
-        </a>
-    </div>
-
-    <!-- TAB 3: BUSCAR PACIENTE -->
-    <div id="buscar" class="tab-content">
-        <h2><i class="fa-solid fa-magnifying-glass"></i> Buscar paciente</h2>
-
-        <form method="POST" action="{% url 'dashboard_administradora' %}">
-            {% csrf_token %}
-            <input type="text" name="buscar" placeholder="Nombre, apellido, número o teléfono" required>
-            <button type="submit"><i class="fa-solid fa-search"></i> Buscar</button>
-        </form>
-
-        {% if resultado %}
-            {% if resultado|length > 0 %}
-                <div class="table-wrapper" style="margin-top:20px;">
-                    <div class="table-caption"><i class="fa-solid fa-users"></i> Resultados de búsqueda</div>
-
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre completo</th>
-                                    <th>Teléfono</th>
-                                    <th>Agendar Cita</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for paciente in resultado %}
-                                <tr>
-                                    <td>{{ paciente.id }}</td>
-                                    <td>{{ paciente.nombre }} {{ paciente.apellido_paterno }} {{ paciente.apellido_materno }}</td>
-                                    <td>{{ paciente.telefono }}</td>
-                                    <td>
-                                        <a href="{% url 'agendar_paciente_existente' paciente.id %}" class="btn">
-                                            <i class="fa-solid fa-calendar-plus"></i> Agendar
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-
-            {% else %}
-                <div style="margin-top:20px; padding:16px; background:#F5B7B1; border-radius:8px; color:#922B21;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> No se encontró ningún paciente.
-                    <br>
-                    <a href="{% url 'registrar_paciente' %}" class="btn" style="margin-top:10px;">
-                        <i class="fa-solid fa-user-plus"></i> Registrar nuevo paciente
-                    </a>
-                </div>
-            {% endif %}
+        {% if citas %}
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Paciente</th>
+                        <th>Nombre</th>
+                        <th>Doctor</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for cita in citas %}
+                    <tr>
+                        <td>{{ cita.paciente.numero }}</td>
+                        <td>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
+                        <td>{{ cita.doctor.user.get_full_name }}</td>
+                        <td>{{ cita.fecha }}</td>
+                        <td>{{ cita.hora }}</td>
+                        <td>
+                            <span class="status-badge status-{{ cita.estado|lower }}">
+                                {{ cita.estado }}
+                            </span>
+                        </td>
+                        <td class="action-links">
+                            {% if cita.estado == 'Pendiente' or cita.estado == 'Confirmada' %}
+                                <a href="{% url 'modificar_cita' cita.id %}" class="edit">
+                                    <i class="fa-solid fa-pen"></i> Editar
+                                </a>
+                                <a href="{% url 'cancelar_cita' cita.id %}" class="cancel">
+                                    <i class="fa-solid fa-ban"></i> Cancelar
+                                </a>
+                            {% else %}
+                                <span>{{ cita.estado }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div style="padding:16px;">No hay citas programadas.</div>
         {% endif %}
     </div>
+</div>
 
-    <!-- TAB 4: REPORTES -->
+<!-- ================= TAB AGREGAR ================= -->
+<div id="agregar" class="tab-content">
+    <h2><i class="fa-solid fa-user-plus"></i> Registrar / Agendar Paciente</h2>
+    <a href="{% url 'agendar_paciente' %}" class="btn">
+        <i class="fa-solid fa-calendar-plus"></i> Agregar Nuevo Paciente
+    </a>
+</div>
+
+<!-- ================= TAB BUSCAR ================= -->
+<div id="buscar" class="tab-content">
+    <h2><i class="fa-solid fa-magnifying-glass"></i> Buscar paciente</h2>
+
+    <form method="POST" action="{% url 'dashboard_administradora' %}">
+        {% csrf_token %}
+        <input type="text" name="buscar" placeholder="Nombre, apellido, número o teléfono" required>
+        <button type="submit">
+            <i class="fa-solid fa-search"></i> Buscar
+        </button>
+    </form>
+
+    {% if resultado %}
+    <div class="table-wrapper" style="margin-top:20px;">
+        <div class="table-caption">
+            <i class="fa-solid fa-users"></i> Resultados
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre completo</th>
+                        <th>Teléfono</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for paciente in resultado %}
+                    <tr>
+                        <td>{{ paciente.id }}</td>
+                        <td>{{ paciente.nombre }} {{ paciente.apellido_paterno }} {{ paciente.apellido_materno }}</td>
+                        <td>{{ paciente.telefono }}</td>
+                        <td style="display:flex; gap:8px;">
+                            <a href="{% url 'agendar_paciente_existente' paciente.id %}" class="btn">
+                                <i class="fa-solid fa-calendar-plus"></i> Agendar
+                            </a>
+                            <a href="{% url 'reporte_historial' paciente.id %}" class="btn" style="background:#3498db;">
+                                <i class="fa-solid fa-file-pdf"></i> Historial
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ================= TAB REPORTES ================= -->
+<!-- TAB 4: REPORTES -->
     <div id="reportes" class="tab-content">
         <h2><i class="fa-solid fa-chart-bar"></i> Reportes de Citas</h2>
 
@@ -889,14 +879,18 @@
                     </button>
                 </div>
             </div>
-
-        </div>
-    </div>
-
-</div>
+            
 {% endif %}
-
 </div>
+
+<script>
+function openTab(evt, tabName) {
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-buttons button").forEach(b => b.classList.remove("active"));
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+</script>
 <script>
 function descargarReporte(tipo) {
     let fechaInput, url;

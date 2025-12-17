@@ -600,87 +600,126 @@
     </style>
 </head>
 <body>
-    <div id="header">
-        <div class="logo-container">
-            <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
-            <div class="logo-placeholder">HSP</div>
-            <div class="hospital-name">Hospital<br>San Pedro</div>
-        </div>
-        <a href="{% url 'logout' %}" class="btn"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
+
+<!-- ===== HEADER ===== -->
+<div id="header">
+    <div class="logo-container">
+        <img src="{% static 'citas/img/logo.png' %}" alt="Logo Hospital San Pedro"
+             class="logo"
+             onerror="this.style.display='none'; document.querySelector('.logo-placeholder').style.display='flex';">
+        <div class="logo-placeholder" style="display:none;">HSP</div>
+        <div class="hospital-name">Hospital<br>San Pedro</div>
     </div>
 
-    <div class="container">
-        <a href="{% url 'dashboard_doctor' %}" class="btn-back">
-            <i class="fa-solid fa-arrow-left"></i><span>Regresar al Dashboard</span>
-        </a>
+    <a href="{% url 'logout' %}" class="btn">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Salir</span>
+    </a>
+</div>
 
-        <div class="page-title">
-            <h2><i class="fas fa-search" style="color: #4A90E2; margin-right: 10px;"></i> Buscar Pacientes</h2>
-            <p>Busca pacientes por nombre, apellido o número de teléfono</p>
-        </div>
+<!-- ===== CONTENEDOR ===== -->
+<div class="container">
 
-        <!-- 🔍 Formulario de Búsqueda -->
-        <div class="card-custom">
-            <div class="card-header-custom">
-                <h3 class="mb-0"><i class="fa-solid fa-magnifying-glass"></i> Búsqueda</h3>
-            </div>
-            <div class="card-body">
-                <form method="get" action="{% url 'buscar_pacientes_doctor' %}" class="search-form">
-                    <input type="text" name="q" placeholder="Nombre, apellido o número de teléfono" 
-                           value="{{ query }}" />
-                    <button type="submit"><i class="fa-solid fa-search"></i><span>Buscar</span></button>
-                </form>
-            </div>
-        </div>
+    <a href="{% url 'dashboard_doctor' %}" class="btn-back">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Regresar al Inicio</span>
+    </a>
 
-        <!-- 📋 Resultados -->
-       {% if pacientes_con_cita %}
-<div class="table-wrapper">
-    <div class="table-caption">
-        <i class="fas fa-users"></i> Resultados de la búsqueda ({{ pacientes_con_cita|length }} encontrado{{ pacientes_con_cita|length|pluralize }})
+    <div class="page-title">
+        <h2>
+            <i class="fas fa-search" style="color:#4A90E2;"></i>
+            Buscar Pacientes
+        </h2>
+        <p>Busca pacientes por nombre, apellido o número de teléfono</p>
     </div>
 
-    <div class="table-responsive">
-        <table>
-            <thead>
+    <!-- ===== FORMULARIO BUSQUEDA ===== -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h3><i class="fa-solid fa-magnifying-glass"></i> Búsqueda</h3>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{% url 'buscar_pacientes_doctor' %}" class="search-form">
+                <input type="text" name="q"
+                       placeholder="Nombre, apellido o número de teléfono"
+                       value="{{ query }}">
+                <button type="submit">
+                    <i class="fa-solid fa-search"></i>
+                    <span>Buscar</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== RESULTADOS ===== -->
+    {% if pacientes_con_cita %}
+    <div class="table-wrapper">
+
+        <div class="table-caption">
+            <i class="fas fa-users"></i>
+            Resultados de la búsqueda ({{ pacientes_con_cita|length }}
+            encontrado{{ pacientes_con_cita|length|pluralize }})
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
                 <tr>
                     <th>Nombre</th>
                     <th>Apellidos</th>
                     <th>Teléfono</th>
                     <th>Acciones</th>
                 </tr>
-            </thead>
+                </thead>
 
-            <tbody>
+                <tbody>
                 {% for item in pacientes_con_cita %}
                 {% with p=item.paciente c=item.ultima_cita %}
                 <tr>
                     <td><strong>{{ p.nombre }}</strong></td>
                     <td><strong>{{ p.apellido_paterno }} {{ p.apellido_materno }}</strong></td>
                     <td>{{ p.numero }}</td>
-                    <td class="action-links">
-                        {% if c %}
-                            <!-- SI TIENE CITA: botón para ver detalle -->
-                            <a href="{% url 'detalle_cita_doctor' c.id %}" class="btn-agendar">
-                                <i class="fa-solid fa-eye"></i><span>Ver Detalles</span>
-                            </a>
-                        {% else %}
-                            <!-- SI NO TIENE: crear cita -->
-                            <a href="{% url 'agendar_paciente_existente' p.id %}">
-                                <i class="fa-solid fa-calendar-plus"></i><span>Crear Cita</span>
-                            </a>
-                        {% endif %}
-                    </td>
+
+                   <td class="action-links" style="display:flex; gap:8px; flex-wrap:wrap;">
+
+    <!-- VER DETALLES (solo si tiene cita) -->
+    {% if c %}
+    <a href="{% url 'detalle_cita_doctor' c.id %}"
+       class="btn-agendar"
+       style="background:#3498db;">
+        <i class="fa-solid fa-eye"></i>
+        <span>Ver detalles</span>
+    </a>
+    {% endif %}
+
+    <!-- AGENDAR CITA (SIEMPRE) -->
+    <a href="{% url 'agendar_paciente_existente' p.id %}"
+       class="btn-agendar"
+       style="background:#27ae60;">
+        <i class="fa-solid fa-calendar-plus"></i>
+        <span>Agendar cita</span>
+    </a>
+
+    <!-- IMPRIMIR HISTORIAL (SIEMPRE) -->
+    <a href="{% url 'reporte_historial' p.id %}"
+       target="_blank"
+       class="btn-agendar"
+       style="background:#2c3e50;">
+        <i class="fa-solid fa-print"></i>
+        <span>Imprimir historial</span>
+    </a>
+
+</td>
                 </tr>
                 {% endwith %}
                 {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
+    {% endif %}
+
 </div>
-{% endif %}
 
-
-    </div>
 </body>
 </html>

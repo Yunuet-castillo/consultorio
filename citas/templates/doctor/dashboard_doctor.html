@@ -16,7 +16,7 @@
             margin: 0;
             padding: 0;
         }
-        
+
         body { 
             font-family: "Poppins", "Roboto", sans-serif; 
             background: linear-gradient(135deg, #EAF2F8 0%, #D5E7F4 50%, #EAF2F8 100%);
@@ -44,7 +44,7 @@
             pointer-events: none;
             z-index: 0;
         }
-        
+
         /* Header con barra azul y logo */
         #header { 
             background: linear-gradient(135deg, rgba(46,134,193,0.98) 0%, rgba(74,144,226,0.95) 50%, rgba(46,134,193,1) 100%);
@@ -81,14 +81,14 @@
                 opacity: 1;
             }
         }
-        
+
         .logo-container { 
             display: flex; 
             align-items: center; 
             position: relative;
             z-index: 1;
         }
-        
+
         .logo { 
             height: 80px; 
             width: auto; 
@@ -106,7 +106,7 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-5px); }
         }
-        
+
         .logo-placeholder { 
             display: none; 
             width: 80px; 
@@ -119,7 +119,7 @@
             color: #2E86C1; 
             border-radius: 5px; 
         }
-        
+
         .hospital-name { 
             color: white; 
             font-size: 22px; 
@@ -132,7 +132,7 @@
             justify-content: center;
             letter-spacing: 1px;
         }
-        
+
         .container { 
             padding: 30px; 
             max-width: 1200px; 
@@ -152,7 +152,7 @@
                 transform: translateY(0);
             }
         }
-        
+
         /* Botones */
         .btn { 
             display: inline-block; 
@@ -190,7 +190,7 @@
             width: 300px;
             height: 300px;
         }
-        
+
         .btn i { 
             margin-right: 8px;
             position: relative;
@@ -206,7 +206,7 @@
             position: relative;
             z-index: 1;
         }
-        
+
         .btn:hover { 
             background-position: right center;
             transform: translateY(-3px) scale(1.05); 
@@ -214,14 +214,14 @@
                         0 0 0 4px rgba(93,173,226,0.1);
             color: #fff; 
         }
-        
+
         /* Mensajes */
         .messages { 
             margin: 20px 0; 
             padding: 0; 
             list-style: none; 
         }
-        
+
         .messages li { 
             background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
             backdrop-filter: blur(10px);
@@ -238,13 +238,13 @@
             transform: translateX(5px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.12);
         }
-        
+
         /* Información de usuario */
         .user-info { 
             margin: 30px 0 30px 0; 
             text-align: center; 
         }
-        
+
         .user-info h2 { 
             color: #1C1C1C; 
             margin-bottom: 8px; 
@@ -262,13 +262,13 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
-        
+
         .user-info p { 
             color: #1C1C1C; 
             margin: 0; 
             font-size: 16px; 
         }
-        
+
         /* Tarjetas */
         .card-custom { 
             background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
@@ -287,7 +287,7 @@
                         inset 0 1px 0 rgba(255,255,255,0.8);
             transform: translateY(-2px);
         }
-        
+
         .card-header-custom { 
             background: linear-gradient(135deg, rgba(46,134,193,0.95) 0%, rgba(74,144,226,0.9) 50%, rgba(46,134,193,1) 100%);
             color: #fff; 
@@ -308,17 +308,17 @@
             height: 2px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
         }
-        
+
         .card-body { 
             padding: 25px; 
         }
-        
+
         /* Buscador */
         .input-group { 
             display: flex; 
             margin-bottom: 0; 
         }
-        
+
         .input-group input { 
             flex: 1; 
             padding: 14px 18px; 
@@ -330,7 +330,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+
         .input-group input:focus { 
             outline: none; 
             border-color: #4A90E2; 
@@ -339,7 +339,7 @@
             transform: translateY(-1px);
             background: rgba(234,242,248,0.95);
         }
-        
+
         .btn-primary-custom { 
             background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 50%, #4A90E2 100%);
             background-size: 200% 200%;
@@ -386,13 +386,13 @@
             position: relative;
             z-index: 1;
         }
-        
+
         .btn-primary-custom:hover { 
             background-position: right center;
             transform: translateY(-2px) scale(1.02); 
             box-shadow: 0 8px 20px rgba(93,173,226,0.35);
         }
-        
+
         /* Tabla */
         .table-wrapper { 
             background: linear-gradient(135deg, rgba(174,214,241,0.9) 0%, rgba(213,231,244,0.85) 100%);
@@ -402,7 +402,7 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.1), 
                         inset 0 1px 0 rgba(255,255,255,0.6);
             overflow: hidden; 
-            margin-bottom: 30px; 
+            margin-bottom: 30px;
             transition: all 0.3s ease;
         }
 
@@ -411,7 +411,7 @@
                         inset 0 1px 0 rgba(255,255,255,0.8);
             transform: translateY(-2px);
         }
-        
+
         .table-caption { 
             background: linear-gradient(135deg, rgba(46,134,193,0.95) 0%, rgba(74,144,226,0.9) 50%, rgba(46,134,193,1) 100%);
             color: #fff; 
@@ -432,13 +432,13 @@
             height: 2px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
         }
-        
+
         .table-responsive { overflow-x: auto; }
-        
+
         table { width: 100%; border-collapse: collapse; }
-        
+
         table thead { background: #D5E7F4; }
-        
+
         table th, table td { 
             padding: 14px 16px; 
             text-align: center; 
@@ -446,7 +446,7 @@
             color: #1C1C1C; 
             border-bottom: 1px solid rgba(46,134,193,0.2); 
         }
-        
+
         table tr {
             transition: all 0.3s ease;
             position: relative;
@@ -463,9 +463,9 @@
             transform: scaleY(0);
             transition: transform 0.3s ease;
         }
-        
+
         table tr:nth-child(even) { background: rgba(234,242,248,0.5); }
-        
+
         table tr:hover { 
             background: linear-gradient(90deg, rgba(213,231,244,0.7), rgba(174,214,241,0.5));
             transform: translateX(5px);
@@ -474,7 +474,7 @@
         table tr:hover::before {
             transform: scaleY(1);
         }
-        
+
         /* Badges de estado */
         .status-badge { 
             display: inline-block; 
@@ -510,24 +510,24 @@
             transform: scale(1.1);
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
-        
+
         .status-confirmada { 
             background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 100%);
         }
-        
+
         .status-pendiente { 
             background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);
             color: #333; 
         }
-        
+
         .status-cancelada { 
             background: linear-gradient(135deg, #2E86C1 0%, #3498db 100%);
         }
-        
+
         .status-atendida { 
             background: linear-gradient(135deg, #2ECC71 0%, #27ae60 100%);
         }
-        
+
         /* Botones de acción */
         .action-links { 
             display: flex; 
@@ -535,7 +535,7 @@
             justify-content: center; 
             flex-wrap: wrap; 
         }
-        
+
         .action-links a { 
             padding: 10px 18px; 
             border-radius: 50px; 
@@ -549,7 +549,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             border: 2px solid rgba(255,255,255,0.2);
         }
-        
+
         .action-links a i { 
             font-size: 12px; 
             transition: transform 0.3s ease;
@@ -558,41 +558,41 @@
         .action-links a:hover i {
             transform: scale(1.2) rotate(5deg);
         }
-        
+
         .btn-details { 
             background: linear-gradient(135deg, #4A90E2 0%, #5DADE2 100%);
             color: #fff; 
         }
-        
+
         .btn-details:hover { 
             background: linear-gradient(135deg, #357ABD 0%, #2E86C1 100%);
             transform: translateY(-2px) scale(1.05); 
             box-shadow: 0 6px 16px rgba(53,122,189,0.3);
             color: #fff; 
         }
-        
+
         .btn-receta { 
             background: linear-gradient(135deg, #2ECC71 0%, #27ae60 100%);
             color: #fff; 
         }
-        
+
         .btn-receta:hover { 
             background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
             transform: translateY(-2px) scale(1.05); 
             box-shadow: 0 6px 16px rgba(39,174,96,0.3);
             color: #fff; 
         }
-        
+
         /* Animación de resaltado */
         .table-warning { 
             animation: highlight 3s ease-in-out; 
         }
-        
+
         @keyframes highlight {
             0% { background-color: #FFF59D; }
             100% { background-color: transparent; }
         }
-        
+
         /* Responsividad */
         @media (max-width: 768px) {
             #header { height: auto; padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -645,71 +645,83 @@
         </div>
 
         <!-- 📅 Mis Citas -->
-        <div class="table-wrapper">
-            <div class="table-caption"><i class="fas fa-calendar-check"></i> Mis Citas</div>
-            {% if citas %}
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Paciente</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cita in citas %}
-                        <tr>
-                            <td><strong>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</strong></td>
-                            <td>{{ cita.fecha|date:"d/m/Y" }}</td>
-                            <td>{{ cita.hora|time:"H:i" }}</td>
-                            <td>
-                                {% if cita.estado == "Confirmada" %}
-                                    <span class="status-badge status-confirmada">{{ cita.estado }}</span>
-                                {% elif cita.estado == "Pendiente" %}
-                                    <span class="status-badge status-pendiente">{{ cita.estado }}</span>
-                                {% elif cita.estado == "Cancelada" %}
-                                    <span class="status-badge status-cancelada">{{ cita.estado }}</span>
-                                {% elif cita.estado == "Atendida" %}
-                                    <span class="status-badge status-atendida">{{ cita.estado }}</span>
-                                {% else %}
-                                    <span class="status-badge" style="background:#6c757d">{{ cita.estado }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="action-links">
-                                <a href="{% url 'detalle_cita_doctor' cita.id %}" class="btn-details">
-                                    <i class="fa-solid fa-eye"></i><span>Detalles</span>
-                                </a>
-                                <a href="{% url 'generar_receta_pdf' cita.id %}" class="btn-receta">
-                                    <i class="fa-solid fa-file-pdf"></i><span>Receta</span>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-                <div style="padding: 20px; text-align: center; color: #1C1C1C;">
-                    <i class="fa-solid fa-circle-info" style="font-size: 24px; color: #4A90E2; margin-bottom: 10px;"></i>
-                    <p style="margin: 0;">No tienes citas programadas.</p>
-                </div>
-            {% endif %}
-        </div>
+<div class="table-wrapper">
+    <div class="table-caption"><i class="fas fa-calendar-check"></i> Mis Citas</div>
+
+    {% if citas %}
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <!-- 🔄 TABLA DINÁMICA QUE SE ACTUALIZA SIN RECARGAR -->
+            <tbody id="tabla-citas">
+                {% include "doctor/partials/tabla_citas.html" %}
+            </tbody>
+
+        </table>
     </div>
 
-    <!-- ✨ Script para enfocar automáticamente la siguiente cita pendiente -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const filaPendiente = document.querySelector('tr:has(.status-pendiente)');
-        if (filaPendiente) {
-            filaPendiente.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            filaPendiente.classList.add('table-warning');
-            setTimeout(() => filaPendiente.classList.remove('table-warning'), 3000);
-        }
-    });
-    </script>
+    {% else %}
+        <div style="padding: 20px; text-align: center; color: #1C1C1C;">
+            <i class="fa-solid fa-circle-info" style="font-size: 24px; color: #4A90E2; margin-bottom: 10px;"></i>
+            <p style="margin: 0;">No tienes citas programadas.</p>
+        </div>
+    {% endif %}
+</div>
+</div>
+
+<!-- ✨ Script para enfocar automáticamente la siguiente cita pendiente -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filaPendiente = document.querySelector('tr:has(.status-pendiente)');
+    if (filaPendiente) {
+        filaPendiente.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        filaPendiente.classList.add('table-warning');
+        setTimeout(() => filaPendiente.classList.remove('table-warning'), 3000);
+    }
+});
+</script>
+
+<!-- 🔄 SCRIPT PARA ACTUALIZAR TABLA SIN RECARGAR PAGINA -->
+<script>
+setInterval(() => {
+    fetch("{% url 'actualizar_citas' %}")
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("tabla-citas").innerHTML = html;
+        })
+        .catch(err => console.error("Error al actualizar citas:", err));
+}, 5000);
+</script>
+
+<!-- 🎨 ESTILOS NUEVOS PARA SIGNOS -->
+<style>
+    .status-espera {
+        background: #FFC107;
+        color: #000;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    .status-lista {
+        background: #28A745;
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 13px;
+    }
+</style>
+
 </body>
 </html>

@@ -275,6 +275,53 @@
                         0 0 0 4px rgba(93,173,226,0.1);
             color: #fff;
         }
+
+        /* Botones naranja para agregar/editar signos vitales */
+        .btn-agregar-signos, .btn-editar-signos {
+            background: linear-gradient(135deg, #e67e22 0%, #f39c12 50%, #e67e22 100%);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid rgba(255,255,255,0.12);
+            box-shadow: 0 10px 30px rgba(230,126,34,0.18);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-agregar-signos::before,
+        .btn-editar-signos::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.14);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-agregar-signos:hover::before,
+        .btn-editar-signos:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-agregar-signos:hover, .btn-editar-signos:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 45px rgba(230,126,34,0.22);
+        }
+
+        .btn-editar-signos {
+            background: linear-gradient(135deg, #ff8a00 0%, #e67e22 60%);
+        }
         
         /* Tarjetas de módulos */
         .module-card {
@@ -1156,45 +1203,77 @@
         </div>
     </div>
 
-        <!-- Signos Vitales -->
-        <div class="module-card">
-            <header><i class="fas fa-heartbeat"></i> Signos Vitales</header>
-            <div class="body">
-                {% if signos %}
-                <div class="info-grid signos-vitales-activos">
-                    <div class="info-item">
-                        <i class="fas fa-weight"></i> 
-                        <strong>Peso:</strong> {{ signos.peso }} kg
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-tachometer-alt"></i> 
-                        <strong>Presión:</strong> {{ signos.presion_arterial }}
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-heart"></i> 
-                        <strong>Frecuencia Cardíaca:</strong> {{ signos.frecuencia_cardiaca }} lpm
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-thermometer-half"></i> 
-                        <strong>Temperatura:</strong> {{ signos.temperatura }} °C
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-lungs"></i> 
-                        <strong>Frecuencia Respiratoria:</strong> {{ signos.frecuencia_respiratoria }} rpm
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-tint"></i> 
-                        <strong>Saturación de Oxígeno:</strong> {{ signos.saturacion_oxigeno }}%
-                    </div>
-                </div>
-                {% else %}
-                <div class="no-signos-vitales">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>No se han registrado signos vitales aún.</p>
-                </div>
-                {% endif %}
+        <!-- ================= SIGNOS VITALES ================= -->
+<div class="module-card">
+    <header>
+        <i class="fas fa-heartbeat"></i> Signos Vitales
+    </header>
+
+    <div class="body">
+
+        {% if signos %}
+        <!-- ===== MOSTRAR SIGNOS REGISTRADOS ===== -->
+        <div class="info-grid signos-vitales-activos">
+            <div class="info-item">
+                <i class="fas fa-weight"></i>
+                <strong>Peso:</strong> {{ signos.peso }} kg
+            </div>
+
+            <div class="info-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <strong>Presión:</strong> {{ signos.presion_arterial }}
+            </div>
+
+            <div class="info-item">
+                <i class="fas fa-heart"></i>
+                <strong>Frecuencia Cardíaca:</strong> {{ signos.frecuencia_cardiaca }} lpm
+            </div>
+
+            <div class="info-item">
+                <i class="fas fa-thermometer-half"></i>
+                <strong>Temperatura:</strong> {{ signos.temperatura }} °C
+            </div>
+
+            <div class="info-item">
+                <i class="fas fa-lungs"></i>
+                <strong>Frecuencia Respiratoria:</strong> {{ signos.frecuencia_respiratoria }} rpm
+            </div>
+
+            <div class="info-item">
+                <i class="fas fa-tint"></i>
+                <strong>Saturación O₂:</strong> {{ signos.saturacion_oxigeno }} %
             </div>
         </div>
+
+            <!-- BOTÓN EDITAR -->
+        <div style="margin-top:20px; text-align:right;">
+            <a href="{% url 'registrar_signos_vitales' cita.id %}"
+               class="btn-editar-signos">
+                <i class="fas fa-edit"></i>
+                Editar signos vitales
+            </a>
+        </div>
+
+        {% else %}
+        <!-- ===== NO HAY SIGNOS ===== -->
+        <div class="no-signos-vitales">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>No se han registrado signos vitales aún.</p>
+
+            <!-- BOTÓN AGREGAR -->
+            <a href="{% url 'registrar_signos_vitales' cita.id %}"
+               class="btn-agregar-signos"
+               style="margin-top:15px; display:inline-flex;">
+                <i class="fas fa-plus-circle"></i>
+                Agregar signos vitales
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+<!-- =============== FIN SIGNOS VITALES =============== -->
+
 
   <!-- Diagnóstico -->
 <div class="module-card diagnostico-section">

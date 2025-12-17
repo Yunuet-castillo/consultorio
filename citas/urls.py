@@ -77,5 +77,22 @@ path('doctor/cita/<int:cita_id>/imprimir_historial/', views.imprimir_historial, 
 path('dashboard/doctor/cita/<int:cita_id>/', views.detalle_cita_doctor, name='detalle_cita_doctor'),
  #path('api/citas/<int:doctor_id>/', views.citas_por_doctor),
  path("dashboard/actualizar-citas/", views.actualizar_citas, name="actualizar_citas"),
+      path(
+        "historial/paciente/<int:paciente_id>/",
+        views.imprimir_historial_paciente,
+        name="reporte_historial"
+    ),
+      path(
+    'agendar/paciente/<int:paciente_id>/',
+    views.agendar_paciente_existente,
+    name='agendar_paciente_existente'
+),
+      path(
+    'cita/<int:cita_id>/signos-vitales/',
+    views.registrar_signos_vitales,
+    name='registrar_signos_vitales'
+),
+
+
 
 ]

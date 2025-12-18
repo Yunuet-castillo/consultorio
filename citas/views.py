@@ -780,16 +780,14 @@ def imprimir_historial_paciente(request, paciente_id):
 # ---------------------------
 # --- Gestión de Pacientes y Citas ---
 # ---------------------------
-@login_required
+@login_required(login_url='login')
 def agendar_paciente_existente(request, paciente_id):
 
-    # Solo doctor o administradora
-    if not (hasattr(request.user, 'doctor') or hasattr(request.user, 'administradora')):
-        return redirect('dashboard_doctor')
+    if request.user.role not in ['doctor', 'administradora']:
+        return redirect('dashboard')
 
     request.session['paciente_id'] = paciente_id
     return redirect('agendar_cita')
-
 
 
 
@@ -834,8 +832,15 @@ def agendar_paciente(request):
 # ---------------------------
 # REGISTRO DE LA CITA (AUTOMÁTICO CON PACIENTE)
 # ---------------------------
-@login_required
+
+
+@login_required(login_url='login')
 def agendar_cita(request):
+
+    # 🔐 SOLO DOCTOR Y ADMINISTRADORA
+    if request.user.role not in ['doctor', 'administradora']:
+        return redirect('dashboard')
+
     paciente_id = request.session.get('paciente_id')
     paciente = None
 
@@ -858,27 +863,26 @@ def agendar_cita(request):
             request.session.pop('paciente_id', None)
 
             # 🔁 REDIRECCIÓN SEGÚN ROL
-            if hasattr(request.user, 'doctor'):
+            if request.user.role == 'doctor':
                 return redirect('dashboard_doctor')
-            elif hasattr(request.user, 'administradora'):
-                return redirect('dashboard_administradora')
             else:
-                return redirect('login')
+                return redirect('dashboard_administradora')
 
         else:
-            messages.error(request, form.errors.as_text())
+            messages.error(request, '❌ Revisa los datos del formulario')
 
     else:
         form = CitaForm(paciente=paciente)
         form.fields['doctor_user'].queryset = doctores
 
-    context = {
+    return render(request, 'recepcion/agendar_cita.html', {
         'form': form,
         'paciente': paciente,
         'titulo': 'Agendar Cita',
         'boton': 'Agendar',
-    }
-    return render(request, 'recepcion/agendar_cita.html', context)
+    })
+
+
 
 
 

@@ -92,6 +92,8 @@ path('dashboard/doctor/cita/<int:cita_id>/', views.detalle_cita_doctor, name='de
     views.registrar_signos_vitales,
     name='registrar_signos_vitales'
 ),
+path('agendar/paciente/<int:paciente_id>/', views.agendar_paciente_existente, name='agendar_paciente_existente'),
+path('agendar/cita/', views.agendar_cita, name='agendar_cita'),
 
 
 
